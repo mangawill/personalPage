@@ -1,0 +1,20 @@
+#header a.jure span {padding: 50px 0 0 0;}
+.joomla_add_this {position:absolute;padding:0;margin:0;top:-39px;right:5px;}
+
+/* IE multicolumn */
+.column {border-right: 1px dashed #ccc;}
+#slogan .column li{list-style: none;text-align: left;}
+.column li h5 a{text-transform: none;font-variant: normal;word-spacing: normal;letter-spacing: normal;font-weight: normal;color:#000;}
+.column li h5 {margin: 0;}
+.column>li>h5 {font-size: 13px;font-weight: normal;text-decoration: underline;margin-bottom: 10px;}
+.column>li>ul>li>h5 {font-size: 11px;text-decoration: none}
+.column a:active, .column a:hover{color: #FF5247;}
+
+/* ozadja v IE */
+#vsebinaKontejner, .ozadje, .panel {background: rgb(255,255,255);}
+#slogan {letter-spacing: 0.1em;text-shadow: none;}
+
+/* Stolpci pod traveling */
+#potovanje1 {width: 100%;margin: 0 20px;}
+.listContainer1 {clear: both;}
+#potovanje1 .listContainer1 .listCol1, #potovanje1 .listContainer1 .listCol2, #potovanje1 .listContainer1 .listCol3, #potovanje1 .listContainer1 .listCol4, #potovanje1 .listContainer1 .listCol5 {float:left;width: 160px;}

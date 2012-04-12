@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<metafile version="1.6" client="administrator" method="upgrade" >
+	<tag>sl-SI</tag>
+	<name>Slovenian (Slovenija)</name>
+	<description>slojoomla prevod</description>
+	<version>1.6.beta.1</version>
+	<creationDate>2011-05-29</creationDate>
+	<author>slojoomla</author>
+	<authorEmail>info@slojoomla.si</authorEmail>
+	<authorUrl>www.slojoomla.si</authorUrl>
+	<copyright>Copyright (C) 2005 - 2011 Open Source Matters. All rights reserved.</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+	<metadata>
+		<name>Slovenian (Slovenija)</name>
+		<tag>sl-SI</tag>
+		<rtl>0</rtl>
+		<locale>sl, si, slv-SI, sl-SI, slovenian, Slovenian, slovenščina, slovenija, slovensko</locale>
+		<firstDay>1</firstDay>
+	</metadata>
+	<params />
+</metafile>

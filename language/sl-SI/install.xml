@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<install version="1.6" client="site" type="language" method="upgrade">
+	<name>Slovenian sl-SI</name>
+    <tag>sl-SI</tag>
+    <version>1.6.alpha</version>
+    <creationDate>2011-05-29</creationDate>
+    <author>sloJoomla</author>
+    <authorEmail>info@slojoomla.si</authorEmail>
+    <authorUrl>www.slojoomla.si</authorUrl>
+    <copyright>Copyright (C) 2005 - 2011 Open Source Matters. All rights reserved</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <description>Slovenian sl-SI site pack for Joomla! 1.6.3</description>
+	<files>
+        <filename>index.html</filename>
+		<filename>sl-SI.com_contact.ini</filename>
+		<filename>sl-SI.com_content.ini</filename>
+		<filename>sl-SI.com_mailto.ini</filename>
+		<filename>sl-SI.com_media.ini</filename>
+		<filename>sl-SI.com_messages.ini</filename>
+		<filename>sl-SI.com_newsfeeds.ini</filename>
+		<filename>sl-SI.com_search.ini</filename>
+		<filename>sl-SI.com_users.ini</filename>
+		<filename>sl-SI.com_weblinks.ini</filename>
+		<filename>sl-SI.com_wrapper.ini</filename>
+		<filename>sl-SI.ini</filename>
+            <filename>sl-SI.lib_joomla.ini</filename>
+		<filename>sl-SI.localise.php</filename>
+	      <filename>sl-SI.mod_articles_archive.ini</filename>
+		<filename>sl-SI.mod_articles_archive.sys.ini</filename>
+		<filename>sl-SI.mod_articles_categories.ini</filename>
+		<filename>sl-SI.mod_articles_categories.sys.ini</filename>
+		<filename>sl-SI.mod_articles_category.ini</filename>
+		<filename>sl-SI.mod_articles_category.sys.ini</filename>
+		<filename>sl-SI.mod_articles_latest.ini</filename>
+		<filename>sl-SI.mod_articles_latest.sys.ini</filename>
+		<filename>sl-SI.mod_articles_news.ini</filename>
+		<filename>sl-SI.mod_articles_news.sys.ini</filename>
+		<filename>sl-SI.mod_articles_popular.ini</filename>
+		<filename>sl-SI.mod_articles_popular.sys.ini</filename>
+		<filename>sl-SI.mod_banners.ini</filename>
+		<filename>sl-SI.mod_banners.sys.ini</filename>
+		<filename>sl-SI.mod_breadcrumbs.ini</filename>
+		<filename>sl-SI.mod_breadcrumbs.sys.ini</filename>
+		<filename>sl-SI.mod_custom.ini</filename>
+		<filename>sl-SI.mod_custom.sys.ini</filename>
+		<filename>sl-SI.mod_feed.ini</filename>
+		<filename>sl-SI.mod_feed.sys.ini</filename>
+		<filename>sl-SI.mod_footer.ini</filename>
+		<filename>sl-SI.mod_footer.sys.ini</filename>
+		<filename>sl-SI.mod_languages.ini</filename>
+		<filename>sl-SI.mod_languages.sys.ini</filename>
+		<filename>sl-SI.mod_login.ini</filename>
+		<filename>sl-SI.mod_login.sys.ini</filename>
+		<filename>sl-SI.mod_menu.ini</filename>
+		<filename>sl-SI.mod_menu.sys.ini</filename>
+		<filename>sl-SI.mod_random_image.ini</filename>
+		<filename>sl-SI.mod_random_image.sys.ini</filename>
+		<filename>sl-SI.mod_related_items.ini</filename>
+		<filename>sl-SI.mod_related_items.sys.ini</filename>
+		<filename>sl-SI.mod_search.ini</filename>
+		<filename>sl-SI.mod_search.sys.ini</filename>
+		<filename>sl-SI.mod_stats.ini</filename>
+		<filename>sl-SI.mod_stats.sys.ini</filename>
+		<filename>sl-SI.mod_syndicate.ini</filename>
+		<filename>sl-SI.mod_syndicate.sys.ini</filename>
+		<filename>sl-SI.mod_users_latest.ini</filename>
+		<filename>sl-SI.mod_users_latest.sys.ini</filename>
+		<filename>sl-SI.mod_weblinks.ini</filename>
+		<filename>sl-SI.mod_weblinks.sys.ini</filename>
+		<filename>sl-SI.mod_whosonline.ini</filename>
+		<filename>sl-SI.mod_whosonline.sys.ini</filename>
+		<filename>sl-SI.mod_wrapper.ini</filename>
+		<filename>sl-SI.mod_wrapper.sys.ini</filename>
+		<filename>sl-SI.tpl_atomic.ini</filename>
+		<filename>sl-SI.tpl_atomic.sys.ini</filename>
+		<filename>sl-SI.tpl_beez_20.ini</filename>
+		<filename>sl-SI.tpl_beez_20.sys.ini</filename>
+		<filename>sl-SI.tpl_beez5.ini</filename>
+		<filename>sl-SI.tpl_beez5.sys.ini</filename>
+		<filename file="meta">install.xml</filename>
+		<filename file="meta">sl-SI.xml</filename>
+	</files>
+</install>

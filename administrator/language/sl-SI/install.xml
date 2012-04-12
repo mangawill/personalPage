@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<install version="1.6" client="administrator" type="language" method="upgrade">
+	<tag>sl-SI</tag>
+	<name>Slovenian (Slovenija)</name>
+	<version>1.6.beta.1</version>
+	<creationDate>2011-05-29</creationDate>
+	<author>slojoomla</author>
+	<authorEmail>info@slojoomla.si</authorEmail>
+	<authorUrl>www.slojoomla.si</authorUrl>
+	<copyright>Copyright (C) 2005 - 2011 Open Source Matters. All rights reserved.</copyright>
+	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <description><![CDATA[
+	<div align="center">
+     <table border="0" width="90%">
+  	    <tr>
+  		    <td colspan="2">
+  		      <div align="center">
+  		        <h3><font face="Arial, Helvetica, sans-serif">Slovenski prevod Joomla! 1.6 lokalizacija d.kosec</font></h3>
+  		      </div>
+  		      <hr />	      </td>
+</tr>
+  	    <tr>
+  		    <td width="16%"><font face="Arial, Helvetica, sans-serif">Področje:</font></td>
+  		    <td width="84%"><font face="Arial, Helvetica, sans-serif">Administracija (Backend)</font></td>
+  </tr>
+  	    <tr>
+  		    <td width="16%"><font face="Arial, Helvetica, sans-serif">Joomla! verzija:</font></td>
+  		    <td width="84%"><font face="Arial, Helvetica, sans-serif"><a href="http://www.joomlacode.org/gf/project/joomla/frs/?action=index" target="_blank">1.6.3</a></font></td>
+  </tr>
+  	    <tr>
+  		    <td width="16%"><font face="Arial, Helvetica, sans-serif">Verzija prevoda:</font></td>
+  		    <td width="84%"><font face="Arial, Helvetica, sans-serif">1.6.beta.1</font></td>
+  </tr>
+  	    <tr>
+  		    <td width="16%"><font face="Arial, Helvetica, sans-serif">Namestitvena datoteka:</font></td>
+	      <td width="84%"><font face="Arial, Helvetica, sans-serif">admin_sl-SI.zip</font></td>
+  </tr>
+  	    <td colspan="2"><hr /></td>
+  	    <tr>
+  		    <td width="16%"><font face="Arial, Helvetica, sans-serif">Slojoomla:</font></td>
+  		    <td width="84%"><font face="Arial, Helvetica, sans-serif"><a href="http://www.slojoomla.si" target="_blank">http://www.slojoomla.si</a></font></td>
+  </tr>
+  	    <tr>
+  		    <td width="16%"><font face="Arial, Helvetica, sans-serif">Slojoomla-prevodi:</font></td>
+  		    <td width="84%"><font face="Arial, Helvetica, sans-serif"><a href="http://www.slojoomla.si/index.php?option=com_wrapper&amp;view=wrapper&amp;Itemid=116" target="_blank">slojoomla.si-forum</a></font></td>
+  </tr>
+  	    <tr>
+  		    <td width="16%"><font face="Arial, Helvetica, sans-serif">Avtorji popravkov:</font></td>
+	      <td width="84%"><font face="Arial, Helvetica, sans-serif">duskosec, Chico</font></td>
+  </tr>
+  	    <tr>
+  		    <td colspan="2">
+  		      <font face="Arial, Helvetica, sans-serif"><strong><font color="#008000">Priporočljivo je, da na slojoomla forumu redno preverjate če obstaja novejša različica prevoda. </font></strong><br/>
+              </font></tr>
+  </tr>
+      </table>
+    </div>]]></description>
+	<files>
+		<filename>index.html</filename>
+		<filename>sl-SI.com_admin.ini</filename>
+		<filename>sl-SI.com_admin.sys.ini</filename>
+		<filename>sl-SI.com_banners.ini</filename>
+		<filename>sl-SI.com_banners.sys.ini</filename>
+		<filename>sl-SI.com_cache.ini</filename>
+		<filename>sl-SI.com_cache.sys.ini</filename>
+		<filename>sl-SI.com_categories.ini</filename>
+		<filename>sl-SI.com_categories.sys.ini</filename>
+		<filename>sl-SI.com_checkin.ini</filename>
+		<filename>sl-SI.com_checkin.sys.ini</filename>
+		<filename>sl-SI.com_config.ini</filename>
+		<filename>sl-SI.com_config.sys.ini</filename>
+		<filename>sl-SI.com_contact.ini</filename>
+		<filename>sl-SI.com_contact.sys.ini</filename>
+		<filename>sl-SI.com_content.ini</filename>
+		<filename>sl-SI.com_content.sys.ini</filename>
+		<filename>sl-SI.com_cpanel.ini</filename>
+		<filename>sl-SI.com_cpanel.sys.ini</filename>
+		<filename>sl-SI.com_installer.ini</filename>
+		<filename>sl-SI.com_installer.sys.ini</filename>
+		<filename>sl-SI.com_languages.ini</filename>
+		<filename>sl-SI.com_languages.sys.ini</filename>
+		<filename>sl-SI.com_login.ini</filename>
+		<filename>sl-SI.lib_joomla.ini</filename>
+		<filename>sl-SI.com_login.sys.ini</filename>
+		<filename>sl-SI.com_mailto.sys.ini</filename>
+		<filename>sl-SI.com_media.ini</filename>
+		<filename>sl-SI.com_media.sys.ini</filename>
+		<filename>sl-SI.com_menus.ini</filename>
+		<filename>sl-SI.com_menus.sys.ini</filename>
+		<filename>sl-SI.com_messages.ini</filename>
+		<filename>sl-SI.com_messages.sys.ini</filename>
+		<filename>sl-SI.com_modules.ini</filename>
+		<filename>sl-SI.com_modules.sys.ini</filename>
+		<filename>sl-SI.com_newsfeeds.ini</filename>
+		<filename>sl-SI.com_newsfeeds.sys.ini</filename>
+		<filename>sl-SI.com_plugins.ini</filename>
+		<filename>sl-SI.com_plugins.sys.ini</filename>
+		<filename>sl-SI.com_redirect.ini</filename>
+		<filename>sl-SI.com_redirect.sys.ini</filename>
+		<filename>sl-SI.com_search.ini</filename>
+		<filename>sl-SI.com_search.sys.ini</filename>
+		<filename>sl-SI.com_templates.ini</filename>
+		<filename>sl-SI.com_templates.sys.ini</filename>
+		<filename>sl-SI.com_users.ini</filename>
+		<filename>sl-SI.com_users.sys.ini</filename>
+		<filename>sl-SI.com_weblinks.ini</filename>
+		<filename>sl-SI.com_weblinks.sys.ini</filename>
+		<filename>sl-SI.com_wrapper.ini</filename>
+		<filename>sl-SI.com_wrapper.sys.ini</filename>
+		<filename>sl-SI.lib_joomla.ini</filename>
+		<filename>sl-SI.ini</filename>
+		<filename>sl-SI.mod_custom.ini</filename>
+		<filename>sl-SI.mod_custom.sys.ini</filename>
+		<filename>sl-SI.mod_feed.ini</filename>
+		<filename>sl-SI.mod_feed.sys.ini</filename>
+		<filename>sl-SI.mod_latest.ini</filename>
+		<filename>sl-SI.mod_latest.sys.ini</filename>
+		<filename>sl-SI.mod_logged.ini</filename>
+		<filename>sl-SI.mod_logged.sys.ini</filename>
+		<filename>sl-SI.mod_login.ini</filename>
+		<filename>sl-SI.mod_login.sys.ini</filename>
+		<filename>sl-SI.mod_menu.ini</filename>
+		<filename>sl-SI.mod_menu.sys.ini</filename>
+		<filename>sl-SI.mod_online.ini</filename>
+		<filename>sl-SI.mod_online.sys.ini</filename>
+		<filename>sl-SI.mod_popular.ini</filename>
+		<filename>sl-SI.mod_popular.sys.ini</filename>
+		<filename>sl-SI.mod_quickicon.ini</filename>
+		<filename>sl-SI.mod_quickicon.sys.ini</filename>
+		<filename>sl-SI.mod_status.ini</filename>
+		<filename>sl-SI.mod_status.sys.ini</filename>
+		<filename>sl-SI.mod_submenu.ini</filename>
+		<filename>sl-SI.mod_submenu.sys.ini</filename>
+		<filename>sl-SI.mod_title.ini</filename>
+		<filename>sl-SI.mod_title.sys.ini</filename>
+		<filename>sl-SI.mod_toolbar.ini</filename>
+		<filename>sl-SI.mod_toolbar.sys.ini</filename>
+		<filename>sl-SI.mod_unread.ini</filename>
+		<filename>sl-SI.mod_unread.sys.ini</filename>
+		<filename>sl-SI.plg_authentication_example.ini</filename>
+		<filename>sl-SI.plg_authentication_example.sys.ini</filename>
+		<filename>sl-SI.plg_authentication_gmail.ini</filename>
+		<filename>sl-SI.plg_authentication_gmail.sys.ini</filename>
+		<filename>sl-SI.plg_authentication_joomla.ini</filename>
+		<filename>sl-SI.plg_authentication_joomla.sys.ini</filename>
+		<filename>sl-SI.plg_authentication_ldap.ini</filename>
+		<filename>sl-SI.plg_authentication_ldap.sys.ini</filename>
+		<filename>sl-SI.plg_content_emailcloak.ini</filename>
+		<filename>sl-SI.plg_content_emailcloak.sys.ini</filename>
+		<filename>sl-SI.plg_content_geshi.ini</filename>
+		<filename>sl-SI.plg_content_geshi.sys.ini</filename>
+		<filename>sl-SI.plg_content_joomla.ini</filename>
+		<filename>sl-SI.plg_content_joomla.sys.ini</filename>
+		<filename>sl-SI.plg_content_loadmodule.ini</filename>
+		<filename>sl-SI.plg_content_loadmodule.sys.ini</filename>
+		<filename>sl-SI.plg_content_pagebreak.ini</filename>
+		<filename>sl-SI.plg_content_pagebreak.sys.ini</filename>
+		<filename>sl-SI.plg_content_pagenavigation.ini</filename>
+		<filename>sl-SI.plg_content_pagenavigation.sys.ini</filename>
+		<filename>sl-SI.plg_content_vote.ini</filename>
+		<filename>sl-SI.plg_content_vote.sys.ini</filename>
+		<filename>sl-SI.plg_editors_codemirror.ini</filename>
+		<filename>sl-SI.plg_editors_codemirror.sys.ini</filename>
+		<filename>sl-SI.plg_editors_none.ini</filename>
+		<filename>sl-SI.plg_editors_none.sys.ini</filename>
+		<filename>sl-SI.plg_editors_tinymce.ini</filename>
+		<filename>sl-SI.plg_editors_tinymce.sys.ini</filename>
+		<filename>sl-SI.plg_editors-xtd_article.ini</filename>
+		<filename>sl-SI.plg_editors-xtd_article.sys.ini</filename>
+		<filename>sl-SI.plg_editors-xtd_image.ini</filename>
+		<filename>sl-SI.plg_editors-xtd_image.sys.ini</filename>
+		<filename>sl-SI.plg_editors-xtd_pagebreak.ini</filename>
+		<filename>sl-SI.plg_editors-xtd_pagebreak.sys.ini</filename>
+		<filename>sl-SI.plg_editors-xtd_readmore.ini</filename>
+		<filename>sl-SI.plg_editors-xtd_readmore.sys.ini</filename>
+		<filename>sl-SI.plg_extension_joomla.ini</filename>
+		<filename>sl-SI.plg_extension_joomla.sys.ini</filename>
+		<filename>sl-SI.plg_search_categories.ini</filename>
+		<filename>sl-SI.plg_search_categories.sys.ini</filename>
+		<filename>sl-SI.plg_search_contacts.ini</filename>
+		<filename>sl-SI.plg_search_contacts.sys.ini</filename>
+		<filename>sl-SI.plg_search_content.ini</filename>
+		<filename>sl-SI.plg_search_content.sys.ini</filename>
+		<filename>sl-SI.plg_search_newsfeeds.ini</filename>
+		<filename>sl-SI.plg_search_newsfeeds.sys.ini</filename>
+		<filename>sl-SI.plg_search_weblinks.ini</filename>
+		<filename>sl-SI.plg_search_weblinks.sys.ini</filename>
+		<filename>sl-SI.plg_system_cache.ini</filename>
+		<filename>sl-SI.plg_system_cache.sys.ini</filename>
+		<filename>sl-SI.plg_system_debug.ini</filename>
+		<filename>sl-SI.plg_system_debug.sys.ini</filename>
+		<filename>sl-SI.plg_system_languagefilter.ini</filename>
+		<filename>sl-SI.plg_system_languagefilter.sys.ini</filename>
+		<filename>sl-SI.plg_system_log.ini</filename>
+		<filename>sl-SI.plg_system_log.sys.ini</filename>
+		<filename>sl-SI.plg_system_logout.ini</filename>
+		<filename>sl-SI.plg_system_logout.sys.ini</filename>
+		<filename>sl-SI.plg_system_p3p.ini</filename>
+		<filename>sl-SI.plg_system_p3p.sys.ini</filename>
+		<filename>sl-SI.plg_system_redirect.ini</filename>
+		<filename>sl-SI.plg_system_redirect.sys.ini</filename>
+		<filename>sl-SI.plg_system_remember.ini</filename>
+		<filename>sl-SI.plg_system_remember.sys.ini</filename>
+		<filename>sl-SI.plg_system_sef.ini</filename>
+		<filename>sl-SI.plg_system_sef.sys.ini</filename>
+		<filename>sl-SI.plg_user_contactcreator.ini</filename>
+		<filename>sl-SI.plg_user_contactcreator.sys.ini</filename>
+		<filename>sl-SI.plg_user_joomla.ini</filename>
+		<filename>sl-SI.plg_user_joomla.sys.ini</filename>
+		<filename>sl-SI.plg_user_profile.ini</filename>
+		<filename>sl-SI.plg_user_profile.sys.ini</filename>
+		<filename>sl-SI.tpl_bluestork.ini</filename>
+		<filename>sl-SI.tpl_bluestork.sys.ini</filename>
+		<filename>sl-SI.tpl_hathor.ini</filename>
+		<filename>sl-SI.tpl_hathor.sys.ini</filename>
+		<filename file="meta">sl-SI.xml</filename>
+		<filename file="meta">install.xml</filename>
+        <filename>sl-SI.localise.php</filename>
+    </files>
+</install>

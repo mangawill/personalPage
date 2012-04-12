@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<extension type="package" version="1.6">
+	<name>Slovenian Language Pack</name>
+	<packagename>sl-SI</packagename>
+	<version>1.6</version>
+	<url>http://www.slojoomla.si</url>
+	<packager>d.kosec</packager>
+	<packagerurl>http://www.slojoomla.si</packagerurl>
+    <description><![CDATA[
+	<div align="center">
+      <table border="0" width="90%">
+  	    <tr>
+  		    <td colspan="2">
+  		      <div align="center" class="style2">
+  		        <h3 align="left" class="style3">Slovenski prevod Joomla! sl_SI_joomla_lang_full.1.6  datum: 30.05.2011</h3>
+  		      </div>
+  		      <hr />  		    </td>
+  	    </tr>
+  	    <tr>
+  		    <td width="14%"><span class="style4">Vsebina:</span></td>
+	      <td width="86%"><span class="style4">Administracija(Backend)v.: 1.6.  in Website(Frontend) v.: 1.6.alpha</span></td>
+  	    </tr>
+  	    <tr>
+  		    <td width="14%"><span class="style4">Joomla! verzija:</span></td>
+  		    <td width="86%"><span class="style4"><a href="http://www.joomlacode.org/gf/project/joomla/frs/?action=index" target="_blank">1.6.3</a></span></td>
+  	    </tr>
+  	    <tr>
+  		    <td width="14%"><span class="style3 style2">Verzija prevoda:</span></td>
+  		    <td width="86%"><span class="style2 style3">1.6. </span></td>
+  </tr>
+  	    <tr>
+  		    <td width="14%"><span class="style3 style2">Namestitvene datoteke:</span></td>
+  		    <td width="86%"><span class="style2 style3">admin_sl-SI.zip in site_sl-SI.zip</span></td>
+  	    </tr>
+  	    <td colspan="2"><hr class="style2" /></td>
+  	    <tr>
+  		    <td width="14%"><span class="style3 style2">Slojoomla:</span></td>
+  		    <td width="86%"><a href="http://www.slojoomla.si" target="_blank" class="style2 style3">http://www.slojoomla.si</a></td>
+  	    </tr>
+  	    <tr>
+  		    <td width="14%"><span class="style3 style2">Prijave napak:</span></td>
+  		    <td width="86%"><span class="style4"><a href="mailto:dusan.kosec@teleing.com" target="_blank" class="style2">administracija,</a> <a href="mailto:info@slojoomla.si" target="_blank">website</a></span></td>
+            </tr>
+  	    <tr>
+  		    <td width="14%"><span class="style3 style2">Ekipa:</span></td>
+  		    <td width="86%"><span class="style6">Iztok, Jože(levjos), Max, Mark, Mitja(SONYSONY), Rupar(admrs), Dušan(DUSKOSEC), Chico, Boki, Pino, Jaka(Jake007) </span></td>
+  </tr>
+  	    <tr>
+  		    <td width="14%"><span class="style3 style2">Opozorilo:</span></td>
+  		    <td width="86%"><span class="style2 style3">Priporočamo, da na slojoomla forumu redno preverjate če obstaja novejša različica prevoda.</span></td>
+  		    </tr>
+  	    </tr>
+      </table>
+    </div>]]></description>
+	<files>
+		<file type="language" client="site" id="sl-SI">site_sl-SI.zip</file>
+		<file type="language" client="administrator" id="sl-SI">admin_sl-SI.zip</file>
+	</files>
+</extension> 
