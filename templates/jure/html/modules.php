@@ -39,7 +39,7 @@ function modChrome_reference($module, &$params, &$attribs)
 {
 	if (!empty ($module->content)) : ?>
 		<section class="moduletable<?php echo $params->get('moduleclass_sfx'); ?>">
-		  <div class="ozadje">
+		  <div class="ozadje clearfix">
     		<?php if ($module->showtitle != 0) : ?>
     			<h1><?php echo $module->title; ?></h1>
     		<?php endif; ?>

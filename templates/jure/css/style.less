@@ -1,0 +1,1605 @@
+@import url("bootstrap.css");
+@import url("font-awesome.css");
+
+/* =============================================================================
+   Base
+   ========================================================================== */
+
+/*
+ * 1. Correct text resizing oddly in IE6/7 when body font-size is set using em units
+ * 2. Force vertical scrollbar in non-IE
+ * 3. Prevent iOS text size adjust on device orientation change, without disabling user zoom: h5bp.com/g
+ */
+ 
+/* Global variables */
+
+@fontHeading: Georgia,serif;
+@primaryColor: #FF5247;
+@borderBox: 1px solid #CCC;
+@borderDashed: 1px dashed #CCC;
+
+/* End Global variables */
+
+/* less mixins */
+
+.boxShadow (@x: 0px, @y: 0px, @blur: 20px, @shadow: #787878) {
+  -webkit-box-shadow: @x @y @blur @shadow;
+	-moz-box-shadow: @x @y @blur @shadow;
+	box-shadow: @x @y @blur @shadow;
+}
+
+.roundedCorners (@radius: 5px) {
+	-moz-border-radius: @radius;
+	-webkit-border-radius: @radius;
+	border-radius: @radius;
+}
+
+.hideText {
+  text-indent: -100%;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 0;
+  height: 0;
+}
+
+.transition (@type: color, @time: 250ms, @effect: ease-in-out){
+  -webkit-transition: @type @time @effect;
+  -moz-transition: @type @time @effect;
+  -ms-transition: @type @time @effect;
+  -o-transition: @type @time @effect;
+  transition: @type @time @effect;
+}
+
+.animation { /* try it if it works */
+  @-webkit-keyframes beat {
+	0%   { font-size: 30px; }
+	50%  { font-size: 40px; }
+	60%  { font-size: 35px; }
+	80%  { font-size: 40px; }
+	100% { font-size: 30px; }
+  }
+  @-moz-keyframes beat {
+  	0%   { font-size: 30px; }
+  	50%  { font-size: 40px; }
+  	100% { font-size: 30px; }
+  }
+  @-ms-keyframes beat {
+  	0%   { font-size: 30px; }
+  	50%  { font-size: 40px; }
+  	100% { font-size: 30px; }
+  }
+}
+
+@-webkit-keyframes beat {
+	0%   { font-size: 30px; }
+	50%  { font-size: 40px; }
+	60%  { font-size: 35px; }
+	80%  { font-size: 40px; }
+	100% { font-size: 30px; }
+}
+@-moz-keyframes beat {
+	0%   { font-size: 30px; }
+	50%  { font-size: 40px; }
+	100% { font-size: 30px; }
+}
+@-ms-keyframes beat {
+	0%   { font-size: 30px; }
+	50%  { font-size: 40px; }
+	100% { font-size: 30px; }
+}
+@keyframes beat {
+	0%   { font-size: 30px; }
+	50%  { font-size: 40px; }
+	100% { font-size: 30px; }
+
+}
+
+@-webkit-keyframes shot {
+	0%   { opacity: 1; }
+	50%  { opacity: 0; }
+	100% { opacity: 1; }
+}
+@-moz-keyframes shot {
+	0%   { opacity: 1; }
+	50%  { opacity: 0; }
+	100% { opacity: 1; }
+}
+@-ms-keyframes shot {
+	0%   { opacity: 1; }
+	50%  { opacity: 0; }
+	100% { opacity: 1; }
+}
+@keyframes shot {
+	0%   { opacity: 1; }
+	50%  { opacity: 0; }
+	100% { opacity: 1; }
+
+}
+
+/* end less mixins */
+
+html{ 
+  font-size: 100%;
+  overflow-y: scroll;
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+body{
+  font: 14px/1.5em "Lucida Grande",Verdana,Tahoma,sans-serif;
+  color:#393939;
+  margin: 0;
+  background:url(../images/bg-grid.png) repeat;
+}
+
+p{
+  margin-bottom: 1.5em;
+}
+
+::-moz-selection {
+  background: @primaryColor;
+  color: #fff;
+  text-shadow: none;
+}
+
+::selection{
+  background: @primaryColor;
+  color: #fff; 
+  text-shadow: none;
+}
+
+a{
+  color: @primaryColor;
+  text-decoration:none;
+}
+
+a:visited{
+  color: @primaryColor;
+}
+
+a:hover{
+  text-decoration:none;
+  color: @primaryColor;
+}
+
+a:focus{
+  outline: thin dotted;
+}
+
+/* Improve readability when focused and hovered in all browsers: h5bp.com/h */
+a:hover,
+a:active {
+  outline: 0;
+}
+
+img {
+  max-width: 100%;
+  -ms-interpolation-mode: bicubic;
+}
+
+/* =============================================================================
+   Typography
+   ========================================================================== */
+
+h1,h2,h3,h4,h5,h6 {
+  font-family:@fontHeading;
+  font-style: normal;
+  color: #000;
+  text-shadow: 0px 1px 0px #ffffff;
+  margin: 0;
+  padding: 0;
+  line-height: 1.2em;
+}
+
+h1 {
+  font-size:218%;
+  margin: 0 0 10px 0;
+}
+
+h2 {
+  font-size:164%;
+}
+
+h3 {
+  font-size:145%;
+}
+
+h4 {
+  font-size:118%;
+}
+
+h5 {
+  font-size:118%;
+}
+
+h6 {
+  font-size:118%;
+}
+
+abbr[title] {
+  border-bottom: 1px dotted;
+}
+
+b,strong {
+  font-weight: bold;
+}
+
+blockquote {
+  margin: 1em 40px;
+  text-indent: -0.2em;
+}
+
+dfn {
+  font-style: italic;
+}
+
+hr {
+  display: block;
+  height: 1px;
+  border: 0;
+  border-top: 1px solid #ccc;
+  margin: 1em 0;
+  padding: 0;
+}
+
+ins {
+  background: #ff9;
+  color: #000;
+  text-decoration: none;
+}
+
+mark {
+  background: #ff0;
+  color: #000;
+  font-style: italic;
+  font-weight: bold;
+}
+
+pre,code,kbd,samp {
+  font-family: monospace, monospace; _font-family: 'courier new', monospace;
+  font-size: 1em;
+}
+
+pre {
+  white-space: pre;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+q {
+  quotes: none;
+}
+
+q:before,q:after {
+  content: "";
+  content: none;
+}
+
+small {
+  font-size: 85%;
+}
+
+/* header */
+a .jure {
+  font-size: 40px;
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+}
+
+.brand span {
+  display: block;
+  float: left;
+}
+
+.brand .title {
+  margin-left: 15px;
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 18px;
+}
+
+.jezik {
+  line-height: 70px;
+  
+    .lang-inline li a {
+      color: #999;
+    }
+    
+    .lang-inline .lang-active a {
+      color: #fff;
+    }
+}
+    
+#header {
+  padding-bottom: 20px;
+  position: relative;
+  margin-top: 56px;
+  
+    a:hover,
+    a:hover span,
+    a:hover.jure span {
+      color: @primaryColor;
+      .transition;     
+    }
+    
+    
+  
+} /* end header */
+
+/* Glavna navigacija */
+#menu {
+
+    a {
+      text-align: center;
+      .transition;
+    }
+  
+    i {
+      font-size: 30px;
+    }
+       
+    
+}/* end #menu */
+      	
+/* reklama */
+
+#reklama {
+  margin-bottom: 20px;
+  padding-top: 20px;
+  
+   h3 {
+    font-size: 44px;
+   }
+   
+   .hello {
+    padding: 20px 20px 0 20px;
+    min-height: 250px;
+    
+      .nagovor {
+        font-size: 20px;
+        line-height: 30px;
+       }
+       
+   }
+   
+   .achivement {
+    padding: 20px 20px 0 20px;
+    min-height: 250px;
+    
+      h3 {
+        text-align: center;
+        font-size: 34px;
+       }
+       
+       #playerProfile {
+      
+        .achivementList {
+        
+          .number {
+            font-size: 30px;
+            float: left;
+          }
+          
+          .icon {
+            height: 40px;
+              
+              i {
+                font-size: 30px;
+              }
+          }
+          
+          
+          li {
+            display: inline-block;
+            width: 30%;
+            list-style-type: none;
+            line-height: 30px;
+          }
+          
+          li:hover {
+            color: @primaryColor;
+            .transition;
+          }  
+          
+          li:hover i {
+            -webkit-animation: beat 1s infinite;
+            -moz-animation: beat 1s infinite;
+            -ms-animation: beat 1s infinite;
+          }
+          
+          li:hover .icon-camera {
+            -webkit-animation: shot 1s infinite;
+            -moz-animation: shot 1s infinite;
+            -ms-animation: shot 1s infinite;
+          }
+                  
+        }/* end achivementList */
+      }/* end playerProfile */
+   } /* end achivement */
+  
+  
+  
+    .roundabout-holder {
+      list-style:none;
+      width:600px;
+      height:300px;
+      margin:0 auto;
+    }
+
+    .roundabout-moveable-item {
+      font-size:12px;
+      height:300px;
+      width:600px;
+      cursor:pointer;
+      padding:5px;
+      border: @borderBox;
+      background:#f9f9f9;
+    }
+    
+    .roundabout-moveable-item img {
+      height:100%;
+      width:100%;
+      background-color:#FFFFFF;
+      margin:0;
+      }
+    
+    .roundabout-in-focus {
+      cursor:auto;
+    }
+    
+    .roundabout-in-focus:hover {
+      .boxShadow;
+      background:#f9f9f9;
+    }
+    
+    .roundabout-holder span {
+      display:none;
+      font-size:12px;
+    }
+    
+    .roundabout-in-focus:hover span {
+      display:inline;
+      position:absolute;
+      bottom:5px;
+      right:5px;
+      padding:8px 20px;
+      background:#f9f9f9;
+      color:#000000;
+      z-index:999;
+      font-size : 12px;
+      border-left:1px solid #aaaaaa;
+      border-top:1px solid #aaaaaa;
+    }
+    
+    .roundabout a:active,
+    .roundabout a:focus,
+    .roundabout a:visited {
+      outline:none;
+      text-decoration:none;
+    }
+    
+    .roundabou li {
+      margin:0
+    }
+    
+    a img {
+      border:none;
+      outline:0;
+    }
+
+} /* end reklama */
+
+/* Vsebina */
+.vsebina {
+  background: rgba(255,255,255,0.7);
+  border: 1px solid #ccc;
+  padding: 0px 20px 0px 20px;
+  margin-bottom: 20px;
+  
+    .img-intro-none {
+     float: left;
+    }
+  
+}/* end .vsebina */
+
+/* Drobtinice */
+#drobtinice {
+  display: block;
+  font-size: 80%;
+  margin-top: 10px;
+  
+    a {
+      color: #000;
+    }   
+} /* end #drobtinice */
+
+
+/* Slogan */
+#slogan {
+  padding: 30px 0 20px 0;
+  text-align: center;
+  letter-spacing: 0.1em;
+  word-spacing: 0.1em;
+  
+    .moduletable {
+      border-top: @borderDashed;
+      border-bottom: @borderDashed;
+      margin-left: 30px;
+      margin-right: 30px;
+    }
+  
+    .custom {
+      margin: 10px 0;
+    }
+    
+    h2 {
+      color:#494949;
+      margin: 0;
+      font-size: 18px;
+      line-height: 25px;
+    }
+} /* end #slogan */
+
+/* Reference */
+#reference {
+  width: 100%;
+  
+    .items-row {
+      margin-bottom: 40px;
+      clear: both;
+    }
+    
+    h2 a {
+      color: #000;
+    }
+    
+    .referenceLevo {
+      float: left;
+      width: 155px;     
+      margin: 0 20px;
+    }
+    
+    .referenceDesno {
+     float: left;
+      width: 690px;     
+      margin: 20px 0 0 0;
+    }
+    
+    .portfolio_item {
+      position:relative;
+      display: block;
+      float: left;
+      width:223px;
+      margin:0 7px 7px 7px;
+      padding:0;  
+      
+        img	{
+          padding:5px;
+          border: 1px solid #aaaaaa;
+          width:211px;
+          .roundedCorners;
+          background:#f9f9f9;
+          margin-bottom:0;
+        }
+        
+        span {
+          display: none;
+        }
+    }/* end .portfolio_item */
+    
+    .portfolio_item:hover img {
+      .boxShadow;
+      background:#f9f9f9;
+    }
+    
+    .portfolio_item:hover span {
+      display: inline;
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      padding: 10px 15px;
+      background: #f9f9f9;
+      color: #000000;
+      z-index: 999;
+      border-left: @borderBox;
+      border-top: @borderBox;
+    }
+  
+}/* end #reference */
+
+/* Blog Stili */
+#blog,
+.frontPage .leading-0 p {
+  text-align: justify;
+
+    .items-row .item {
+      border-top: 1px solid #000;
+      margin-top: 20px;
+      
+        .blogClanek {
+        
+            h2 {
+              padding: 10px 0;
+            }
+            
+            a:hover {
+              color: @primaryColor;
+            }
+        }/* end .blogClanek h2 */
+        
+    }/* end .items-row .item */
+
+}/* end #blog */
+
+.avtorBlog,
+.footerBlog {
+  display: block;
+  font-size: 10px;
+  color:#717171;
+  width: 100%;
+  border-top: @borderDashed;
+  border-bottom: @borderDashed;
+  padding: 5px 0 5px 0;
+}
+
+.avtorBlog dl,
+.footerBlog dl {
+  margin: 0;
+  padding: 0;
+}
+
+.avtorBlog dd,
+.footerBlog dd {
+  float: left;
+}
+
+.avtorBlog a,
+.footerBlog a {
+  color:#717171;
+}
+
+.footerBlog {
+  margin-top: 20px;
+
+    .category-name dd img,
+    .hitsClanek img,
+    .category-name img,
+    .hits img {
+      padding-right: 5px;
+    }
+
+}/* end footerBlog */
+
+.published,
+.kategorija,
+.hitsClanek,
+.hits {
+  border-left: @borderDashed;
+  padding:0 0 0 5px;
+  margin:0 0 0 5px;
+}
+
+.clanek {
+  position: relative;
+}
+
+.clanek h2 {
+  border-bottom: 1px solid #000;
+  padding: 20px 0 10px 0;
+}
+
+/* aside right */
+
+#right {
+
+  a {
+      color: #000;
+    }
+    
+    a:hover {
+      color: @primaryColor;
+    }
+
+    > section.moduletable {
+      padding: 20px;
+    }
+
+    ul.brano li {
+      list-style-type: decimal;
+      margin: 0 0 5px 0;
+      padding-bottom: 5px;
+      border-bottom: @borderDashed;
+    } /* end ul.brano li */
+    
+    .mostread {
+      
+      li {
+        list-style: none;
+        padding-bottom: 5px;
+        margin-bottom: 10px;
+        border-bottom: @borderDashed;
+        
+          a {
+              float: left;
+              width: 80%;
+            }
+            
+            span {
+              float: left;
+              text-align: right;
+              display: block;
+              width: 20%;
+              line-height: 30px;
+            }
+      }
+      
+      li:last-child {
+          border-bottom: none;
+          padding-bottom: 0;
+          margin-bottom: 0;
+        }
+    }
+
+} /* end #right */
+
+    
+        
+        
+
+/* Disqus stili */
+#recentcomments h2 {
+  font-size:19px;
+}
+
+ul.dsq-widget-list .dsq-widget-meta a {
+  font-size: 10px;
+  color: #000;
+  font-style: italic;
+}
+
+#disqus_thread {
+  margin: 40px 0 10px 0;
+  border-top: @borderDashed;
+}
+
+.bellowContent {
+    .moduletable .ozadje{
+      padding: 20px;
+    }
+    
+    .tweet .ozadje {
+      padding: 0;
+    }
+    
+    .moduletable .ozadje .mostread {
+      margin: 0;
+      width: 100%;
+      
+        li {
+          border-bottom: @borderDashed;
+          padding-bottom: 5px;
+          margin-bottom: 10px;
+          list-style-type: none;
+          
+            a {
+              float: left;
+              width: 80%;
+            }
+            
+            span {
+              float: left;
+              text-align: right;
+              display: block;
+              width: 20%;
+              line-height: 30px;
+            }
+        }
+        
+        li:last-child {
+          border-bottom: none;
+          padding-bottom: 0;
+          margin-bottom: 0;
+        }
+    }
+    
+}
+
+
+
+
+/* Twitter stili */
+.twtr-hd,
+.twtr-ft {
+  display: none;
+}
+
+.twtr-tweet {
+  margin-top: 10px;
+  padding-bottom: 10px;
+}
+
+/* Kontaktni obrazec */
+.kontaktNaslov {border-bottom: 1px dashed #ccc;margin-bottom: 10px;padding-bottom: 10px;}
+.naslov {margin-bottom: 20px!important;}
+.contact-mobile {margin-bottom: 20px;}
+.ccms_form_element {padding: 0;margin: 0;}
+.ccms_form_element label {margin:6px 0 0 0;text-align: right;padding-right: 10px;text-shadow: 0px 1px 0px #ffffff;font-weight: normal!important;}
+.ccms_form_element input, textarea, input[type="file"] {margin: 0 0 10px 0;-webkit-box-shadow: inset 1px 1px 5px 2px rgba(204, 204, 204, 0.3);-moz-box-shadow: inset 1px 1px 5px 2px rgba(204, 204, 204, 0.3);box-shadow: inset 1px 1px 5px 2px rgba(204, 204, 204, 0.3);border: 1px solid rgba(255,255,255,.7);background: url(../images/formLine.png) repeat-x bottom left rgba(255,255,255,.8);}
+.ccms_form_element .buttonSubmit {border: 1px solid rgba(255,255,255,.7);color: #ccc;text-shadow: 0px -1px 0px #000000;-webkit-box-shadow: none;-moz-box-shadow: none;box-shadow: none;background: url(../images/formLine.png) repeat-x bottom left #545353;float: right;margin-right: 10px;}
+.cfdiv_checkboxgroup {margin: 10px 0 0 0;}
+#subject25_container_div {margin-top: 10px;}
+#webpage56_container_div, #recaptcha {margin-bottom: 10px;}
+#recaptcha {float: right;}
+.chronoform a {display: none;}
+
+/* Stili za module */
+.ozadje {
+  background: rgba(255,255,255,0.7);
+  border: @borderBox;
+}
+
+.ozadjemodulblog,
+.customtweet,
+.movescount {
+  position: relative;
+}
+
+.ozadjemodulblog img {
+  position: absolute;
+  top:-10px;
+  right: -10px;
+}
+
+.ozadjemodulblog ul li {
+  list-style-image: url("../images/tag.png");
+  color:#eee;
+  
+    h4 {
+      font-size: 12px;
+      padding: 0;
+    } 
+}
+
+.customtweet > img {
+  position: absolute;
+  top:10px;
+  right: -46px;
+}
+
+.movescount {
+  text-align: center;
+  
+    img {
+      position: absolute;top:0;left: -47px;
+    }
+}
+
+/* Gumbi */
+.readon,
+.readon:visited,
+.button {
+  position:relative;
+  display:inline-block;
+  background:#000000 url(../images/alert-overlay.png) repeat-x;
+  font-size:13px;
+  font-weight: normal;
+  line-height:1;
+  border:0;
+  padding:5px 10px 6px;
+  color:#fff;
+  text-decoration:none;
+  .roundedCorners;
+  .boxShadow(0, 1px, 3px, rgba(0,0,0,0.5));  
+  cursor:pointer;
+}
+
+.readon:hover,
+.button:hover,
+.pagination strong .stevilkaStran {
+  background-color:@primaryColor;
+  color:#fff;
+  text-decoration:none;
+}
+
+p.counter {
+  text-align: center!important;
+  font-style: italic;
+  text-shadow: 1px 1px 1px #fff;
+}
+
+.pagination strong .button,
+a.button {
+  margin: 0 5px 0 5px;
+  color: #fff;
+}
+
+.pagination a {
+  margin: 0 2px 0 2px;
+}
+
+.pagination {
+  display: block;
+  padding-bottom: 20px
+}
+
+
+/* Geshi stili */
+#vsebinaKontejner .php, 
+#vsebinaKontejner .html, 
+#vsebinaKontejner .js {
+  padding: 0 10px;
+  margin:10px;
+}
+
+.highlight {
+  background: #fbaba6;
+  font-weight: normal;
+  font-size: 13px;
+  border-bottom: 2px solid @primaryColor;
+}
+
+code,
+pre {
+  font-family: Andale Mono,monospace;
+  font-size: 14px;
+  padding: 0 4px;
+  border-top: 2px solid rgba(255, 82, 71,.1);
+  background:rgba(255, 82, 71,.05);
+}
+
+/* Desno
+#desno p,#desno a {font-size: 12px;}
+#desno a:hover {color:@primaryColor;}
+#desno .tags a.button {margin: 0 0 5px 5px;}
+#desno  a.button:hover {color: #fff;}
+#desno section:firstchild {margin-top: 20px;padding-bottom:10px;}
+#desno section {margin: 20px 0 30px 0;}
+#desno section h4 {font-size:12px;text-transform: uppercase;margin: 0 0 10px 0;padding: 0 0 5px 0;border-bottom: 3px solid #000;}
+#desno, .cat-children {width: 300px;margin: 0 20px 0 20px;float: left;}
+.desno h3, .skrij {text-indent: -9999px;width: 0;height: 0;margin-bottom: 0;font-size: 0;}
+#desno .obroba img{border: 3px solid #e8e8e8;background: #717171;}
+
+*/
+
+/* Footer glavne strani */
+#nogaStran {
+  background: url(../images/footerozadje.jpg) repeat;
+  margin: 0;
+  padding: 0 0 30px 0;
+}
+
+#nogaZgoraj {
+  background: url(../images/nogaZgoraj.png) repeat-x;
+  width: 100%;
+  height: 7px;
+}
+
+#nogaKontejner {
+  margin: 0 auto;
+  padding: 30px 0 0 0;
+  color: #ccc;
+  font-style: normal;
+  
+    .moduletable {
+      margin: 0 0 30px 0;
+      padding-bottom: 20px;
+      font-size: 11px;
+      font-style: italic;
+    }
+    
+    h5 {
+      color: #ccc;
+      font-weight: normal;
+      font-size: 16px;
+      margin:0 0 10px 0;
+      padding:0 0 5px 0;
+      text-shadow: 0px -1px 0px #000000;
+    }
+    
+    a {
+      color: #ccc;
+      font-style: normal;
+      font-size: 11px;
+      font-variant: normal;
+      text-transform: none;
+    }
+    
+    a:hover {
+      color: @primaryColor;
+    }
+    
+    li {
+      font-size: 11px;
+    }
+    
+    ul.branofooter {
+      margin: 0;
+      padding-left: 30px;
+      
+        li {
+          list-style-type: decimal;
+          margin: 0;
+          border-bottom: 1px dotted #5f5f5f;
+          padding-bottom: 5px;
+          margin-bottom: 5px;
+        }
+    }
+    
+    .arhivfooter ul {
+      margin: 0;
+      padding: 0 0 0 25px;
+      
+        li {
+          list-style:none;
+          background: url("../images/jureSternSprite.png") no-repeat -545px -301px;
+          color:#eee;
+          padding: 0 0 0 20px;
+          margin: 10px 0 0 0;
+          
+            h4 {
+              margin:0;
+              padding: 0;
+              font-size: 11px;
+              font-weight: normal;
+              text-shadow: none;
+            }
+        }
+    }
+    
+    img {
+      margin-bottom: 10px;
+    }
+    
+    .nogaMeni {
+      width: 450px;
+      margin: 0 auto;
+      
+        li {
+          float: left;
+          list-style: none;
+          padding-right: 20px;
+        }
+    }
+    
+} /* #nogaKontejner */
+
+
+/* Prva stran */
+.blog-featured h6 {
+  padding: 0;
+  margin: 0;
+}
+
+.frontPage h1 a,
+.frontPage h2 a,
+.frontPage h3 a,
+.frontPage h4 a,
+.frontPage h5 a,
+.frontPage h6 a {
+  color: #000;
+}
+
+.frontPage,
+.items-row .item {
+  margin-bottom: 30px;
+}
+
+.frontSpan {
+  position: relative;
+  display: block;
+  margin: 1em 0 0 0;
+}
+
+.prvaNaslov,
+.blog-featured .items-row .item h2 {
+  font-size:12px;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin:0 0 10px 0;
+  padding:0 0 5px 0;
+  border-bottom: 3px solid #000;
+}
+
+.prvaNaslov a {
+  color: #000;
+}
+
+.frontPage > div h2 {
+  margin: 0 0 10px 0;
+  padding: 0;
+}
+
+.frontPage > div h2 a {
+  color: #000;
+}
+
+.frontPage > div h2 a:hover {
+  color: @primaryColor;
+}
+
+.blog-featured .cols-2 {
+  clear: both;
+}
+
+.blog-featured .column-1 {
+  float: left;
+  width: 270px;
+}
+
+.blog-featured .column-2 {
+  float: right;
+  width: 270px;
+}
+
+.readmore a {
+  color: #fff;
+}
+
+.vsebina .readmore {
+  float: right;
+  color: #fff;
+}
+
+/* Prenosi - Downloads */
+.downloadsObroba {
+  display:block;
+  margin: 0 0 20px 0;
+}
+
+.naslovDownloads {
+  font-size: 12px;
+  font-weight: normal;
+  margin: 0;
+  padding: 0 0 5px 0;
+}
+
+.downloadFileList {
+  display:block;
+  font-size: 10px;
+  font-weight: normal;
+  border-top: @borderDashed;
+  border-bottom: @borderDashed;
+  padding: 3px 0 3px 0;
+}
+
+.fileListDownload {
+  float: left;
+}
+
+.fileListLinks {
+  float: right;
+}
+
+.fileListLinks i {
+  padding: 0 2px 0 0;
+}
+
+.fileListLinks i a {
+  color: #000;
+}
+
+/* Seznam kategorij */
+.seznam {
+  width: 350px;
+  padding: 20px 0;
+  
+    .list-title {
+      clear: both;
+      width: 250px;
+        
+        a {
+          text-align: right;
+        }
+    }
+    
+    .list-hits {
+      float: right;
+    }
+    
+    .list-hits img {
+      padding-right: 5px;
+    }
+  
+}/*end .seznam */
+
+.seznam-cat {
+  display: block;
+  border-bottom: @borderDashed;
+  height: 30px;
+}
+
+
+/* Seznam podkategorij */
+.seznam li {
+  margin: 0 0 8px 40px;
+}
+
+/* hresume */
+.hresume {
+  width: 880px;
+  padding: 10px;
+  margin: 1em 0 0 0;
+}
+
+.contact {
+  font-size: 15px;
+  padding-top: 20px;
+}
+
+.summary,
+.contact,
+.tehno {
+  width: 540px;
+  float: left;
+}
+
+#j {
+  font-weight: bold;
+}
+
+.izobrazba,
+.sposobnosti {
+  float: right;
+  width: 300px;
+  overflow: hidden;
+}
+
+.image {
+  float: left;
+  margin-right: 20px;
+}
+
+.date_duration {
+  border-bottom: 1px solid #000;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.date_duration abbr {
+  border-bottom: none;
+}
+
+.htitle {
+  padding: 0 20px 20px 0;
+}
+
+.mosaic-block {
+  float:left;
+  position:relative;
+  overflow:hidden;
+  width:180px;
+  height:100px;
+  margin:0;
+  background:#fff url(../images/progress.gif) no-repeat center center;
+  border:none;
+}
+
+.mosaic-backdrop {
+  display:none;
+  position:absolute;
+  top:0;
+  height:100%;
+  width:100%;
+  background:#fff;
+}
+
+.mosaic-overlay {
+  display:none;
+  z-index:5;
+  position:absolute;
+  width:100%;
+  height:100%;
+  background:#fff;
+}
+
+.details {
+  text-align: center;
+}
+
+.experience .htitle {
+  padding-top: 10px;
+  margin-top:30px;
+  border-top: @borderDashed;
+  font-weight: bold;
+}
+
+/*** Custom Animation Styles (You can remove/add any styles below) ***/
+.circle .mosaic-overlay {background:url(../images/hover-magnify.png) no-repeat center center;opacity:0;-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=00)";filter:alpha(opacity=00);display:none;}
+.fade .mosaic-overlay {opacity:0;-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=00)";filter:alpha(opacity=00);background:url(../images/bg-black.png);}
+.bar .mosaic-overlay {bottom:-100px;height:100px;background:url(../images/bg-black.png);}
+.bar2 .mosaic-overlay {bottom:-50px;height:100px;opacity:0.8;-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";filter:alpha(opacity=80);}
+.bar2 .mosaic-overlay:hover {opacity:1;-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";filter:alpha(opacity=100);}
+.bar3 .mosaic-overlay {top:-100px;height:100px;background:url(../images/bg-black.png);}
+.skill h6 {color: #ffffff;text-shadow: none;margin-top: 40px;}
+/*** End Animation Styles ***/
+
+
+/* Diamonds modul za komentarje strank */
+#dm_tab_1_1,
+#dm_tab_1_2,
+#dm_tab_1_3 {
+  min-height: 140px;
+}
+
+.kom2 a {
+  background: url(../images/stranke/wdtehnik.png) no-repeat #ccc;
+  text-indent: -9999px;
+  display: block;
+  width: 100px;
+  height: 37px;
+}
+
+.kom2 a:hover {
+  background: url(../images/stranke/wdtehnik.png) no-repeat #828282;
+}
+
+.kom1 a,
+.kom3 a {
+  background: url(../images/stranke/granit_logotip.png) no-repeat #ccc top left;
+  text-indent: -9999px;
+  display: block;
+  width: 100px;
+  height: 37px;
+}
+
+.kom1 a:hover,
+.kom3 a:hover {
+  background: url(../images/stranke/granit_logotip.png) no-repeat #828282 top left;
+}
+
+#dm_container_1 {
+  background: url(../images/stranke/narekovaj.png) no-repeat top left #fff;
+  .roundedCorners;
+  .boxShadow(1px, 1px, 1px, #c9c9c9);
+  padding: 0 20px 0 0;
+  margin: 20px;
+}
+
+#dm_tabs_1 {
+  margin: 20px 20px 10px 20px;
+}
+
+/* Social 
+.obrobaSocial {font-family: "Lucida Grande", arial;font-size: 10px; font-weight: bold;color: #464646;text-shadow: 0px 1px 0px #ffffff;}
+.obrobaSocial a {background: url(../images/jureSternSprite.png) no-repeat;text-decoration: none;color: #464646;float:left;line-height: 25px;}
+a:hover .number {color: @primaryColor;}
+.icon, .text, .number {float: left;}
+.text {padding-left:25px;width: 74px;text-align: center;}
+.number {width: 30px;text-align: center;}
+
+.twitterFollow a{background-position:-94px -27px;display: block;width: 130px;height: 25px;}
+.twitterFollow a:hover {background-position:-226px -27px;}
+
+.googlePlusFollow a{background-position:-94px -108px;display: block;width: 130px;height: 25px;}
+.googlePlusFollow a:hover {background-position:-226px -108px;}
+
+.linkedinFollow a{background-position:-94px -54px;display: block;width: 130px;height: 25px;}
+.linkedinFollow a:hover {background-position:-226px -54px;}
+
+.dribbbleFollow a{background-position:-94px 0px;display: block;width: 130px;height: 25px;}
+.dribbbleFollow a:hover {background-position:-226px 0px;}
+
+.facebookFollow a{background-position:-94px -81px;display: block;width: 130px;height: 25px;}
+.facebookFollow a:hover {background-position:-226px -81px;}
+
+.rssFollow a{background-position:-94px -135px;display: block;width: 130px;height: 25px;}
+.rssFollow a:hover {background-position:-226px -135px;}
+*/
+
+
+/* sidebar 
+.panel {position: fixed;top: 30%;left: 0;background: rgba(255,255,255,0.7);border:1px solid #ccc;width: 145px;}
+.zvezd {background: url(../images/jureSternSprite.png) no-repeat 0px -148px;width:86px;height: 21px;margin: 0 auto;margin-top:-10px;padding-bottom: 10px;}
+.zvezd1 {background: url(../images/jureSternSprite.png) no-repeat 0px -148px;width:86px;height: 21px;margin: 0 auto;margin-bottom: -10px;}
+.panel .moduletable {width: 138px;margin: 0 auto;padding-left: 3px;}
+.panel h3 {font-size: 12px;text-align: center;}
+.panel a {color: #000;}
+.lang-active a {color: @primaryColor;}
+div.mod-languages li {margin: 0 0 0 5px;}
+.iskanje, .jezik, .follow {margin: 10px 0;padding:10px 0;border-bottom: 1px dashed #ccc;}
+.follow {border-bottom: 0px;}
+#mod-search-searchword {background: #fff;border: 1px solid #ccc;height: 18px;color: #888;font-style: italic;margin: 0;width: 128px;}
+
+/* QRCode */
+span.qrCode {
+  width:200px;
+  height:200px;
+  background: url(../images/jureSternSprite.png) no-repeat -357px 0px;
+  text-indent: -9999px;
+  display: block;
+}
+
+/* HTMLLint */
+a.niceHTML {
+  width:182px;
+  height:40px;
+  background: url(../images/jureSternSprite.png) no-repeat -375px -202px;
+  text-indent: -9999px;
+  display: block;
+}
+
+/* html5 Badge */
+a.html5Badge {
+  width:209px;
+  height:64px;
+  background: url(../images/jureSternSprite.png) no-repeat -94px -161px;
+  text-indent: -9999px;
+  display: block;
+}
+
+/* Button contact */
+#nogaKontejner a.btn {
+  width:300px;
+  height:43px;
+  background: url(../images/jureSternSprite.png) no-repeat 0 -226px;
+  display: block;
+  text-align: center;
+  font-size: 16px;
+  color:#ffffff;
+  text-shadow: 0 -1px 0 #618926;
+  border: 1px solid #fe948d;
+  line-height: 43px;
+}
+
+#nogaKontejner a.btn:hover {
+  background: url(../images/jureSternSprite.png) no-repeat 0px -270px;
+  text-shadow: 0 1px 0 #868686;
+  color: #ffffff;
+  border: 1px solid #fe948d;
+}
+
+/* 404 */
+.errorboxoutline {
+  background: #fff;
+  border: 1px solid #ccc;
+  margin-bottom:10px;
+  margin-top: 150px;
+  padding: 30px;
+}
+
+.errorboxheader {
+  font-size: 50px;
+}
+
+/* addThis */
+.joomla_add_this {
+  position:absolute;
+  padding:0;
+  margin:0;
+  top:-38px;
+  right:5px;
+}
+
+a.share {
+  color: #717171;
+  font-size: 12px;
+}
+
+/* Twitter bootsrap overrides */
+
+@media (max-width: 767px) {
+  
+}
+
+@media (min-width: 768px) and (max-width: 979px) {
+
+}
+
+@media (max-width: 480px) {
+
+}
+
+
+@media (min-width: 1200px) {
+
+  .span8 {
+    width: 728px;
+    }
+    
+}
+
+/* ==|== non-semantic helper classes ========================================
+   Please define your styles before this section.
+   ========================================================================== */
+
+/* For image replacement */
+.skrij {
+  .hideText;
+}
+
+iframe {
+  border: none;
+  
+    html body {
+      margin: 0;
+      padding: 0;
+    }
+}
+
+.dribbbleShot {
+  background: black;
+}
+    
+.ir { 
+  display: block; 
+  border: 0; 
+  text-indent: -999em; 
+  overflow: hidden; 
+  background-color: transparent; 
+  background-repeat: no-repeat; 
+  text-align: left; 
+  direction: ltr;
+}
+.ir br { 
+  display: none; 
+}
+
+/* Hide from both screenreaders and browsers: h5bp.com/u */
+.hidden { 
+  display: none !important;
+  visibility: hidden;
+}
+
+/* Hide only visually, but have it available for screenreaders: h5bp.com/v */
+.visuallyhidden {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+  }
+
+/* Extends the .visuallyhidden class to allow the element to be focusable when navigated to via the keyboard: h5bp.com/p */
+.visuallyhidden.focusable:active,
+.visuallyhidden.focusable:focus {
+  clip: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  position: static;
+  width: auto;
+}
+
+/* Hide visually and from screenreaders, but maintain layout */
+.invisible {
+  visibility: hidden;
+}
+
+/* Contain floats: h5bp.com/q */ 
+.clearfix:before,
+.clearfix:after {
+  content: "";
+  display: table;
+}
+
+.clearfix:after {
+  clear: both;
+}
+
+.clearfix {
+  zoom: 1;
+}
+
+/* ==|== print styles =======================================================
+   Print styles.
+   Inlined to avoid required HTTP connection: h5bp.com/r
+   ========================================================================== */
+ 
+@media print {
+  * { background: transparent !important; color: black !important; text-shadow: none !important; filter:none !important; -ms-filter: none !important; } /* Black prints faster: h5bp.com/s */
+  a, a:visited { text-decoration: underline; }
+  a[href]:after { content: " (" attr(href) ")"; }
+  abbr[title]:after { content: " (" attr(title) ")"; }
+  .ir a:after, a[href^="javascript:"]:after, a[href^="#"]:after { content: ""; }  /* Don't show links for images, or javascript/internal links */
+  pre, blockquote { border: 1px solid #999; page-break-inside: avoid; }
+  thead { display: table-header-group; } /* h5bp.com/t */
+  tr, img { page-break-inside: avoid; }
+  img { max-width: 100% !important; }
+  @page { margin: 0.5cm; }
+  p, h2, h3 { orphans: 3; widows: 3; }
+  h2, h3 { page-break-after: avoid; }
+}

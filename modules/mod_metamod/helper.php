@@ -15,7 +15,7 @@ class modMetaModHelper
 		return modMetaModHelper::versionMajor() . '.' . modMetaModHelper::versionMinor(); 
 	}
 	function versionMajor() { return 3; }
-	function versionMinor() { return 5; }
+	function versionMinor() { return 9; }
 	
 	function locateGeoIPInclude($use_geoip) {
 

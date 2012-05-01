@@ -6,9 +6,26 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
  * JomGenius classes
  * 
  * @package		JomGenius
- * @version		9
+ * @version		2.11 (VM2; J1.7)
  * @license		GNU/GPL
  * @copyright	Copyright (C) 2010-2011 Brandon IT Consulting. All rights reserved.
+ *
+ * @changelog	v11 removed some product attributes: productshipcodeid, productsales, productattributes, childoptions
+ *					removed some types that are no longer available: couponid, coupontype
+ *					new type: couponvalue (currency value of the discount applied)
+ *					made the following types count "shipped" products as well as "confirmed" ones:
+ *						previouspurchaseproductids, previouspurchaseproductskus, previouspurchaseproductnames, previouspurchasequantityofproduct
+ *					fixed isSearchResults
+ *					changed product attribute search and manufacturer search to look up localised version of product (VM_LANG required)
+ *					in pagetype, removed checkout.thankyou, orders
+ *					in pagetype, added plugin.response (for return from PayPal, for example), order.view, checkout.editshipto,
+ *						checkout.editbillto, productdetails.mailquestion, cart.editshipment, cart.editpayment, cart.thankyou, searchresults
+ *					fixed broken shoppergroup retrieval; now allow it to retrieve value set in shoppergroup Action
+ *					fixed broken shopperinfo (for billto and shipto addresses)
+ *					fixed broken "state" info in shipto and billto addresses (now accesses related table for state names)
+ *					removed shipto email addresses as these have been removed from VM2
+ *					fixed broken category retrieval (due to localisation)
+ *					
  */
 
 class JomGeniusClassVirtuemart extends JomGeniusParent {
@@ -23,30 +40,45 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 	var $product_id;
 	var $page;
 	var $category_id;
+	var $layout;
+	var $task;
 	
 	function __construct() {
 		$this->Itemid		= JRequest::getVar('Itemid');
-		$this->product_id	= JRequest::getVar('product_id');
+		$this->product_id	= JRequest::getVar('virtuemart_product_id');
 		$this->view			= JRequest::getWord('view');
 		$this->option		= JRequest::getVar('option');
-		$this->page			= JRequest::getVar('page');
-		$this->category_id	= JRequest::getVar('category_id');
+		$this->category_id	= JRequest::getVar('virtuemart_category_id');
+		$this->layout		= JRequest::getVar('layout');
+		$this->addrtype		= JRequest::getVar('addrtype');
+		$this->task			= JRequest::getVar('task');
 		
+		// What happens when the URL is "&option=com_virtuemart&Itemid=XXX", so there's no "page" in the query string?
+		// Borrowed from virtuemart_parser.php to get the logic of how to interpret a request when there's a menu item
+		// and itemid for the page, but the _GET has no "page" in it.
+		
+		if ( $this->option == 'com_virtuemart' and !isset( $_REQUEST['page']) ) {
 			
-		// we check to see if the page URL is simply "option=com_virtuemart&Itemid=XXX", and a GET request. If so
-		// then we get the page type from the menu item rather than the URL.
-		// double check the URL... should work with SEF or non SEF
-		if ( $this->option == 'com_virtuemart' and $this->Itemid != '' and $this->page == null and $this->view == null and $this->category_id == null 
-			and !empty($_SERVER['REQUEST_METHOD']) and $_SERVER['REQUEST_METHOD'] == 'GET' and count( $_GET ) == 2 ) {
+			/* need to revisit all these for VM1.98 / J1.7 FIXME */
+			$tmp_product_id			= JomGeniusParent::menuItemParam( 'product_id' );
+			$tmp_category_id		= JomGeniusParent::menuItemParam( 'category_id' );
+			$tmp_flypage			= JomGeniusParent::menuItemParam( 'flypage' );
+			$tmp_page				= JomGeniusParent::menuItemParam( 'page' );
 
-			$this->page = JomGeniusParent::menuItemParam( 'page' );
-			$this->category_id = JomGeniusParent::menuItemParam( 'category_id' );
-			$this->product_id = JomGeniusParent::menuItemParam( 'product_id' );
-			// in the menu params, if a category id was given, page defaults to shop.browse.
-			// likewise with a product id - defaults to a shop.product_details page.
-			if ( $this->page == null ) {
-				if ( $this->category_id ) $this->page = 'shop.browse';
-				else if ( $this->product_id ) $this->page = 'shop.product_details';
+			if( !empty( $tmp_product_id ) ) {
+				$this->product_id	= $tmp_product_id;
+				$this->view			= 'productdetails'; // new
+			} elseif( !empty( $tmp_category_id ) ) {
+				$this->category_id	= $tmp_category_id ;
+				$this->view			= 'category'; // new
+			}
+
+			if( ( !empty( $tmp_product_id ) || !empty( $tmp_category_id ) ) && !empty( $tmp_flypage ) ) {
+				$this->flypage		= $tmp_flypage; // not actually used here...
+			}
+
+			if( !empty( $tmp_page ) ) {
+				$this->page			= $tmp_page;
 			}
 		}
 	}
@@ -58,6 +90,12 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 		return false;
 	}
 	
+	function loadVmConfig() {
+		if (defined('VMLANG')) return;
+		if (!class_exists( 'VmConfig' )) require(JPATH_ADMINISTRATOR . '/components/com_virtuemart/helpers/config.php');
+		VmConfig::loadConfig();
+	}
+
 	/**
 	 * A generic function that knows how to get lots of different info about the current page or product.
 	 */
@@ -86,15 +124,15 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 			case 'productinstock':
 			case 'isproductspecial':
 			case 'productdiscountid':
-			case 'productshipcodeid':
+		//	case 'productshipcodeid':
 			case 'productname':
-			case 'productsales':
-			case 'productattributes':
+		//	case 'productsales':
+		//	case 'productattributes':
 			case 'producttaxid':
 			case 'productunit':
 			case 'unitsinbox':
 			case 'unitsinpackage':
-			case 'childoptions':
+		//	case 'childoptions':
 			case 'quantityoptions':
 				return $this->productInfo( $type );
 				
@@ -144,8 +182,9 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 			case 'couponredeemed':	// 1
 			case 'iscouponredeemed':	// true
 			case 'coupondiscount':	// 6.00
-			case 'couponid':		// 1
-			case 'coupontype':		// gift
+			case 'couponvalue':	// 121.56
+		//	case 'couponid':		// 1
+		//	case 'coupontype':		// gift
 				return $this->coupons( $type );
 			
 			// these ones there can be several of per user.
@@ -172,11 +211,78 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 				
 			default:
 		}
+		if ( substr( $type, 0, 16 ) == 'previouspurchase' ) {
+			return $this->previousPurchaseInfo( $type );
+		}
+	}
+	
+	function previousPurchaseInfo( $type ) {
+		// we might be looking at previous_purchase_ids, previous_purchase_quantity_for_XXX
+
+		$user 	=& JFactory::getUser();
+		if ( $user->id == 0 ) {
+			return array(); // user was not logged in.
+		}
+		
+		if ( $type == 'previouspurchaseproductids' ) {
+			$query = 'SELECT DISTINCT oi.`virtuemart_product_id` FROM #__virtuemart_order_items oi '
+				. ' LEFT JOIN #__virtuemart_orders o ON (oi.virtuemart_order_id = o.virtuemart_order_id
+					AND (o.order_status = \'C\' OR o.order_status = \'S\') AND (oi.order_status = \'C\' OR oi.order_status = \'S\' )) '
+				. ' WHERE o.virtuemart_user_id = ' . $user->id;
+				
+			$db		=& JFactory::getDBO();
+			$db->setQuery( $query );
+			return $db->loadResultArray();
+		}
+
+		if ( $type == 'previouspurchaseproductskus' ) {
+			$query = 'SELECT DISTINCT oi.`order_item_sku` FROM #__virtuemart_order_items oi '
+				. ' LEFT JOIN #__virtuemart_orders o ON (oi.virtuemart_order_id = o.virtuemart_order_id
+					AND (o.order_status = \'C\' OR o.order_status = \'S\')
+					AND (oi.order_status = \'C\' OR oi.order_status = \'S\')) '
+				. ' WHERE o.virtuemart_user_id = ' . $user->id;
+				
+			$db		=& JFactory::getDBO();
+			$db->setQuery( $query );
+			return $db->loadResultArray();
+		}
+
+		if ( $type == 'previouspurchaseproductnames' ) {
+			$query = 'SELECT DISTINCT oi.`order_item_name` FROM #__virtuemart_order_items oi '
+				. ' LEFT JOIN #__virtuemart_orders o ON (oi.virtuemart_order_id = o.virtuemart_order_id
+					AND (o.order_status = \'C\' OR o.order_status = \'S\')
+					AND (oi.order_status = \'C\' OR oi.order_status = \'S\')) '
+				. ' WHERE o.virtuemart_user_id = ' . $user->id;
+				
+			$db		=& JFactory::getDBO();
+			$db->setQuery( $query );
+			return $db->loadResultArray();
+		}
+		
+		if ( substr($type, 0, 33) == 'previouspurchasequantityofproduct' ) {			
+			$product_id = substr( $type, 33 );
+			if ( $product_id === '' ) {
+				return ''; // bypass; we could not find the id they were asking about
+			}
+			$product_id = (int) $product_id;
+			
+			$query = 'SELECT SUM(oi.`product_quantity`) AS product_quantity FROM #__virtuemart_order_items oi '
+				. ' LEFT JOIN #__virtuemart_orders o ON (oi.virtuemart_order_id = o.virtuemart_order_id
+					AND (o.order_status = \'C\' OR o.order_status = \'S\')
+					AND (oi.order_status = \'C\' OR oi.order_status = \'S\')
+					AND oi.virtuemart_product_id = ' . $product_id . ') '
+				. ' WHERE o.virtuemart_user_id = ' . $user->id;
+				
+			$db		=& JFactory::getDBO();
+			$db->setQuery( $query );
+			return (int)$db->loadResult();// set to int so 0 is returned where necessary.
+		}
+		
 	}
 	
 	function isSearchResults() {
 		if ( $this->option != 'com_virtuemart' ) return false;
-		if ( array_key_exists( 'keyword1', $_REQUEST ) ) return true;
+		if ( array_key_exists( 'keyword', $_REQUEST ) ) return true;
 		return false;
 	}
 	
@@ -185,15 +291,15 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 		
 		switch ( $type ) {
 			case 'manufacturerid':
-				$type = 'manufacturer_id';		break;
+				$type = 'manufacturer_id';		break; //ok
 			case 'manufacturername':
-				$type = 'manufacturer_name';	break;
+				$type = 'manufacturer_name';	break; // ok
 			case 'manufacturercategoryid':
-				$type = 'manufacturer_category_id';	break;
+				$type = 'manufacturer_category_id';	break; // ok
 			case 'manufacturercategoryname':
-				$type = 'manufacturer_category_name';	break;
+				$type = 'manufacturer_category_name';	break; // ok
 			case 'vendorid':
-				$type = 'vendor_id';			break;
+				$type = 'virtuemart_vendor_id';	break; // ok
 			case 'productparentid':
 				$type = 'product_parent_id';	break;
 			case 'productsku':
@@ -203,7 +309,7 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 			case 'productdesc':
 				$type = 'product_desc';			break;
 			case 'isproductpublished':
-				$type = 'product_publish';		break;
+				$type = 'published';			break;
 			case 'productweight':
 				$type = 'product_weight';		break;
 			case 'productweightunit':
@@ -221,15 +327,15 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 			case 'isproductspecial':
 				$type = 'product_special';		break;
 			case 'productdiscountid':
-				$type = 'product_discount_id';	break;
-			case 'productshipcodeid':
-				$type = 'ship_code_id';			break;
+				$type = 'product_discount_id';	break; // NOT IN J1.7 - moved into the proces table
+	//		case 'productshipcodeid':
+	//			$type = 'ship_code_id';			break;
 			case 'productname':
 				$type = 'product_name';			break;
-			case 'productsales':
-				$type = 'product_sales';		break;
-			case 'productattributes':
-				$type = 'attribute';			break;
+	//		case 'productsales':
+	//			$type = 'product_sales';		break;
+	//		case 'productattributes':
+	//			$type = 'attribute';			break; // NOT IN J1.7 - not sure if it's here anywhere.
 			case 'producttaxid':
 				$type = 'product_tax_id';		break;
 			case 'productunit':
@@ -238,18 +344,18 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 				$type = 'units_in_box';			break;
 			case 'unitsinpackage':
 				$type = 'units_in_package';		break;
-			case 'childoptions':
-				$type = 'child_options';		break;
+	//		case 'childoptions':
+	//			$type = 'child_options';		break; // NOT IN J1.7 - not sure if it's here anywhere.
 			case 'quantityoptions':
-				$type = 'quantity_options';		break;
+				$type = 'quantity_options';		break; // NOT IN J1.7 - not sure if it's here anywhere.
 			return '';
 		}
 		
-		$man_id = JRequest::getInt('manufacturer_id');
+		$man_id = JRequest::getInt('virtuemart_manufacturer_id');
 		
 		// browse pages can be indexed by manufacturer - shortcut!
 		if ( $type == 'manufacturer_id'
-			and ( $this->page == 'shop.browse' or $this->page == 'shop.manufacturer_page' )
+			and ( $this->view == 'category' or $this->view == 'manufacturer' )
 			and $man_id > 0
 		  ) {
 			return $man_id;
@@ -260,26 +366,33 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 		if ( $prod_id > 0 ) {
 			static $prods = array();
 			if ( !array_key_exists( $prod_id, $prods ) ) {
+				
+				JomGeniusClassVirtuemart::loadVmConfig(); // to get VMLANG
+				
 				$db		=& JFactory::getDBO();
-				$query = 'SELECT p.*, '
-					. 'mfx.manufacturer_id, '
-					. 'mf.mf_name as manufacturer_name, '
-					. 'mf.mf_category_id as manufacturer_category_id, '
-					. 'mfc.mf_category_name as manufacturer_category_name '
-					. 'FROM #__vm_product p '
-					. 'LEFT JOIN #__vm_product_mf_xref mfx ON mfx.product_id = p.product_id '
-					. 'LEFT JOIN #__vm_manufacturer mf ON mfx.manufacturer_id = mf.manufacturer_id '
-					. 'LEFT JOIN #__vm_manufacturer_category mfc ON mf.mf_category_id = mfc.mf_category_id '
-					. 'WHERE p.product_id = ' . (int)$prod_id;
+				$query = 'SELECT p.*, pl.*, p.`virtuemart_product_id` as product_id, pp.`product_tax_id`, pp.`product_discount_id`, '
+					. 'mfx.virtuemart_manufacturer_id as manufacturer_id, '
+					. 'mfl.mf_name as manufacturer_name, '
+					. 'mf.virtuemart_manufacturercategories_id as manufacturer_category_id, '
+					. 'mfcl.mf_category_name as manufacturer_category_name '
+					. 'FROM #__virtuemart_products p '
+					. 'LEFT JOIN #__virtuemart_products_'.VMLANG.' pl on pl.virtuemart_product_id = p.virtuemart_product_id '
+					. 'LEFT JOIN #__virtuemart_product_manufacturers mfx ON mfx.virtuemart_product_id = p.virtuemart_product_id '
+					. 'LEFT JOIN #__virtuemart_manufacturers mf ON mfx.virtuemart_manufacturer_id = mf.virtuemart_manufacturer_id '
+					. 'LEFT JOIN #__virtuemart_manufacturers_'.VMLANG.' mfl on mfl.virtuemart_manufacturer_id = mfx.virtuemart_manufacturer_id '
+					. 'LEFT JOIN #__virtuemart_manufacturercategories mfc ON mf.virtuemart_manufacturercategories_id = mfc.virtuemart_manufacturercategories_id '
+					. 'LEFT JOIN #__virtuemart_manufacturercategories_'.VMLANG.' mfcl ON mf.virtuemart_manufacturercategories_id = mfcl.virtuemart_manufacturercategories_id '
+					. 'LEFT JOIN #__virtuemart_product_prices pp ON pp.virtuemart_product_id = p.virtuemart_product_id '
+					. 'WHERE p.virtuemart_product_id = ' . (int)$prod_id;
 				$db->setQuery( $query );
 				$row = $db->loadAssoc();
-				$row['product_publish'] = ( $row['product_publish'] == 'Y');
-				$row['product_special'] = ( $row['product_special'] == 'Y');
+//				$row['product_special'] = ( $row['product_special'] == 'Y');
 				$row['units_in_box'] = (int)($row['product_packaging'] / 65536 );
 				$row['units_in_package'] = (int)($row['product_packaging'] % 65536 );
 				
 				
 				$prods[ $prod_id ] = $row;
+				// print_r($row);
 			}
 			return @$prods[ $prod_id ][ $type ];
 		}
@@ -292,12 +405,13 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 			if ( !array_key_exists( $this->product_id, $mans ) ) {
 				$db		=& JFactory::getDBO();
 				$query = 'SELECT '
-					. 'mf.mf_name as manufacturer_name, '
-					. 'mf.mf_category_id as manufacturer_category_id, '
-					. 'mfc.mf_category_name as manufacturer_category_name '
-					. 'FROM #__vm_manufacturer mf '
-					. 'LEFT JOIN #__vm_manufacturer_category mfc ON mf.mf_category_id = mfc.mf_category_id '
-					. 'WHERE mf.manufacturer_id = ' . (int)$man_id;
+					. ' mfl.mf_name as manufacturer_name, '
+					. ' mf.virtuemart_manufacturercategories_id as manufacturer_category_id, '
+					. ' mfcl.mf_category_name as manufacturer_category_name '
+					. ' FROM #__virtuemart_manufacturers mf '
+					. ' LEFT JOIN #__virtuemart_manufacturers_' . VMLANG . ' mfl on mfl.manufacturer_id = ' . (int)$man_id
+					. ' LEFT JOIN #__virtuemart_manufacturercategories_' . VMLANG . ' mfcl ON mf.mf_category_id = mfcl.mf_category_id '
+					. ' WHERE mf.manufacturer_id = ' . (int)$man_id;
 				$db->setQuery( $query );
 				$row = $db->loadAssoc();
 				$mans[ $man_id ] = $row;
@@ -309,9 +423,10 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 	function pageType() {
 		if ( $this->option != 'com_virtuemart' ) return null;
 		
-		if ( $this->page == null or $this->page == "shop.index" ) return "frontpage";
-		if ( in_array( $this->page, 
+		if ( $this->view == null or $this->view == "virtuemart" ) return "frontpage";
+		if ( in_array( $this->view, 
 			array(
+//			'user',
 			'account.billing',
 			'account.index',
 			'account.order_details',
@@ -323,29 +438,66 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 			'checkout.ipayment_result',
 			'checkout.paysbuy',
 			'checkout.result',
-			'checkout.thankyou',
-			'shop.browse',
+//			'checkout.thankyou',
 			'shop.ask',
-			'shop.cart',
+//			'orders',
+//			'cart',
 			'shop.registration',
 			'shop.infopage',
-			'shop.manufacturer_page', // normally appears on menuless popup window
-			'shop.product_details',
+			'manufacturer', // normally appears on menuless popup window
 			'shop.savedcart',
 			'shop.search', // advanced search form
 			'shop.waiting_list',
 			'shop.waiting_thanks'
 			) ) ) {
-				return $this->page;
+				return $this->view;
 		}
-		if ( $this->page == "checkout.index") {
-			$last_step = JRequest::getVar("checkout_last_step");
-			$stage = JRequest::getVar("checkout_stage");
-			if ( $last_step == "3" or $stage == 4 ) return "checkout.index#4";
-			if ( $last_step == "2" or $stage == 3 ) return "checkout.index#3";
-			if ( $last_step == "1" or $stage == 2 ) return "checkout.index#2";
-			if ( $last_step == ""  or $stage == 1 ) return "checkout.index#1";
+		
+		if ($this->view == 'pluginresponse' and JRequest::getVar('task') == 'pluginresponsereceived' ) {
+			return 'plugin.response';
 		}
+		
+		if ($this->view == 'orders') {
+			if (JRequest::getVar('order_number', null) != null) return 'order.view';
+			return 'orders';
+		}
+		
+		if ($this->view == 'user') {
+			switch(strtolower($this->task)) {
+			 	case 'edit':				return 'user'; // what should we call the main user page?
+				case 'editaddresscheckout':
+					if ($this->addrtype == 'ST') return 'checkout.editshipto';
+					if ($this->addrtype == 'BT') return 'checkout.editbillto';
+					return 'user.editaddresscheckout'; // not sure if used
+				case 'editaddressst':		return 'user.editshipto';
+				case 'editaddresscart':
+					if ($this->addrtype == 'ST') return 'user.editshipto';
+					if ($this->addrtype == 'BT') return 'user.editbillto';
+					return ''; // any others?
+			}
+			return 'user';
+		}
+		if ($this->view == 'productdetails') {
+			if ($this->task == 'askquestion') return 'productdetails.ask'; // normally appears on menuless popup window
+			if ($this->task == 'mailAskquestion') return 'productdetails.mailquestion'; // normally appears on menuless popup window
+			return 'productdetails';
+			// there may be more...
+		}
+		
+		if ($this->view == 'cart') {
+			switch(strtolower($this->task)) {
+			 	case 'edit_shipment':		return 'cart.editshipment';
+				case 'editpayment':			return 'cart.editpayment';
+				case 'confirm':				return 'cart.thankyou';
+			}
+			return 'cart'; // any others?
+		}
+		
+		if ($this->view == 'category') {
+			if (isset($_GET['keyword'])) return 'searchresults';
+			return 'category';
+		}
+		
 		
 		return '';
 	}
@@ -373,12 +525,17 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 	 */
 	
 	function shopperGroup() {
+		// if we already set it in a succeed/fail action, then we return that value instead of the user's stored value
+		if (isset($GLOBALS['CHAMELEON_FLAGS']['shopper_group'])) {
+			return $GLOBALS['CHAMELEON_FLAGS']['shopper_group'];
+		}
+		
 		$user 	=& JFactory::getUser();
 		if ( $user->id > 0 ) {
 			$id = (int)$user->id;
 			$db		=& JFactory::getDBO();
-			$query = "SELECT shopper_group_id FROM #__vm_shopper_vendor_xref " .
-			   " WHERE user_id = '$id'";
+			$query = "SELECT virtuemart_shoppergroup_id FROM #__virtuemart_vmuser_shoppergroups " .
+			   " WHERE virtuemart_user_id = '$id'";
 			$db->setQuery( $query );
 			$row = $db->loadResult();
 			return $row;
@@ -398,9 +555,10 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 			$key = $type . $id;
 			if ( !array_key_exists( $key, $users ) ) {
 				$db		=& JFactory::getDBO();
-				$query = "SELECT ui.*, c.country_2_code, c.country_3_code, c.country_name FROM #__vm_user_info ui " .
-					" LEFT JOIN #__vm_country c on ui.country = c.country_3_code " .
-					" WHERE user_id = '$id'";
+				$query = "SELECT ui.*, c.country_2_code, c.country_3_code, c.country_name, s.state_name, s.state_3_code, s.state_2_code FROM #__virtuemart_userinfos ui " .
+					" LEFT JOIN #__virtuemart_countries c on ui.virtuemart_country_id = c.virtuemart_country_id " .
+					" LEFT JOIN #__virtuemart_states s on ui.virtuemart_state_id = s.virtuemart_state_id " .
+					" WHERE ui.virtuemart_user_id = '$id'";
 				if ( $type == 'bt') $query .= " and address_type = 'BT'";
 				if ( $type == 'st') $query .= " and address_type = 'ST'";
 				$db->setQuery( $query );
@@ -449,10 +607,10 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 				if ($type == 'shiptocountry3s') return $this->_extractArrayIndex( $rows, 'country_3_code');
 				if ($type == 'shiptocountry2s') return $this->_extractArrayIndex( $rows, 'country_2_code');
 				if ($type == 'shiptocountrynames') return $this->_extractArrayIndex( $rows, 'country_name');
-				if ($type == 'shiptostates') return $this->_extractArrayIndex( $rows, 'state');
+				if ($type == 'shiptostates') return $this->_extractArrayIndex( $rows, 'state_name');
 				if ($type == 'shiptocitys') return $this->_extractArrayIndex( $rows, 'city');
 				if ($type == 'shiptozips') return $this->_extractArrayIndex( $rows, 'zip');
-				if ($type == 'shiptoemails') return $this->_extractArrayIndex( $rows, 'user_email');
+//				if ($type == 'shiptoemails') return $this->_extractArrayIndex( $rows, 'user_email');
 			default:
 		}
 			// these ones there can only 1 of per user.
@@ -470,10 +628,10 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 				if ($type == 'billtocountry3') return $row['country_3_code'];
 				if ($type == 'billtocountry2') return $row['country_2_code'];
 				if ($type == 'billtocountryname') return $row['country_name'];
-				if ($type == 'billtostate') return $row['state'];
+				if ($type == 'billtostate') return $row['state_name'];
 				if ($type == 'billtocity') return $row['city'];
 				if ($type == 'billtozip') return $row['zip'];
-				if ($type == 'billtoemail') return $row['user_email'];
+//				if ($type == 'billtoemail') return $row['user_email'];
 		}
 	}
 	/**
@@ -481,24 +639,35 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 	 */
 	function coupons( $type ) {
 		
+		$cart = $this->prepareCart(); //print_r($cart);
+		if ($cart == null) {
+			return;
+		}
+		
 		switch( $type ) {
 			case 'couponcode':		// MY_COUPON
-				return @$_SESSION['coupon_code']; 
+				//return @$_SESSION['coupon_code']; 
+				return @$cart->couponCode;
 			
 			case 'couponredeemed':	// 1
-				return @$_SESSION['coupon_redeemed'];
+				return isset($cart->couponCode);
 				
 			case 'iscouponredeemed':
-				return ( @$_SESSION['coupon_redeemed'] == true );
+				return ( @$cart->couponCode == true );
 
-			case 'coupondiscount':	// 6.00
-			return @$_SESSION['coupon_discount'];
+			case 'coupondiscount':	// 6%
+				return @$cart->cartData['couponDescr'];
+				
+			case 'couponvalue':
+				return @$cart->pricesUnformatted['couponValue'];
 
-			case 'couponid':		// 1
-				return @$_SESSION['coupon_id'];
+			// we no longer have access to this
+		//	case 'couponid':		// 1
+		//		return @$_SESSION['coupon_id'];
 
-			case 'coupontype':		// gift
-				return @$_SESSION['coupon_type'];
+			// we no longer have access to this
+		//	case 'coupontype':		// gift
+		//		return @$_SESSION['coupon_type'];
 				
 			default: return;
 		}
@@ -559,7 +728,7 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 			default:
 				$names = array();
 				if ($this->option == "com_virtuemart" ) {
-					if ( $this->page == "shop.product_details" ) {
+					if ( $this->view == "productdetails" ) {
 						$allCatInfo = $this->_categoryInfoForProductId( $this->product_id );
 						if ( is_array( $allCatInfo ) ) {
 							// step through array, and return array of items containing the c1 item in each
@@ -637,7 +806,7 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 			default:
 				$ids = array();
 				if ($this->option == "com_virtuemart" ) {
-					if ( $this->page == "shop.product_details" ) {
+					if ( $this->view == "productdetails" ) {
 						$allCatInfo = $this->_categoryInfoForProductId( $this->product_id );
 						if ( is_array( $allCatInfo ) ) {
 							// step through array, and return array of items containing the c1 item in each
@@ -695,7 +864,7 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 	function _allCategoryStuff( $type ) {
 		$ids = array();
 		if ($this->option == "com_virtuemart" ) {
-			if ( $this->page == "shop.product_details" ) {
+			if ( $this->view == "productdetails" ) {
 				$allCatInfo = $this->_categoryInfoForProductId( $this->product_id );
 			} else {
 				$allCatInfo = $this->_categoryInfoForCategoryId( $this->category_id );				
@@ -727,7 +896,7 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 		$ids = array();
 		$allCatInfo = array();
 		if ($this->option == "com_virtuemart" ) {
-			if ( $this->page == "shop.product_details" ) {
+			if ( $this->view == "productdetails" ) {
 				$allCatInfo = $this->_categoryInfoForProductId( $this->product_id );
 			} else {
 				$allCatInfo = $this->_categoryInfoForCategoryId( $this->category_id );
@@ -756,13 +925,19 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 	function _infoForCategoryId( $id ) {
 		$id = (int)$id;
 		$db		=& JFactory::getDBO();
-		$query = "select c.*			
-			from 
-			#__vm_category c
-			where c.category_id = $id";
+		
+		JomGeniusClassVirtuemart::loadVmConfig(); // to get VMLANG
+		
+		$query = 'SELECT c.*, cl.*
+			FROM 
+			#__virtuemart_categories c
+			LEFT JOIN #__virtuemart_categories_' . VMLANG . ' cl ON c.virtuemart_category_id = cl.virtuemart_category_id
+			where c.virtuemart_category_id = ' . $id . '
+			and cl.virtuemart_category_id = ' . $id;
 
 		$db->setQuery( $query, 0, 1 );
 		$res = $db->loadAssoc();
+
 		return $res;
 	}
 	
@@ -789,45 +964,49 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 		}
 		$db		=& JFactory::getDBO();
 
+		JomGeniusClassVirtuemart::loadVmConfig(); // to get VMLANG
+		$vmlang = VMLANG;
+
 		$product_id = (int)$id;
+		
 		$query = "select distinct
 			cx1.category_child_id as c1,
-			vmc1.category_name as n1,
+			vmcl1.category_name as n1,
 			cx2.category_child_id as c2,
-			vmc2.category_name as n2,
+			vmcl2.category_name as n2,
 			cx3.category_child_id as c3,
-			vmc3.category_name as n3,
+			vmcl3.category_name as n3,
 			cx4.category_child_id as c4,
-			vmc4.category_name as n4,
+			vmcl4.category_name as n4,
 			cx5.category_child_id as c5,
-			vmc5.category_name as n5,
+			vmcl5.category_name as n5,
 			cx6.category_child_id as c6,
-			vmc6.category_name as n6,
+			vmcl6.category_name as n6,
 			cx7.category_child_id as c7,
-			vmc7.category_name as n7,
+			vmcl7.category_name as n7,
 			cx8.category_child_id as c8,
-			vmc8.category_name as n8
+			vmcl8.category_name as n8
 			
-			from #__vm_product_category_xref pcx
-			left outer join #__vm_category_xref cx1 on pcx.category_id = cx1.category_child_id
-			left outer join #__vm_category_xref cx2 on cx1.category_parent_id = cx2.category_child_id
-			left outer join #__vm_category_xref cx3 on cx2.category_parent_id = cx3.category_child_id
-			left outer join #__vm_category_xref cx4 on cx3.category_parent_id = cx4.category_child_id
-			left outer join #__vm_category_xref cx5 on cx4.category_parent_id = cx5.category_child_id
-			left outer join #__vm_category_xref cx6 on cx5.category_parent_id = cx6.category_child_id
-			left outer join #__vm_category_xref cx7 on cx6.category_parent_id = cx7.category_child_id
-			left outer join #__vm_category_xref cx8 on cx7.category_parent_id = cx8.category_child_id
+			from #__virtuemart_product_categories pcx
+			left outer join #__virtuemart_category_categories cx1 on pcx.virtuemart_category_id = cx1.category_child_id
+			left outer join #__virtuemart_category_categories cx2 on cx1.category_parent_id = cx2.category_child_id
+			left outer join #__virtuemart_category_categories cx3 on cx2.category_parent_id = cx3.category_child_id
+			left outer join #__virtuemart_category_categories cx4 on cx3.category_parent_id = cx4.category_child_id
+			left outer join #__virtuemart_category_categories cx5 on cx4.category_parent_id = cx5.category_child_id
+			left outer join #__virtuemart_category_categories cx6 on cx5.category_parent_id = cx6.category_child_id
+			left outer join #__virtuemart_category_categories cx7 on cx6.category_parent_id = cx7.category_child_id
+			left outer join #__virtuemart_category_categories cx8 on cx7.category_parent_id = cx8.category_child_id
 			
-			left outer join #__vm_category vmc1 on vmc1.category_id = cx1.category_child_id
-			left outer join #__vm_category vmc2 on vmc2.category_id = cx2.category_child_id
-			left outer join #__vm_category vmc3 on vmc3.category_id = cx3.category_child_id
-			left outer join #__vm_category vmc4 on vmc4.category_id = cx4.category_child_id
-			left outer join #__vm_category vmc5 on vmc5.category_id = cx5.category_child_id
-			left outer join #__vm_category vmc6 on vmc6.category_id = cx6.category_child_id
-			left outer join #__vm_category vmc7 on vmc7.category_id = cx7.category_child_id
-			left outer join #__vm_category vmc8 on vmc8.category_id = cx8.category_child_id
+			left outer join #__virtuemart_categories_$vmlang vmcl1 on vmcl1.virtuemart_category_id = cx1.category_child_id
+			left outer join #__virtuemart_categories_$vmlang vmcl2 on vmcl2.virtuemart_category_id = cx2.category_child_id
+			left outer join #__virtuemart_categories_$vmlang vmcl3 on vmcl3.virtuemart_category_id = cx3.category_child_id
+			left outer join #__virtuemart_categories_$vmlang vmcl4 on vmcl4.virtuemart_category_id = cx4.category_child_id
+			left outer join #__virtuemart_categories_$vmlang vmcl5 on vmcl5.virtuemart_category_id = cx5.category_child_id
+			left outer join #__virtuemart_categories_$vmlang vmcl6 on vmcl6.virtuemart_category_id = cx6.category_child_id
+			left outer join #__virtuemart_categories_$vmlang vmcl7 on vmcl7.virtuemart_category_id = cx7.category_child_id
+			left outer join #__virtuemart_categories_$vmlang vmcl8 on vmcl8.virtuemart_category_id = cx8.category_child_id
 
-			where pcx.product_id in ( $id )";
+			where pcx.virtuemart_product_id in ( $id )";
 
 		$db->setQuery( $query );
 		$res = $db->loadAssocList();
@@ -836,7 +1015,7 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 		$cat = $this->category_id;
 		$found_cat = null;
 		// only put the categories into order if we are in virtuemart, and the category id is in the URL
-		if ($ret != null and $cat != null and $this->option == 'com_virtuemart') {
+		if ($res != null and $cat != null and $this->option == 'com_virtuemart') {
 			foreach ( $res as $key=>$val ) {
 				if ( $val['c1'] == $cat ) {
 					$found_cat = $val;
@@ -863,43 +1042,46 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 		}
 		$db		=& JFactory::getDBO();
 
+		JomGeniusClassVirtuemart::loadVmConfig(); // to get VMLANG
+		$vmlang = VMLANG;
+
 		$category_id = (int)$id;
 		$query = "select distinct
 			cx1.category_child_id as c1,
-			vmc1.category_name as n1,
+			vmcl1.category_name as n1,
 			cx2.category_child_id as c2,
-			vmc2.category_name as n2,
+			vmcl2.category_name as n2,
 			cx3.category_child_id as c3,
-			vmc3.category_name as n3,
+			vmcl3.category_name as n3,
 			cx4.category_child_id as c4,
-			vmc4.category_name as n4,
+			vmcl4.category_name as n4,
 			cx5.category_child_id as c5,
-			vmc5.category_name as n5,
+			vmcl5.category_name as n5,
 			cx6.category_child_id as c6,
-			vmc6.category_name as n6,
+			vmcl6.category_name as n6,
 			cx7.category_child_id as c7,
-			vmc7.category_name as n7,
+			vmcl7.category_name as n7,
 			cx8.category_child_id as c8,
-			vmc8.category_name as n8
+			vmcl8.category_name as n8
 			
 			from
-			#__vm_category_xref cx1
-			left outer join #__vm_category_xref cx2 on cx1.category_parent_id = cx2.category_child_id
-			left outer join #__vm_category_xref cx3 on cx2.category_parent_id = cx3.category_child_id
-			left outer join #__vm_category_xref cx4 on cx3.category_parent_id = cx4.category_child_id
-			left outer join #__vm_category_xref cx5 on cx4.category_parent_id = cx5.category_child_id
-			left outer join #__vm_category_xref cx6 on cx5.category_parent_id = cx6.category_child_id
-			left outer join #__vm_category_xref cx7 on cx6.category_parent_id = cx7.category_child_id
-			left outer join #__vm_category_xref cx8 on cx7.category_parent_id = cx8.category_child_id
+			#__virtuemart_category_categories cx1
+			left outer join #__virtuemart_category_categories cx2 on cx1.category_parent_id = cx2.category_child_id
+			left outer join #__virtuemart_category_categories cx3 on cx2.category_parent_id = cx3.category_child_id
+			left outer join #__virtuemart_category_categories cx4 on cx3.category_parent_id = cx4.category_child_id
+			left outer join #__virtuemart_category_categories cx5 on cx4.category_parent_id = cx5.category_child_id
+			left outer join #__virtuemart_category_categories cx6 on cx5.category_parent_id = cx6.category_child_id
+			left outer join #__virtuemart_category_categories cx7 on cx6.category_parent_id = cx7.category_child_id
+			left outer join #__virtuemart_category_categories cx8 on cx7.category_parent_id = cx8.category_child_id
 
-			left outer join #__vm_category vmc1 on vmc1.category_id = cx1.category_child_id
-			left outer join #__vm_category vmc2 on vmc2.category_id = cx2.category_child_id
-			left outer join #__vm_category vmc3 on vmc3.category_id = cx3.category_child_id
-			left outer join #__vm_category vmc4 on vmc4.category_id = cx4.category_child_id
-			left outer join #__vm_category vmc5 on vmc5.category_id = cx5.category_child_id
-			left outer join #__vm_category vmc6 on vmc6.category_id = cx6.category_child_id
-			left outer join #__vm_category vmc7 on vmc7.category_id = cx7.category_child_id
-			left outer join #__vm_category vmc8 on vmc8.category_id = cx8.category_child_id
+			left outer join #__virtuemart_categories_$vmlang vmcl1 on vmcl1.virtuemart_category_id = cx1.category_child_id
+			left outer join #__virtuemart_categories_$vmlang vmcl2 on vmcl2.virtuemart_category_id = cx2.category_child_id
+			left outer join #__virtuemart_categories_$vmlang vmcl3 on vmcl3.virtuemart_category_id = cx3.category_child_id
+			left outer join #__virtuemart_categories_$vmlang vmcl4 on vmcl4.virtuemart_category_id = cx4.category_child_id
+			left outer join #__virtuemart_categories_$vmlang vmcl5 on vmcl5.virtuemart_category_id = cx5.category_child_id
+			left outer join #__virtuemart_categories_$vmlang vmcl6 on vmcl6.virtuemart_category_id = cx6.category_child_id
+			left outer join #__virtuemart_categories_$vmlang vmcl7 on vmcl7.virtuemart_category_id = cx7.category_child_id
+			left outer join #__virtuemart_categories_$vmlang vmcl8 on vmcl8.virtuemart_category_id = cx8.category_child_id
 
 			where cx1.category_child_id = $category_id";
 
@@ -910,7 +1092,7 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 		$cat = $this->category_id;
 		$found_cat = null;
 		// only put the categories into order if we are in virtuemart, and the category id is in the URL
-		if ( $ret != null and $cat != null and $this->option == 'com_virtuemart' ) {
+		if ( $res != null and $cat != null and $this->option == 'com_virtuemart' ) {
 			foreach ( $res as $key=>$val ) {
 				if ( $val['c1'] == $cat ) {
 					$found_cat = $val;
@@ -929,12 +1111,23 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 		return $res;
 	}
 	
+	function prepareCart() {
+		static $cart = null;
+		if ($cart == null) {
+			if (!class_exists( 'VmConfig' )) require(JPATH_ADMINISTRATOR . DS . 'components' . DS . 'com_virtuemart'.DS.'helpers'.DS.'config.php');
+			if(!class_exists('VirtueMartCart')) require(JPATH_VM_SITE.DS.'helpers'.DS.'cart.php');
+			$cart = VirtueMartCart::getCart(false,false);
+			$cart->prepareAjaxData();
+		}
+		return $cart;
+	}
+	
 	function numberCartProducts() {
-		$cart = @$_SESSION['cart'];
-		if ($cart == null or @$cart["idx"] == 0) {
+		$cart = $this->prepareCart();
+		if ($cart == null or @$cart->data->totalProduct == 0) {
 			return 0;
 		}
-		return $cart['idx'];
+		return count($cart->data->products);
 	}
 	
 	/* bear in mind that if this method is used in a system plugin, then the number
@@ -943,16 +1136,11 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 	 * in the numbers given here.
 	 */
 	function numberCartItems() {
-		$cart = @$_SESSION['cart'];
-		if ($cart == null or @$cart["idx"] == 0) {
+		$cart = $this->prepareCart();
+		if ($cart == null or @count($cart->data->products) == 0) {
 			return 0;
 		}
-		$products = $cart['idx'];
-		$count = 0;
-		for ($i = 0; $i < $products; $i++ ) {
-			$count += $cart[$i]['quantity'];
-		}
-		return $count;
+		return $cart->data->totalProduct;
 	}
 
 	/* bear in mind that if this method is used in a system plugin, then the number
@@ -961,16 +1149,15 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 	 * in the numbers given here.
 	 */
 	function cartProductIds() {
-		$cart = @$_SESSION['cart'];
-		if ($cart == null or @$cart["idx"] == 0) {
+		$cart = $this->prepareCart();
+		if ($cart == null or @count($cart->products) == 0) {
 			return array();
 		}
-		$ret = array();
-		$products = $cart['idx'];
-		for ($i = 0; $i < $products; $i++ ) {
-			$ret[] = $cart[$i]['product_id'];
+		$products = $cart->products;
+		if (is_array($products)) {
+			return array_keys($products);
 		}
-		return $ret;
+		return array();
 	}
 
 	/* bear in mind that if this method is used in a system plugin, then the number
@@ -979,15 +1166,18 @@ class JomGeniusClassVirtuemart extends JomGeniusParent {
 	 * in the numbers given here.
 	 */
 	function cartCategoryIds() {
-		$cart = @$_SESSION['cart'];
-		if ($cart == null or @$cart["idx"] == 0) {
+		$cart = $this->prepareCart();
+		if ($cart == null or @count($cart->products) == 0) {
 			return array();
 		}
-		$ret = array();
-		$products = $cart['idx'];
-		for ($i = 0; $i < $products; $i++ ) {
-			$ret[] = $cart[$i]['category_id'];
+		$products = $cart->products;
+		if (is_array($products)) {
+			$ret = array();
+			foreach ($products as $product) {
+				$ret = array_merge($ret, $product->categories);
+			}
+			return $ret;
 		}
-		return $ret;
-	}	
+		return array();
+	}
 }

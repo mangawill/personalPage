@@ -1,0 +1,74 @@
+DEBUG   |120430 21:05:53|*** Batching successive steps (nesting level 1)
+DEBUG   |120430 21:05:53|====== Starting Step number 1 ======
+DEBUG   |120430 21:05:53|Kettenrad :: BREAKING STEP BEFORE SWITCHING DOMAIN
+DEBUG   |120430 21:05:53|AECoreDomainInit :: New instance
+DEBUG   |120430 21:05:54|----- Finished operation 1 ------
+INFO    |120430 21:05:54|--------------------------------------------------------------------------------
+INFO    |120430 21:05:54|Akeeba Backup 3.4.3 (2012-03-21)
+INFO    |120430 21:05:54|Got backup?
+INFO    |120430 21:05:54|--------------------------------------------------------------------------------
+INFO    |120430 21:05:54|--- System Information ---
+INFO    |120430 21:05:54|PHP Version        :5.3.6
+INFO    |120430 21:05:54|OS Version         :Darwin
+INFO    |120430 21:05:54|DB Version         :5.5.9
+INFO    |120430 21:05:54|Web Server         :Apache/2.2.17 (Unix) mod_ssl/2.2.17 OpenSSL/0.9.8r DAV/2 PHP/5.3.6
+INFO    |120430 21:05:54|PHP Interface      :apache2handler
+INFO    |120430 21:05:54|Joomla! version    :2.5.4
+INFO    |120430 21:05:54|Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.19 (KHTML, like Gecko) Chrome/18.0.1025.168 Safari/535.19
+INFO    |120430 21:05:54|Safe mode          :
+INFO    |120430 21:05:54|Display errors     :
+INFO    |120430 21:05:54|Error reporting    :E_ALL
+INFO    |120430 21:05:54|Error display      :off
+INFO    |120430 21:05:54|Disabled functions :
+INFO    |120430 21:05:54|open_basedir restr.:
+INFO    |120430 21:05:54|Max. exec. time    :30
+INFO    |120430 21:05:54|Memory limit       :32M
+INFO    |120430 21:05:54|Current mem. usage :3322376
+INFO    |120430 21:05:54|GZIP Compression   : available (good)
+INFO    |120430 21:05:54|JPATH_BASE         :<root>/administrator
+INFO    |120430 21:05:54|JPATH_SITE         :<root>
+INFO    |120430 21:05:54|JPATH_ROOT         :<root>
+INFO    |120430 21:05:54|JPATH_CACHE        :<root>/administrator/cache
+INFO    |120430 21:05:54|Computed root      :<root>
+INFO    |120430 21:05:54|Output directory   :<root>/administrator
+INFO    |120430 21:05:54|--------------------------------------------------------------------------------
+INFO    |120430 21:05:54|Loaded profile #1
+DEBUG   |120430 21:05:54|Archive template name: site-[HOST]-[DATE]-[TIME]
+DEBUG   |120430 21:05:54|Expanded template name: site-localhost-20120501-010554
+DEBUG   |120430 21:05:54|Backup type is now set to 'full'
+DEBUG   |120430 21:05:54|Expanded archive file name: <root>/administrator/site-localhost-20120501-010554.jpa
+DEBUG   |120430 21:05:54|Initializing archiver engine
+DEBUG   |120430 21:05:54|AEArchiverJpa :: new instance - archive <root>/administrator/site-localhost-20120501-010554.jpa
+DEBUG   |120430 21:05:54|Updating multipart status to 1
+INFO    |120430 21:05:54|AEArchiverJpa :: Spanned JPA creation enabled
+DEBUG   |120430 21:05:54|AEArchiverJpa :: Killing old archive
+DEBUG   |120430 21:05:54|----- Finished operation 2 ------
+DEBUG   |120430 21:05:54|----- Finished operation 3 ------
+DEBUG   |120430 21:05:54|Successful Smart algorithm on AECoreDomainInit
+DEBUG   |120430 21:05:54|Kettenrad :: Domain 'init' has finished.
+DEBUG   |120430 21:05:54|====== Finished Step number 1 ======
+DEBUG   |120430 21:05:54|*** Engine steps batching: Break flag detected.
+DEBUG   |120430 21:05:54|*** Batching of engine steps finished. I will now return control to the caller.
+DEBUG   |120430 21:05:54|Sleeping for 1958.42385292 msec, using usleep()
+DEBUG   |120430 21:05:55|Saving Kettenrad instance backend
+DEBUG   |120430 21:05:55|
+DEBUG   |120430 21:05:56| -- Loaded stored Akeeba Factory (backend)
+DEBUG   |120430 21:05:56|====== Starting Step number 1 ======
+DEBUG   |120430 21:05:56|Kettenrad :: BREAKING STEP BEFORE SWITCHING DOMAIN
+DEBUG   |120430 21:05:56|AECoreDomainInstaller :: New instance
+DEBUG   |120430 21:05:56|-- Adding installation/README.html to archive (virtual data)
+DEBUG   |120430 21:05:56|-- Adding installation/extrainfo.ini to archive (virtual data)
+DEBUG   |120430 21:05:56|----- Finished operation 1 ------
+WARNING |120430 21:05:56|AEAbstractArchiver:: Selected embedded installer not found, using ABI instead
+ERROR   |120430 21:05:56|AEAbstractArchiver:: Installer package <root>/administrator/components/com_akeeba/assets/installers/abi.jpa does not exist!
+DEBUG   |120430 21:05:56|----- Finished operation 2 ------
+ERROR   |120430 21:05:56|Failed Smart algorithm on AECoreDomainInstaller
+DEBUG   |120430 21:05:56|Kettenrad :: More work required in domain 'installer'
+DEBUG   |120430 21:05:56|====== Finished Step number 1 ======
+DEBUG   |120430 21:05:56|*** Engine steps batching: Break flag detected.
+DEBUG   |120430 21:05:56|*** Batching of engine steps finished. I will now return control to the caller.
+DEBUG   |120430 21:05:56|Sleeping for 1996.0899353 msec, using usleep()
+DEBUG   |120430 21:05:58|Saving Kettenrad instance backend
+DEBUG   |120430 21:06:12|Kettenrad :: Attempting to load from database (backend)
+DEBUG   |120430 21:06:12| -- Loaded stored Akeeba Factory (backend)
+DEBUG   |120430 21:06:12|

@@ -6,9 +6,17 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
  * JomGenius classes
  * 
  * @package		JomGenius
- * @version		8
+ * @version		10
  * @license		GNU/GPL
  * @copyright	Copyright (C) 2010-2011 Brandon IT Consulting. All rights reserved.
+ *
+ * @changelog	v10 added articlesave pagetype
+ *					added profilesave pagetype
+ *					added weblinkgo pagetype
+ *					caused search/searchresults pagetypes to only trigger on GET 
+ *						requests (Joomla initially takes the request as a post,
+ *						then rewrites the URL and redirects as a GET)
+ *					fixed groups and groupids to work under 1.7 and 2.5 (2.5 system is different)
  */
 
 class JomGeniusClassCore extends JomGeniusParent {
@@ -114,6 +122,7 @@ class JomGeniusClassCore extends JomGeniusParent {
 					case 'featured':
 						return 'featured';
 					case 'article':
+						if ($this->task == 'article.save') return 'articlesave';
 						return 'article';
 					case 'category':
 						if ($this->layout == 'blog' ) return 'categoryblog';
@@ -135,6 +144,7 @@ class JomGeniusClassCore extends JomGeniusParent {
 					case 'login':
 						return 'login';
 					case 'profile':
+						if ($this->task == 'profile.save') return 'profilesave';
 						if (JRequest::getVar('layout') == 'edit') return 'profileedit';
 						else return "profile";
 				}
@@ -150,6 +160,7 @@ class JomGeniusClassCore extends JomGeniusParent {
 				}
 				return '';
 			case 'com_weblinks':
+				if ( $this->task == "weblink.go" ) return 'weblinkgo';
 				switch ( $this->view ) {
 					case 'form':
 						if ( JRequest::getVar('w_id') != null ) return 'weblinkedit';
@@ -176,6 +187,9 @@ class JomGeniusClassCore extends JomGeniusParent {
 			case 'com_search':
 				switch ( $this->view ) {
 					case 'search':
+						// a search causes a POST then a GET in quick succession. I have decided to
+						// only trap the 2nd request (the GET).
+						if ($_SERVER['REQUEST_METHOD'] == 'POST') return '';
 						if ( JRequest::getVar('searchword') == '' ) {
 							return 'search';
 						} else {
@@ -478,10 +492,41 @@ class JomGeniusClassCore extends JomGeniusParent {
 				return $user->guest == 1;
 				
 			case 'groups'			:
-				return array_keys($user->groups);
+				if ( version_compare( JVERSION, '2.5', '<' ) ) {
+					return array_keys($user->groups);
+				}
+				// Joomla 2.5 and up, we need to retrieve it from the database.
+				static $groups_by_name = null;
+				if ($groups_by_name != null) return $groups_by_name;
+				
+				$db		= JFactory::getDbo();
+				$query	= $db->getQuery(true); 
+				$query->select("ug.title");
+				$query->from("#__user_usergroup_map ugm, #__usergroups ug");
+				$query->where("ugm.group_id = ug.id");
+				$query->where("ugm.user_id = " .(int)$user->id);
+
+				$db->setQuery($query);
+				$groups_by_name = $db->loadResultArray();
+				return $groups_by_name;
 
 			case 'groupids'			:
-				return array_values($user->groups);
+				if ( version_compare( JVERSION, '2.5', '<' ) ) {
+					return array_values($user->groups);
+				}
+				// Joomla 2.5 and up, we need to retrieve it from the database.
+				static $groups_by_id = null;
+				if ($groups_by_id != null) return $groups_by_id;
+				
+				$db		= JFactory::getDbo();
+				$query	= $db->getQuery(true); 
+				$query->select("group_id");
+				$query->from("#__user_usergroup_map");
+				$query->where("user_id = " .(int)$user->id);
+
+				$db->setQuery($query);
+				$groups_by_id = $db->loadResultArray();
+				return $groups_by_id;
 
 			case 'userlastvisitdate'			:
 				return $user->lastvisitDate;

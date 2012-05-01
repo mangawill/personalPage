@@ -1,6 +1,6 @@
 <?php
 /**
- * @version        1.2
+ * @version        1.3
  * @package        RokComments
  * @copyright      (C) 2005 - 2011 RocketTheme, LLC. All rights reserved.
  * @license        http://www.gnu.org/copyleft/gpl.html GNU/GPL
@@ -49,7 +49,7 @@ class plgContentRokComments extends JPlugin
         if(JPluginHelper::isEnabled('content','rokcomments')==false || $row == null) return;
 
         // only works for content
-        if (!preg_match('/^com_content/', $context)) return true;
+        if (!preg_match('/^com_content/', $context)) return;
 
 
         // Get Plugin info
@@ -181,7 +181,7 @@ class plgContentRokComments extends JPlugin
         {
             // remove rokcomments code if in there
             $text = preg_replace($regex, '', $text);
-            if (!(in_array($r_catid, $categories) && in_array($itemid, $menus)))
+            if (!(in_array($r_catid, $categories) || in_array($itemid, $menus)))
             {
                 $this->_setContentText($row,$text);
                 return;
@@ -356,7 +356,7 @@ class plgContentRokComments extends JPlugin
         $this->_setContentText($row,$text);
 
 
-        return true;
+        return;
     }
 
     protected function _replaceText($output) {
@@ -375,7 +375,7 @@ class plgContentRokComments extends JPlugin
         } else {
             $row->text = $text;
         }
-        return true;
+        return;
     }
 
 
@@ -399,14 +399,14 @@ class plgContentRokComments extends JPlugin
             $recursive = true;
             $items = $categories->getItems($recursive);
 
-            foreach ($items as $category)
-            {
-                $condition = (($category->level - $categories->getParent()->level) <= $levels);
-                if ($condition)
-                {
-                    $additional_catids[] = $category->id;
-                }
+            if($items) {
+                foreach ($items as $category) {
+                    $condition = (($category->level - $categories->getParent()->level) <= $levels);
+                    if ($condition) {
+                        $additional_catids[] = $category->id;
+                    }
 
+                }
             }
         }
 

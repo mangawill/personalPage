@@ -7,12 +7,12 @@
 
 	<name>MetaMod</name>
 	<author>Stephen Brandon</author>
-	<creationDate>2011-08-15</creationDate>
+	<creationDate>2012-03-12</creationDate>
 	<copyright>This extension in released under the GNU/GPL License - http://www.gnu.org/copyleft/gpl.html</copyright>
 	<license>GNU General Public License version 2 or later; see LICENSE.txt</license>
 	<authorEmail>stephen@brandonitconsulting.co.uk</authorEmail>
 	<authorUrl>http://www.metamodpro.com/</authorUrl>
-	<version>3.5</version>
+	<version>3.9</version>
 	<description>METAMOD_OVERALL_DESCRIPTION</description>
 	<description2>A module that allows selective inclusion of other modules, depending on time, date, GeoIP-based Country lookup, and any other factors.</description2>
 

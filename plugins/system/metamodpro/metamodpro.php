@@ -200,8 +200,8 @@ class plgSystemMetamodPro extends JPlugin
 	
 	function metaModVersion( $which = 'both') {
 		static $major = '3';
-		static $minor = '4';
-		static $all = '3.4';
+		static $minor = '9';
+		static $all = '3.9';
 		
 		if ( !is_callable( array( 'modMetaModHelper', 'version') ) ) {
 			$path = JPATH_BASE.DS.'modules'.DS."mod_metamod".DS.'helper.php';

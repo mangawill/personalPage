@@ -1,9 +1,8 @@
 <?php
 /**
- * @version		$Id: default.php 21518 2011-06-10 21:38:12Z chdemko $
  * @package		Joomla.Site
  * @subpackage	com_content
- * @copyright	Copyright (C) 2005 - 2011 Open Source Matters, Inc. All rights reserved.
+ * @copyright	Copyright (C) 2005 - 2012 Open Source Matters, Inc. All rights reserved.
  * @license		GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -21,10 +20,10 @@ JHtml::addIncludePath(JPATH_COMPONENT . '/helpers');
 	<?php echo $this->escape($this->params->get('page_heading')); ?>
 	</h1>
 <?php endif; ?>
-<h1 class="prvaNaslov">From my blog</h1>
+<h2 class="prvaNaslov">From my blog</h2>
 <?php $leadingcount=0 ; ?>
 <?php if (!empty($this->lead_items)) : ?>
-<div class="frontPage">
+<div class="items-leading">
 	<?php foreach ($this->lead_items as &$item) : ?>
 		<div class="leading-<?php echo $leadingcount; ?><?php echo $item->state == 0 ? ' system-unpublished' : null; ?>">
 			<?php
@@ -88,4 +87,3 @@ JHtml::addIncludePath(JPATH_COMPONENT . '/helpers');
 <?php endif; ?>
 
 </div>
-

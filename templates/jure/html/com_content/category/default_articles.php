@@ -1,9 +1,8 @@
 <?php
 /**
- * @version		$Id: default_articles.php 21700 2011-06-28 04:32:41Z dextercowley $
  * @package		Joomla.Site
  * @subpackage	com_content
- * @copyright	Copyright (C) 2005 - 2011 Open Source Matters, Inc. All rights reserved.
+ * @copyright	Copyright (C) 2005 - 2012 Open Source Matters, Inc. All rights reserved.
  * @license		GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -23,7 +22,7 @@ $listDirn	= $this->escape($this->state->get('list.direction'));
 
 <?php if (empty($this->items)) : ?>
 
-	<?php if ($this->params->get('show_no_articles',1)) : ?>
+	<?php if ($this->params->get('show_no_articles', 1)) : ?>
 	<p><?php echo JText::_('COM_CONTENT_NO_ARTICLES'); ?></p>
 	<?php endif; ?>
 
@@ -57,7 +56,44 @@ $listDirn	= $this->escape($this->state->get('list.direction'));
 	</fieldset>
 	<?php endif; ?>
 
-	<div class="seznam">
+	<table class="category">
+		<?php if ($this->params->get('show_headings')) :?>
+		<thead>
+			<tr>
+				<th class="list-title" id="tableOrdering">
+					<?php  echo JHtml::_('grid.sort', 'JGLOBAL_TITLE', 'a.title', $listDirn, $listOrder) ; ?>
+				</th>
+
+				<?php if ($date = $this->params->get('list_show_date')) : ?>
+				<th class="list-date" id="tableOrdering2">
+					<?php if ($date == "created") : ?>
+						<?php echo JHtml::_('grid.sort', 'COM_CONTENT_'.$date.'_DATE', 'a.created', $listDirn, $listOrder); ?>
+					<?php elseif ($date == "modified") : ?>
+						<?php echo JHtml::_('grid.sort', 'COM_CONTENT_'.$date.'_DATE', 'a.modified', $listDirn, $listOrder); ?>
+					<?php elseif ($date == "published") : ?>
+						<?php echo JHtml::_('grid.sort', 'COM_CONTENT_'.$date.'_DATE', 'a.publish_up', $listDirn, $listOrder); ?>
+					<?php endif; ?>
+				</th>
+				<?php endif; ?>
+
+				<?php if ($this->params->get('list_show_author', 1)) : ?>
+				<th class="list-author" id="tableOrdering3">
+					<?php echo JHtml::_('grid.sort', 'JAUTHOR', 'author', $listDirn, $listOrder); ?>
+				</th>
+				<?php endif; ?>
+
+				<?php if ($this->params->get('list_show_hits', 1)) : ?>
+				<th class="list-hits" id="tableOrdering4">
+					<?php echo JHtml::_('grid.sort', 'JGLOBAL_HITS', 'a.hits', $listDirn, $listOrder); ?>
+				</th>
+				<?php endif; ?>
+			</tr>
+		</thead>
+		<?php endif; ?>
+
+		<tbody>
+		
+		<div class="seznam">
 
 		<?php foreach ($this->items as $i => $article) : ?>
 			<?php if ($this->items[$i]->state == 0) : ?>
@@ -74,7 +110,7 @@ $listDirn	= $this->escape($this->state->get('list.direction'));
 						<?php if ($article->params->get('access-edit')) : ?>
 						<ul class="actions">
 							<li class="edit-icon">
-								<?php echo JHtml::_('icon.edit',$article, $params); ?>
+								<?php echo JHtml::_('icon.edit', $article, $params); ?>
 							</li>
 						</ul>
 						<?php endif; ?>
@@ -82,12 +118,12 @@ $listDirn	= $this->escape($this->state->get('list.direction'));
 
 					<?php if ($this->params->get('list_show_date')) : ?>
 					<span class="list-date">
-						<?php echo JHtml::_('date',$article->displayDate, $this->escape(
+						<?php echo JHtml::_('date', $article->displayDate, $this->escape(
 						$this->params->get('date_format', JText::_('DATE_FORMAT_LC3')))); ?>
 					</span>
 					<?php endif; ?>
 
-					<?php if ($this->params->get('list_show_author',1) && !empty($article->author )) : ?>
+					<?php if ($this->params->get('list_show_author', 1) && !empty($article->author )) : ?>
 					<span class="list-author">
 						<?php $author =  $article->author ?>
 						<?php $author = ($article->created_by_alias ? $article->created_by_alias : $author);?>
@@ -105,12 +141,11 @@ $listDirn	= $this->escape($this->state->get('list.direction'));
 					</span>
 					<?php endif; ?>
 
-					<?php if ($this->params->get('list_show_hits',1)) : ?>
+					<?php if ($this->params->get('list_show_hits', 1)) : ?>
 					<span class="list-hits">
-						<?php echo ('<img src="templates/jure/images/hits.png" />' . $article->hits), JText::sprintf('COM_CONTENT_ARTICLE_HITS'); ?>
+						<?php echo $article->hits; ?>
 					</span>
 					<?php endif; ?>
-					
 
 				<?php else : // Show unauth links. ?>
 					<span>
@@ -132,7 +167,7 @@ $listDirn	= $this->escape($this->state->get('list.direction'));
 				</span>
 				<br />
 		<?php endforeach; ?>
-</div><!-- seznam -->
+		</div><!-- seznam -->
 <?php endif; ?>
 
 <?php // Code to add a link to submit an article. ?>

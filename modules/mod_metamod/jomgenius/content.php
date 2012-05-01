@@ -6,9 +6,10 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
  * JomGenius classes
  * 
  * @package		JomGenius
- * @version		5
+ * @version		6
  * @license		GNU/GPL
  * @copyright	Copyright (C) 2010-2011 Brandon IT Consulting. All rights reserved.
+ * @changelog	v6 added articlenew pagetype
  */
 
 class JomGeniusClassContent extends JomGeniusParent {
@@ -65,7 +66,7 @@ class JomGeniusClassContent extends JomGeniusParent {
 		// everything else requires the database
 		if ( $this->view == 'article' ) {
 			$row = $this->_infoForArticleId( $this->id );
-		} else if ( $this->view == 'category' ) {
+		} else if ( $this->view == 'category' or $this->view == 'categories') {
 			$row = $this->_infoForCategoryId( $this->id );
 		}
 		
@@ -132,6 +133,7 @@ class JomGeniusClassContent extends JomGeniusParent {
 			case 'featured':
 				return 'featured';
 			case 'article':
+				if ($this->task == 'article.save') return 'articlesave';
 				return 'article';
 			case 'category':
 				if ($this->layout == 'blog' ) return 'categoryblog';
@@ -154,7 +156,7 @@ class JomGeniusClassContent extends JomGeniusParent {
 		
 		$category_id = null;
 		
-		if ( $this->view == "category" ) {
+		if ( $this->view == "category" or $this->view == "categories" ) {
 			/* category list pages (blog or list style) */
 			$category_id = (int)$this->id;
 		} else if (array_key_exists("catid",$_REQUEST)) {

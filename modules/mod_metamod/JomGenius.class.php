@@ -6,7 +6,7 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
  * JomGenius classes
  * 
  * @package		JomGenius
- * @version		8
+ * @version		12
  * @license		GNU/GPL
  * @copyright	Copyright (C) 2010-2011 Brandon IT Consulting. All rights reserved.
  */
@@ -16,13 +16,16 @@ defined( '_JEXEC' ) or die( 'Restricted access' );
 /* changelog:
  * v7 added blackberry detection
  * v8 VM: increased category level nesting limit to 8; added extra page types
+ * v10 VM: fix detection of pagetype when directly on menu item with no "page" param
+ * v11 VM: added virtuemart history queries
+ * v12 Core: fixed user groups for J2.5+
  */
 
 // to allow this class to be defined in more than one component
 if (!defined('JOMGENIUS_CLASS_LOADED')) {
 
 	define( 'JOMGENIUS_CLASS_LOADED', 1 );
-	define( 'JOMGENIUS_VERSION', 9 );
+	define( 'JOMGENIUS_VERSION', 13 );
 	define( 'JOMGENIUS_FILE', __FILE__ );
 
 	class JomGeniusFactory extends JObject {
