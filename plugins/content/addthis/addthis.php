@@ -99,7 +99,6 @@ class plgContentAddThis extends JPlugin {
 	    $outputValue .= "var addthis_product = 'jlp-1.2';\r\n";
 		$outputValue .="var addthis_config =\r\n{";
 		$configValue = $this->prepareConfigValues();
-		
 
     	//Removing the last comma and end of line characters
     	if("" != trim($configValue))
@@ -107,7 +106,6 @@ class plgContentAddThis extends JPlugin {
 		  	$outputValue .= implode( ',', explode( ',', $configValue, -1 ));
 		}
 		$outputValue .= "}</script>". PHP_EOL;
-		
 
         //Creates the button code depending on the button style chosen
         $buttonValue = "";
@@ -125,9 +123,9 @@ class plgContentAddThis extends JPlugin {
         else
 		{
 			$buttonValue .= "<a href='" . $this->pageProtocol ."://www.addthis.com/bookmark.php' ".
-				" class='share' "." onmouseover=\"return addthis_open(this,'', '". urldecode($this->getArticleUrl($article))."', '".$this->escapeText($article->title)."' )\" ".
+				" onmouseover=\"return addthis_open(this,'', '". urldecode($this->getArticleUrl($article))."', '".$this->escapeText($article->title)."' )\" ".
 			" onmouseout='addthis_close();' onclick='return addthis_sendto();'>";
-		    $buttonValue .= "<span>Share</span> <img src='";
+		    $buttonValue .= "<img src='";
 		    //Custom image for button
 			if ("custom_button_image" == trim($this->arrParamValues["button_style"]))
 	    	{
@@ -290,7 +288,7 @@ class plgContentAddThis extends JPlugin {
         				   "addthis_offset_left", "addthis_hover_delay", "addthis_click", "addthis_hover_direction",
         				   "addthis_use_addressbook", "addthis_508_compliant", "addthis_data_track_clickback",
         				   "addthis_hide_embed", "addthis_language", "position", "show_frontpage", "toolbox_more_services_mode",
-        				   "addthis_use_css", "addthis_ga_tracker", "addthis_ga_social");
+        				   "addthis_use_css", "addthis_ga_tracker");
         foreach ( $arrParams as $key => $value ) {
 			$this->arrParamValues[$value] = $joomlaVersion > 1.5 ? $this->params->def($value): $params->get($value);
 		}
@@ -314,13 +312,13 @@ class plgContentAddThis extends JPlugin {
 							"addthis_hover_direction" => "ui_hover_direction", "addthis_use_addressbook" => "ui_use_addressbook",
 							"addthis_508_compliant" => "ui_508_compliant", "addthis_data_track_clickback" => "data_track_clickback",
 							"addthis_hide_embed" => "ui_hide_embed", "addthis_language" => "ui_language",
-							"addthis_use_css" => "ui_use_css", "addthis_ga_tracker" => "data_ga_property", "addthis_ga_social" => "data_ga_social");
+							"addthis_use_css" => "ui_use_css", "addthis_ga_tracker" => "data_ga_tracker");
 
 		foreach ( $arrConfigs as $key => $value ) {
 		   if(in_array($value, array("pubid", "ui_cobrand", "ui_header_color", "ui_header_background", "services_compact",
 		               "services_exclude", "services_expanded", "ui_language")) && ($this->arrParamValues[$key] != ""))
 		           $configValue .= $value . ":'" . $this->arrParamValues[$key] . "'," . PHP_EOL;
-		   elseif(in_array($value, array("ui_offset_top", "ui_offset_left", "ui_delay", "ui_hover_direction", "data_ga_property", "data_ga_social",
+		   elseif(in_array($value, array("ui_offset_top", "ui_offset_left", "ui_delay", "ui_hover_direction", "data_ga_tracker",
 		               "services_custom")) && ($this->arrParamValues[$key] != ""))
 				   $configValue .= $value . ":" . $this->arrParamValues[$key] . "," .  PHP_EOL;
 		   elseif(in_array($value, array("ui_click", "ui_use_addressbook", "ui_508_compliant", "data_track_clickback", "ui_hide_embed",

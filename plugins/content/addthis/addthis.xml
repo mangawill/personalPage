@@ -5,7 +5,7 @@
     <copyright>Copyright (C) 2011 AddThis, LLC</copyright>
     <license>GPL 3.0</license>
     <authorUrl>www.addthis.com</authorUrl>
-    <version>1.1.5</version>
+    <version>1.1.6</version>
     <creationDate>16-Jun-2009</creationDate>
     <description>
         <![CDATA[Help your visitors promote your site! The AddThis Joomla Plugin allows any visitor to bookmark your pages easily with many popular services. Sign up for an AddThis.com account to see how your visitors are sharing your content--which services they're using for sharing, which content is shared the most, and more. It's all free--even the pretty charts and graphs. This module only works with Joomla 1.5.x. To remove the button from an article, add a the custom tag {addthis off} in the article content.]]>
@@ -19,15 +19,20 @@
       <fieldset name="basic">
         <field name="profile_id" type="text" default="Your Profile ID" label="AddThis Profile ID" description="Profile ID under your AddThis account"/>
         <field name="button_style" type="radio" default="lg-share" label="Button Style" description="">
-            <option value="lg-share"><![CDATA[ <img src="http://s7.addthis.com/static/btn/lg-share-en.gif"/><br/><br/>]]></option>
-            <option value="lg-bookmark"><![CDATA[ <img src="http://s7.addthis.com/static/btn/lg-bookmark-en.gif"/><br/><br/>]]></option>
-            <option value="lg-addthis"><![CDATA[ <img src="http://s7.addthis.com/static/btn/lg-addthis-en.gif"/><br/><br/>]]></option>
-            <option value="sm-share"><![CDATA[ <img src="http://s7.addthis.com/static/btn/sm-share-en.gif"/><br/><br/>]]></option>
-            <option value="sm-bookmark"><![CDATA[ <img src="http://s7.addthis.com/static/btn/sm-bookmark-en.gif"/><br/><br/>]]></option>
-            <option value="sm-plus"><![CDATA[ <img src="http://s7.addthis.com/static/btn/sm-plus.gif"/><br/><br/>]]></option>
-            <option value="toolbox"><![CDATA[ <img src="http://s7.addthis.com/static/btn/sm-plus.gif"/> TOOLBOX<br/><br/>]]></option>
+            <option value="lg-share"><![CDATA[ <img src="http://s7.addthis.com/static/btn/lg-share-en.gif" style="margin:0;"/><br/><br/>]]></option>
+            <option value="lg-bookmark"><![CDATA[ <img src="http://s7.addthis.com/static/btn/lg-bookmark-en.gif" style="margin:0;"/><br/><br/>]]></option>
+            <option value="lg-addthis"><![CDATA[ <img src="http://s7.addthis.com/static/btn/lg-addthis-en.gif" style="margin:0;"/><br/><br/>]]></option>
+            <option value="sm-share"><![CDATA[ <img src="http://s7.addthis.com/static/btn/sm-share-en.gif" style="margin:0;"/><br/><br/>]]></option>
+            <option value="sm-bookmark"><![CDATA[ <img src="http://s7.addthis.com/static/btn/sm-bookmark-en.gif" style="margin:0;"/><br/><br/>]]></option>
+            <option value="sm-plus"><![CDATA[ <img src="http://s7.addthis.com/static/btn/sm-plus.gif" style="margin:0;"/><br/><br/>]]></option>
+            <option value="toolbox"><![CDATA[ <img src="http://s7.addthis.com/static/btn/sm-plus.gif" style="margin:0;margin-right:2px;"/> TOOLBOX<br/><br/>]]></option>
             <option value="custom_button_image"><![CDATA[Custom Button Image]]></option>
-            <option value="custom_button_code"><![CDATA[Custom Button]]></option>
+            <option value="custom_button_code"><![CDATA[Custom Button
+			<script>			            
+            var field_content=document.getElementById('jform_params_button_style').innerHTML;			
+			document.getElementById('jform_params_button_style').innerHTML=field_content.replace(new RegExp('</label>', 'g'), "</label><br/><br/><br/>");			
+            </script>
+			]]></option>
         </field>
         <field name="custom_url" label="Custom Button URL" type="text" default="" description="URL for your button If you selected ''Custom Button Image'' above"/>
         <field name="custom_button_code" filter="raw" label="Custom Button Code" type="textarea" default="" description="Your custom AddThis code If you selected ''Custom Button'' above" rows="7" cols="22"/>
@@ -154,7 +159,6 @@
             <option value="0">No</option>
         </field>
         <field name="addthis_ga_tracker" type="text" default="" label="Google Analytics tracking object" description="Google Analytics tracking object, or the name of a global variable that references it. If set, we'll send AddThis tracking events to Google, so you can have integrated reporting."/>
-        <field name="addthis_ga_social" type="text" default="" label="Google Social Analytics true/false" description="Google Social Analytics."/>
         <field name="position" type="radio" default="top" label="Button Position" description="Position of addthis button in the content">
             <option value="top">Top</option>
             <option value="bottom">Bottom</option>
@@ -300,7 +304,6 @@
             <option value="0">No</option>
         </param>
         <param name="addthis_ga_tracker" type="text" default="" label="Google Analytics tracking object" description="Google Analytics tracking object, or the name of a global variable that references it. If set, we'll send AddThis tracking events to Google, so you can have integrated reporting."/>
-        <param name="addthis_ga_social" type="text" default="" label="Google Social Analytics true/false" description="Google Social Analytics."/>
         <param name="position" type="radio" default="top" label="Button Position" description="Position of addthis button in the content">
             <option value="top">Top</option>
             <option value="bottom">Bottom</option>

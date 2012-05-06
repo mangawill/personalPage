@@ -29,11 +29,7 @@
 		'overlayShow'	:	true
 			});
 						
-		});		
-		
-	
-
-
+		});
 
 
 

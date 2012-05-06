@@ -14,6 +14,7 @@ JHtml::addIncludePath(JPATH_COMPONENT . '/helpers');
 // If the page class is defined, add to class as suffix.
 // It will be a separate class if the user starts it with a space
 ?>
+
 <div class="blog-featured<?php echo $this->pageclass_sfx;?>">
 <?php if ( $this->params->get('show_page_heading')!=0) : ?>
 	<h1 class="skrij">
@@ -51,7 +52,7 @@ JHtml::addIncludePath(JPATH_COMPONENT . '/helpers');
 
 		if ($rowcount==1) : ?>
 
-			<div class="items-row cols-<?php echo (int) $this->columns;?> <?php echo 'row-'.$row ; ?>">
+			<div class="items-row cols-<?php echo (int) $this->columns;?> <?php echo 'row-'.$row ; ?> clearfix">
 		<?php endif; ?>
 		<div class="item column-<?php echo $rowcount;?><?php echo $item->state == 0 ? ' system-unpublished"' : null; ?>">
 			<?php

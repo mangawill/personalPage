@@ -11,9 +11,9 @@
 defined('_JEXEC') or die;
 ?>
 <form action="<?php echo JRoute::_('index.php');?>" method="post">
-	<div class="search<?php echo $moduleclass_sfx ?>">
+	<div class="controls<?php echo $moduleclass_sfx ?>">
 		<?php
-			$output = '<label for="mod-search-searchword">'.'</label><input name="searchword" id="mod-search-searchword" maxlength="'.$maxlength.'"  class="inputbox'.$moduleclass_sfx.'" type="search" size="'.$width.'" value="'.$text.'"  onblur="if (this.value==\'\') this.value=\''.$text.'\';" onfocus="if (this.value==\''.$text.'\') this.value=\'\';" />';
+			$output = '<div class="input-prepend"><span class="add-on"><i class="icon-search"></i></span><input name="searchword" id="prependedInput" class="span3" type="search" placeholder="'.$text.'" /></div>';
 
 			if ($button) :
 				if ($imagebutton) :

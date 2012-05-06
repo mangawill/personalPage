@@ -96,8 +96,8 @@ $user		= JFactory::getUser();
     
     <?php if ($useDefList) : ?>
     	</dl>
+    </span><!-- avtorBlog -->
     <?php endif; ?>
-  </span><!-- avtorBlog -->
   
   
 <?php  if (!$params->get('show_intro')) :

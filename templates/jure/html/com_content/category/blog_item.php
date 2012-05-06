@@ -22,17 +22,19 @@ JHtml::core();
 <?php if ($this->item->state == 0) : ?>
 <div class="system-unpublished">
 <?php endif; ?>
+
 <?php if ($params->get('show_title')) : ?>
 <article class="blogClanek">
   <header>
-	<h2>
-		<?php if ($params->get('link_titles') && $params->get('access-view')) : ?>
-			<a href="<?php echo JRoute::_(ContentHelperRoute::getArticleRoute($this->item->slug, $this->item->catid)); ?>">
-			<?php echo $this->escape($this->item->title); ?></a>
-		<?php else : ?>
-			<?php echo $this->escape($this->item->title); ?>
-		<?php endif; ?>
-	</h2>
+  	<h2>
+  		<?php if ($params->get('link_titles') && $params->get('access-view')) : ?>
+  			<a href="<?php echo JRoute::_(ContentHelperRoute::getArticleRoute($this->item->slug, $this->item->catid)); ?>">
+  			<?php echo $this->escape($this->item->title); ?></a>
+  		<?php else : ?>
+  			<?php echo $this->escape($this->item->title); ?>
+  		<?php endif; ?>
+  	</h2>
+	</header>
 <?php endif; ?>
 
 <?php if ($params->get('show_print_icon') || $params->get('show_email_icon') || $canEdit) : ?>
@@ -62,48 +64,85 @@ JHtml::core();
 <?php // to do not that elegant would be nice to group the params ?>
 
 <?php if (($params->get('show_author')) or ($params->get('show_category')) or ($params->get('show_create_date')) or ($params->get('show_modify_date')) or ($params->get('show_publish_date')) or ($params->get('show_parent_category')) or ($params->get('show_hits'))) : ?>
-<span class="avtorBlog">
- <dl class="clearfix">
- <dt class="skrij"><?php echo JText::_('COM_CONTENT_ARTICLE_INFO'); ?></dt>
+  <div class="avtorBlog clearfix">
+    <div class="postData">
 <?php endif; ?>
 
 <?php if ($params->get('show_author') && !empty($this->item->author )) : ?>
-	<dd class="createdby">
+	<div class="createdby clearfix" itemscope itemtype="http://data-vocabulary.org/Person">
 		<?php $author =  $this->item->author; ?>
 		<?php $author = ($this->item->created_by_alias ? $this->item->created_by_alias : $author);?>
 
 			<?php if (!empty($this->item->contactid ) &&  $params->get('link_author') == true):?>
+			 <span itemprop="name">
 				<?php 	echo JText::sprintf('COM_CONTENT_WRITTEN_BY' ,
 				 JHtml::_('link', JRoute::_('index.php?option=com_contact&view=contact&id='.$this->item->contactid), $author)); ?>
-
+        </span>
 			<?php else :?>
-				<i class="icon-pencil"></i><?php echo JText::sprintf('COM_CONTENT_WRITTEN_BY', $author); ?>
+				<div class="ikona"><i class="icon-pencil"></i></div><div itemprop="name"><?php echo JText::sprintf($author); ?></div>
 			<?php endif; ?>
-	</dd>
+	</div>
 <?php endif; ?>
 
 <?php if ($params->get('show_create_date')) : ?>
-		<dd class="create">
+		<div class="create">
 		<?php echo JText::sprintf('COM_CONTENT_CREATED_DATE_ON', JHtml::_('date', $this->item->created, JText::_('DATE_FORMAT_LC2'))); ?>
-		</dd>
+		</div>
 <?php endif; ?>
 <?php if ($params->get('show_modify_date')) : ?>
-		<dd class="modified">
+		<div class="modified">
 		<?php echo JText::sprintf('COM_CONTENT_LAST_UPDATED', JHtml::_('date', $this->item->modified, JText::_('DATE_FORMAT_LC2'))); ?>
-		</dd>
+		</div>
 <?php endif; ?>
 <?php if ($params->get('show_publish_date')) : ?>
-		<dd class="published">
-		<i class="icon-time"></i><?php echo JText::sprintf('COM_CONTENT_PUBLISHED_DATE_ON', JHtml::_('date', $this->item->publish_up, JText::_('DATE_FORMAT_LC2'))); ?>
-		</dd>
+		<div class="published">
+		<i class="icon-time"></i><?php echo JText::sprintf(JHtml::_('date', $this->item->publish_up, JText::_('DATE_FORMAT_LC3'))); ?>
+		</div>
 <?php endif; ?>
 
-<?php if (($params->get('show_author')) or ($params->get('show_category')) or ($params->get('show_create_date')) or ($params->get('show_modify_date')) or ($params->get('show_publish_date')) or ($params->get('show_parent_category')) or ($params->get('show_hits'))) :?>
- 	</dl>
- 	</span><!-- avtorBlog -->
+<?php if ($params->get('show_parent_category') && $this->item->parent_id != 1) : ?>
+  <div class="parent-category-name">
+    <?php $title = $this->escape($this->item->parent_title);
+    $url = '<a href="' . JRoute::_(ContentHelperRoute::getCategoryRoute($this->item->parent_id)) . '">' . $title . '</a>'; ?>
+    <?php if ($params->get('link_parent_category')) : ?>
+      <?php echo JText::sprintf('COM_CONTENT_PARENT', $url); ?>
+      <?php else : ?>
+      <?php echo JText::sprintf('COM_CONTENT_PARENT', $title); ?>
+    <?php endif; ?>
+  </div>
 <?php endif; ?>
-</header>
-<span class="frontSpan clearfix">
+
+<?php if ($params->get('show_category')) : ?>
+		<div class="category-name">
+			<?php $title = $this->escape($this->item->category_title);
+					$url = '<a href="' . JRoute::_(ContentHelperRoute::getCategoryRoute($this->item->catid)) . '">' . $title . '</a>'; ?>
+			<?php if ($params->get('link_category')) : ?>
+				<i class="icon-tags"></i><?php echo JText::sprintf('COM_CONTENT_CATEGORY', $url); ?>
+				<?php else : ?>
+				<?php echo JText::sprintf('COM_CONTENT_CATEGORY', $title); ?>
+			<?php endif; ?>
+		</div>
+<?php endif; ?>
+
+<?php if ($params->get('show_hits')) : ?>
+		<div class="hits">
+		<i class="icon-eye-open"></i><?php echo JText::sprintf('COM_CONTENT_ARTICLE_HITS', $this->item->hits); ?>
+		</div>
+<?php endif; ?>
+
+<div class="share">
+  <a class="addthis_button_twitter"></a>
+  <a class="addthis_button_reddit"></a>
+  <a class="addthis_button_stumbleupon"></a>
+  <a class="addthis_button_google_plusone_share"></a>
+  <a class="addthis_button_compact"></a>
+  <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=ra-4e5bd2ec4d28157e"></script>
+</div><!-- share -->
+
+
+<?php if (($params->get('show_author')) or ($params->get('show_category')) or ($params->get('show_create_date')) or ($params->get('show_modify_date')) or ($params->get('show_publish_date')) or ($params->get('show_parent_category')) or ($params->get('show_hits'))) :?>
+ 	  </div><!-- postData -->
+<?php endif; ?>
 
 <?php  if (isset($images->image_intro) and !empty($images->image_intro)) : ?>
 	<?php $imgfloat = (empty($images->float_intro)) ? $params->get('float_intro') : $images->float_intro; ?>
@@ -115,8 +154,10 @@ JHtml::core();
 		src="<?php echo htmlspecialchars($images->image_intro); ?>" alt="<?php echo htmlspecialchars($images->image_intro_alt); ?>"/>
 	</div>
 <?php endif; ?>
+
+<div class="introText clearfix">
 <?php echo $this->item->introtext; ?>
-</span><!-- frontSpan -->
+</div>
 
 <?php if ($params->get('show_readmore') && $this->item->readmore) :
 	if ($params->get('access-view')) :
@@ -149,6 +190,10 @@ JHtml::core();
 		</p>
 <?php endif; ?>
 
+<?php if (($params->get('show_author')) or ($params->get('show_category')) or ($params->get('show_create_date')) or ($params->get('show_modify_date')) or ($params->get('show_publish_date')) or ($params->get('show_parent_category')) or ($params->get('show_hits'))) : ?>
+  </div><!-- avtorBlog -->
+<?php endif; ?>
+
 <?php if ($this->item->state == 0) : ?>
 </div>
 <?php endif; ?>
@@ -156,36 +201,8 @@ JHtml::core();
 <footer class="footerBlog">
   <dl class="clearfix">
 	<dd class="category-name">
-<?php if ($params->get('show_parent_category') && $this->item->parent_id != 1) : ?>
-		<dd class="parent-category-name">
-			<?php $title = $this->escape($this->item->parent_title);
-				$url = '<a href="' . JRoute::_(ContentHelperRoute::getCategoryRoute($this->item->parent_id)) . '">' . $title . '</a>'; ?>
-			<?php if ($params->get('link_parent_category')) : ?>
-				<?php echo JText::sprintf('COM_CONTENT_PARENT', $url); ?>
-				<?php else : ?>
-				<?php echo JText::sprintf('COM_CONTENT_PARENT', $title); ?>
-			<?php endif; ?>
-		</dd>
-<?php endif; ?>
 
-<?php if ($params->get('show_category')) : ?>
-		<dd class="category-name">
-			<?php $title = $this->escape($this->item->category_title);
-					$url = '<a href="' . JRoute::_(ContentHelperRoute::getCategoryRoute($this->item->catid)) . '">' . $title . '</a>'; ?>
-			<?php if ($params->get('link_category')) : ?>
-				<i class="icon-tags"></i><?php echo JText::sprintf('COM_CONTENT_CATEGORY', $url); ?>
-				<?php else : ?>
-				<?php echo JText::sprintf('COM_CONTENT_CATEGORY', $title); ?>
-			<?php endif; ?>
-		</dd>
-<?php endif; ?>
 
-<?php if ($params->get('show_hits')) : ?>
-		<dd class="hits">
-		<i class="icon-eye-open"></i><?php echo JText::sprintf('COM_CONTENT_ARTICLE_HITS', $this->item->hits); ?>
-		</dd>
-<?php endif; ?>
-</dl>
 
 <?php echo $this->item->event->afterDisplayContent; ?>
 

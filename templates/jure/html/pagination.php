@@ -81,36 +81,36 @@ function pagination_list_footer($list)
 function pagination_list_render($list)
 {
 	// Initialize variables
-	$html = "<span class=\"pagination\">";
-//	$html .= '<span>&laquo;</span>'.$list['start']['data'];
+	$html = "<div class=\"pagination\"><ul>";
+//  $html .= '<li><a>&laquo;</a></li>'.$list['start']['data'];
 	$html .= $list['previous']['data'];
 
 	foreach( $list['pages'] as $page )
 	{
 		if($page['data']['active']) {
-			$html .= '<strong>';
+			$html .= '<li>';
 		}
 
 		$html .= $page['data'];
 
 		if($page['data']['active']) {
-			$html .= '</strong>';
+			$html .= '</li>';
 		}
 	}
 
 	$html .= $list['next']['data'];
-//	$html .= $list['end']['data'];
-//	$html .= '<span>&raquo;</span>';
+//  $html .= $list['end']['data'];
+//  $html .= '<span>&raquo;</span>';
 
-	$html .= "</span>";
+	$html .= "</ul></div>";
 	return $html;
 }
 
 function pagination_item_active(&$item) {
-	return "<a href=\"".$item->link."\" class=\"button\" title=\"".$item->text."\">".$item->text."</a>";
+	return "<li><a href=\"".$item->link."\" title=\"".$item->text."\">".$item->text."</a></li>";
 }
 
 function pagination_item_inactive(&$item) {
-	return "<span class=\"button stevilkaStran\">".$item->text."</span>";
+	return "<li class=\"active\"><a>".$item->text."</a></li>";
 }
 ?>

@@ -97,15 +97,6 @@ JHtml::addIncludePath(JPATH_COMPONENT.'/helpers');
 
 </div><!-- blog -->
 
-	<?php if (!empty($this->children[$this->category->id])&& $this->maxLevel != 0) : ?>
-		<div class="cat-children">
-		<h3>
-<?php echo JTEXT::_('JGLOBAL_SUBCATEGORIES'); ?>
-</h3>
-			<?php echo $this->loadTemplate('children'); ?>
-		</div>
-	<?php endif; ?>
-
 <?php if (($this->params->def('show_pagination', 1) == 1  || ($this->params->get('show_pagination') == 2)) && ($this->pagination->get('pages.total') > 1)) : ?>
 		<div class="pagination">
 						<?php  if ($this->params->def('show_pagination_results', 1)) : ?>
