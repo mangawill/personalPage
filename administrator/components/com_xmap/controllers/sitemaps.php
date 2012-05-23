@@ -1,6 +1,6 @@
 <?php
 /**
- * @version		$Id: sitemaps.php 64 2011-10-14 23:54:00Z guille $
+ * @version		$Id$
  * @copyright   Copyright (C) 2007 - 2009 Joomla! Vargas. All rights reserved.
  * @license		GNU General Public License version 2 or later; see LICENSE.txt
  * @author		Guillermo Vargas (guille@vargas.co.cr)

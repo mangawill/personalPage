@@ -5,7 +5,7 @@
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU GPL version 3 or, at your option, any later version
  * @package akeebaengine
- * @version $Id: scanner.php 410 2011-01-24 11:29:01Z nikosdion $
+ *
  */
 
 // Protection against direct access

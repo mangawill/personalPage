@@ -11,7 +11,7 @@
 
 defined('_JEXEC') or die('RESTRICTED');
 
-wfimport('editor.libraries.classes.error');
+//wfimport('editor.libraries.classes.error');
 wfimport('editor.libraries.classes.utility');
 wfimport('editor.libraries.classes.token');
 wfimport('editor.libraries.classes.document');
@@ -31,7 +31,7 @@ class WFEditor extends JObject {
 	/**
 	 * @var varchar
 	 */
-	private $_version = '2.0.21';
+	private $_version = '2.1.3';
 
 	/**
 	 * Constructor activating the default information of the class
@@ -295,11 +295,11 @@ class WFEditor extends JObject {
 		}
 
 		if (is_numeric($default)) {
-			$default = intval($default);
+			$default = floatval($default);
 		}
 
 		if (is_numeric($param)) {
-			$param = intval($param);
+			$param = floatval($param);
 		}
 
 		if ($param === $default) {

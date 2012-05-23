@@ -3,39 +3,33 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id$
+ *
  * @since 3.0
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
-
-// Load framework base classes
-jimport('joomla.application.component.view');
+defined('_JEXEC') or die();
 
 /**
  * View class for the Filesystem Filters
  *
  */
-class AkeebaViewFsfilter extends JView
+class AkeebaViewFsfilter extends FOFViewHtml
 {
-	public function display()
+	public function onBrowse($tpl = null)
 	{
-		$task = JRequest::getCmd('task','normal');
+		$model = $this->getModel();
+		$task = $model->getState('browse_task', 'normal');
 
-		// Add toolbar buttons
-		JToolBarHelper::title(JText::_('AKEEBA').': <small>'.JText::_('FSFILTERS').'</small>','akeeba');
-		JToolBarHelper::back('AKEEBA_CONTROLPANEL', 'index.php?option='.JRequest::getCmd('option'));
-		
 		// Add custom submenus
 		JSubMenuHelper::addEntry(
 			JText::_('FILTERS_LABEL_NORMALVIEW'),
-			JURI::base().'index.php?option=com_akeeba&view='.JRequest::getCmd('view').'&task=normal',
+			JURI::base().'index.php?option=com_akeeba&view=fsfilter&task=normal',
 			($task == 'normal')
 		);
 		JSubMenuHelper::addEntry(
 			JText::_('FILTERS_LABEL_TABULARVIEW'),
-			JURI::base().'index.php?option=com_akeeba&view='.JRequest::getCmd('view').'&task=tabular',
+			JURI::base().'index.php?option=com_akeeba&view=fsfilter&task=tabular',
 			($task == 'tabular')
 		);
 
@@ -78,7 +72,7 @@ class AkeebaViewFsfilter extends JView
 		{
 			case 'normal':
 			default:
-				$tpl = null;
+				$this->setLayout('default');
 
 				// Get a JSON representation of the directory data
 				$model = $this->getModel();
@@ -87,7 +81,7 @@ class AkeebaViewFsfilter extends JView
 				break;
 
 			case 'tabular':
-				$tpl = 'tab';
+				$this->setLayout('tabular');
 
 				// Get a JSON representation of the tabular filter data
 				$model = $this->getModel();
@@ -98,19 +92,18 @@ class AkeebaViewFsfilter extends JView
 		}
 
 		// Add live help
-		AkeebaHelperIncludes::addHelp();
+		AkeebaHelperIncludes::addHelp('fsfilter');
 
 		// Get profile ID
 		$profileid = AEPlatform::getInstance()->get_active_profile();
 		$this->assign('profileid', $profileid);
 
 		// Get profile name
-		if(!class_exists('AkeebaModelProfiles')) JLoader::import('models.profiles', JPATH_COMPONENT_ADMINISTRATOR);
-		$model = new AkeebaModelProfiles();
-		$model->setId($profileid);
-		$profile_data = $model->getProfile();
+		$pmodel = FOFModel::getAnInstance('Profiles', 'AkeebaModel');
+		$pmodel->setId($profileid);
+		$profile_data = $pmodel->getItem();
 		$this->assign('profilename', $profile_data->description);
 
-		parent::display($tpl);
+		return true;
 	}
 }

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version             $Id: view.html.php 71 2011-10-15 20:52:55Z guille $
+ * @version             $Id$
  * @copyright			Copyright (C) 2005 - 2009 Joomla! Vargas. All rights reserved.
  * @license             GNU General Public License version 2 or later; see LICENSE.txt
  * @author              Guillermo Vargas (guille@vargas.co.cr)
@@ -109,8 +109,8 @@ class XmapViewXml extends JView
 
         if ($doCompression) {
             $data = ob_get_contents();
-            @ob_end_clean();
             JResponse::setBody($data);
+            @ob_end_clean();
             echo JResponse::toString(true);
         }
         exit;

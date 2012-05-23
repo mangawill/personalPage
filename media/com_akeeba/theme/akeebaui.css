@@ -7,7 +7,7 @@
 /*
  * Akeeba Backup title icon
  */
-.icon-48-akeeba { background-image: url(../../../administrator/components/com_akeeba/assets/images/logo-48.png); }
+.icon-48-akeeba { background-image: url(../icons/logo-48.png); }
 /*
  * UI Icons - 32x32
  */
@@ -89,6 +89,31 @@ div.viewport-bottom .url {
 	left: 20px;
 	bottom: -20px;
 }
+
+.aklargewarning {
+	width: 80%;
+	border: medium solid red;
+	margin: 0.5em 10%;
+	padding: 1em;
+	background: #ffdd00;
+	color: red;
+	border-radius: 5px;
+	-moz-border-radius: 10px;
+	-webkit-border-radius: 10px;
+	font-size: 12pt;
+	box-shadow: 0 0 20px 4px #f00;
+	-webkit-animation-name: akpulsate;
+    -webkit-animation-duration: 1s;
+    -webkit-animation-timing-function: ease-in-out;
+    -webkit-animation-iteration-count: 10;
+}
+
+@-webkit-keyframes akpulsate {
+	0% { box-shadow: 0 0 20px 4px #f00; }
+	50% { box-shadow: 0 0 10px 0px #ff0; }
+	100% { box-shadow: 0 0 20px 4px #f00; }
+}
+
 
 /**
  * Custom checkboxes
@@ -391,7 +416,7 @@ fieldset {
 div.akeeba-ui-optionrow {
 	display: block;
 	width: 100%;
-	height: 100%;
+	height: 2em;
 	margin: 2px 0;
 	clear: both;
 }
@@ -405,6 +430,7 @@ fieldset div.akeeba-ui-optionrow label {
 	background-color: #e9e9e9;
 	-moz-border-radius: 3px;
 	border-radius: 3px;
+	min-height: 1.4em;
 	cursor: help;
 }
 
@@ -428,9 +454,12 @@ div.akeeba-ui-slider-label {
 
 div.akeeba_ui_separator {
 	width: 100%;
+	float: left;
+	border-bottom: 1px solid #999;
 	height: 1px;
-	border-bottom: 1px solid #ccc;
-	margin-bottom: 5px;
+	top: -5px;
+	position: relative;
+	margin-bottom: -8px;
 }
 
 .akeeba_bold_label {

@@ -1,6 +1,6 @@
 <?php
 /**
-* @version             $Id: default_class.php 71 2011-10-15 20:52:55Z guille $
+* @version             $Id$
 * @copyright		Copyright (C) 2005 - 2009 Joomla! Vargas. All rights reserved.
 * @license		GNU General Public License version 2 or later; see LICENSE.txt
 * @author		Guillermo Vargas (guille@vargas.co.cr)
@@ -30,6 +30,19 @@ class XmapHtmlDisplayer extends XmapDisplayer {
         $this->live_site = substr_replace(JURI::root(), "", -1, 1);
 
         $user = JFactory::getUser();
+    }
+    
+    function setJView($view)
+    {
+        parent::setJView($view);
+        
+        $columns = $this->sitemap->params->get('columns',0);
+        if( $columns > 1 ) {		// calculate column widths
+            $total = count($view->items);
+            $columns = $total < $columns? $total : $columns;
+            $this->_width	= (100 / $columns) - 1;
+            $this->sitemap->params->set('columns',$columns);
+        }
     }
 
     /** 
@@ -142,48 +155,6 @@ class XmapHtmlDisplayer extends XmapDisplayer {
             $this->_openList = '';
             $this->level += $level;
         }
-    }
-
-    /** Print component heading, etc. Then call getHtmlList() to print list */
-    function startOutput(&$menus,&$config) {
-        $sitemap = &$this->sitemap;
-
-        $menu = &JTable::getInstance('Menu');
-        $menu->load( $Itemid );			// Load params for the Xmap menu-item
-        $params = new JParameter($menu->params);
-        $title = $params->get('page_title',$menu->name);
-
-        $exlink[0] = $sitemap->exlinks;		// image to mark popup links
-        $exlink[1] = $sitemap->ext_image;
-
-        if( $sitemap->columns > 1 ) {		// calculate column widths
-            $total = count($menus);
-            $columns = $total < $sitemap->columns ? $total : $sitemap->columns;
-            $this->_width	= (100 / $columns) - 1;
-        }
-        echo '<div class="'. $sitemap->classname .'">';
-
-        if ( $params->get( 'show_page_title' ) ) {
-            echo '<div class="componentheading">'.$title.'</div>';
-        }
-        echo '<div class="contentpaneopen"'. ($sitemap->columns > 1 ? ' style="float:left;width:100%;"' : '') .'>';
-
-
-    }
-
-    /** Print component heading, etc. Then call getHtmlList() to print list */
-    function endOutput(&$menus) {
-        $sitemap = &$this->sitemap;
-
-        echo '<div style="clear:left"></div>';
-        //BEGIN: Advertisement
-        if( $sitemap->includelink ) {
-            echo "<div style=\"text-align:center;\"><a href=\"http://joomla.vargas.co.cr\" style=\"font-size:10px;\">Powered by Xmap!</a></div>";
-        }
-        //END: Advertisement
-
-        echo "</div>";
-        echo "</div>\n";
     }
 
     function startMenu(&$menu) {

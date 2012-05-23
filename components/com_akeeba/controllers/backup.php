@@ -3,21 +3,30 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 2, or later
- * @version $Id$
+ *
  * @since 1.3
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
+defined('_JEXEC') or die();
 
 defined('AKEEBA_BACKUP_ORIGIN') or define('AKEEBA_BACKUP_ORIGIN','frontend');
 
-// Load framework base classes
-jimport('joomla.application.component.controller');
-
-class AkeebaControllerBackup extends JController
+class AkeebaControllerBackup extends FOFController
 {
-	public function display()
+	public function __construct($config = array()) {
+		$config['csrf_protection'] = false;
+		parent::__construct($config);
+	}
+	
+	public function execute($task) {
+		if($task != 'step') {
+			$task = 'browse';
+		}
+		parent::execute($task);
+	}
+	
+	public function browse()
 	{
 		// Check permissions
 		$this->_checkPermissions();
@@ -37,11 +46,7 @@ class AkeebaControllerBackup extends JController
 		$userTZ = $user->getParam('timezone',0);
 		$dateNow = new JDate();
 		$dateNow->setOffset($userTZ);
-		if( AKEEBA_JVERSION == '16' ) {
-			$description = JText::_('BACKUP_DEFAULT_DESCRIPTION').' '.$dateNow->format(JText::_('DATE_FORMAT_LC2'), true);
-		} else {
-			$description = JText::_('BACKUP_DEFAULT_DESCRIPTION').' '.$dateNow->toFormat(JText::_('DATE_FORMAT_LC2'));
-		}
+		$description = JText::_('BACKUP_DEFAULT_DESCRIPTION').' '.$dateNow->format(JText::_('DATE_FORMAT_LC2'), true);
 		$options = array(
 			'description'	=> $description,
 			'comment'		=> ''
@@ -58,7 +63,7 @@ class AkeebaControllerBackup extends JController
 		}
 		else
 		{
-			$noredirect = JRequest::getInt('noredirect', 0);
+			$noredirect = FOFInput::getInt('noredirect', 0, $this->input);
 			if($noredirect != 0)
 			{
 				@ob_end_clean();
@@ -68,7 +73,7 @@ class AkeebaControllerBackup extends JController
 			}
 			else
 			{
-				$this->setRedirect(JURI::base().'index.php?option=com_akeeba&view=backup&task=step&key='.JRequest::getVar('key').'&profile='.JRequest::getInt('profile',1));
+				$this->setRedirect(JURI::base().'index.php?option=com_akeeba&view=backup&task=step&key='.FOFInput::getVar('key', '', $this->input).'&profile='.FOFInput::getInt('profile', 1, $this->input));
 			}
 		}
 	}
@@ -103,7 +108,7 @@ class AkeebaControllerBackup extends JController
 		}
 		else
 		{
-			$noredirect = JRequest::getInt('noredirect', 0);
+			$noredirect = FOFInput::getInt('noredirect', 0, $this->input);
 			if($noredirect != 0)
 			{
 				@ob_end_clean();
@@ -113,7 +118,7 @@ class AkeebaControllerBackup extends JController
 			}
 			else
 			{
-				$this->setRedirect(JURI::base().'index.php?option=com_akeeba&view=backup&task=step&key='.JRequest::getVar('key').'&profile='.JRequest::getInt('profile',1));
+				$this->setRedirect(JURI::base().'index.php?option=com_akeeba&view=backup&task=step&key='.FOFInput::getVar('key', '', $this->input).'&profile='.FOFInput::getInt('profile', 1, $this->input));
 			}
 		}
 	}
@@ -134,7 +139,7 @@ class AkeebaControllerBackup extends JController
 		}
 
 		// Is the key good?
-		$key = JRequest::getVar('key');
+		$key = FOFInput::getVar('key', '', $this->input);
 		$validKey=AEPlatform::getInstance()->get_platform_configuration_option('frontend_secret_word','');
 		$validKeyTrim = trim($validKey);
 		if( ($key != $validKey) || (empty($validKeyTrim)) )
@@ -149,7 +154,7 @@ class AkeebaControllerBackup extends JController
 	private function _setProfile()
 	{
 		// Set profile
-		$profile = JRequest::getInt('profile',1);
+		$profile = FOFInput::getInt('profile', 1, $this->input);
 		if(!is_numeric($profile)) $profile = 1;
 		$session = JFactory::getSession();
 		$session->set('profile', $profile, 'akeeba');

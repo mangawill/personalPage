@@ -3,11 +3,11 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id: includes.php 688 2011-06-02 15:31:16Z nikosdion $
+ *
  * @since 1.3
  */
 
-defined('_JEXEC') or die('Restricted access');
+defined('_JEXEC') or die();
 
 /**
  * A centralized place to include Akeeba Backup's CSS and JS files to the rendered page, as well as
@@ -77,16 +77,13 @@ class AkeebaHelperIncludes
 
 		// In Joomla! 1.6 we have to load jQuery and jQuery UI without the hackish onAfterRender method :(
 		jimport('joomla.filesystem.file');
-		if(AKEEBA_JVERSION == '16')
+		foreach(self::$scriptURLs as $url)
 		{
-			foreach(self::$scriptURLs as $url)
-			{
-				$document->addScript($url);
-			}
-			foreach(self::$scriptDefs as $script)
-			{
-				$document->addScriptDeclaration($script);
-			}
+			$document->addScript($url);
+		}
+		foreach(self::$scriptDefs as $script)
+		{
+			$document->addScriptDeclaration($script);
 		}
 
 		// Joomla! 1.5 method
@@ -142,9 +139,8 @@ class AkeebaHelperIncludes
 		self::$scriptURLs[] = JURI::base().'../media/com_akeeba/js/akeebajqui.js?'.AKEEBAMEDIATAG;
 	}
 
-	static public function addHelp()
+	static public function addHelp($view)
 	{
-		$view = JRequest::getCmd('view','cpanel');
 		if( array_key_exists($view, self::$viewHelpMap) )
 		{
 			$page = self::$viewHelpMap[$view];
@@ -157,8 +153,8 @@ class AkeebaHelperIncludes
 	{
 		if(strpos($page, '.html') === false) $page .= '.html';
 		if(strpos($page, '#') === false) $page .= '#maincol';
-		$bar = & JToolBar::getInstance('toolbar');
-		$label = (AKEEBA_JVERSION == '15') ? 'help' : 'JTOOLBAR_HELP';
+		$bar = JToolBar::getInstance('toolbar');
+		$label = 'JTOOLBAR_HELP';
 		$bar->appendButton( 'Popup', 'help', $label, 'https://www.akeebabackup.com/documentation/akeeba-backup-documentation/'.$page, 900, 500 );
 	}
 }

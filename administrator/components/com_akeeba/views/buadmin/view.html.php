@@ -3,21 +3,18 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id$
+ *
  * @since 1.3
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
-
-// Load framework base classes
-jimport('joomla.application.component.view');
+defined('_JEXEC') or die();
 
 /**
  * Akeeba Backup Administrator view class
  *
  */
-class AkeebaViewBuadmin extends JView
+class AkeebaViewBuadmin extends FOFViewHtml
 {
 	protected $lists = null;
 
@@ -28,77 +25,64 @@ class AkeebaViewBuadmin extends JView
         $tmpl_path = JPATH_COMPONENT_ADMINISTRATOR.'/plugins/views/buadmin/tmpl';
 		$this->addTemplatePath($tmpl_path);
 	}
-    
-	public function display()
+	
+	public function onEdit($tpl = null)
 	{
-		$task = JRequest::getCmd('task','default');
+		$document = JFactory::getDocument();
+		$document->addStyleSheet(JURI::base().'../media/com_akeeba/theme/akeebaui.css?'.AKEEBAMEDIATAG);
 
-		switch($task)
+		$model = $this->getModel();
+		$id = $model->getId();
+		$record = AEPlatform::getInstance()->get_statistics($id);
+		$this->assign('record', $record);
+		$this->assign('record_id', $id);
+		
+		$this->setLayout('comment');
+	}
+    
+	public function onBrowse($tpl=null)
+	{
+		$session = JFactory::getSession();
+		$task = $session->get('buadmin.task', 'default', 'akeeba');
+		
+		if($task != 'restorepoint') $task = 'default';
+
+		$aeconfig = AEFactory::getConfiguration();
+
+		// Add custom submenus
+		if(AKEEBA_PRO) {
+			JSubMenuHelper::addEntry(
+				JText::_('BUADMIN_LABEL_BACKUPS'),
+				JURI::base().'index.php?option=com_akeeba&view=buadmin&task=browse',
+				($task == 'default')
+			);
+			JSubMenuHelper::addEntry(
+				JText::_('BUADMIN_LABEL_SRP'),
+				JURI::base().'index.php?option=com_akeeba&view=buadmin&task=restorepoint',
+				($task == 'restorepoint')
+			);
+		}
+
+		if(AKEEBA_PRO && ($task == 'default'))
 		{
-			case 'showcomment':
-				JToolBarHelper::title(JText::_('AKEEBA').': <small>'.JText::_('BUADMIN').'</small>','akeeba');
-				JToolBarHelper::back('AKEEBA_CONTROLPANEL', 'index.php?option='.JRequest::getCmd('option'));
-				JToolBarHelper::save();
-				JToolBarHelper::cancel();
-				$document = JFactory::getDocument();
-				$document->addStyleSheet(JURI::base().'../media/com_akeeba/theme/akeebaui.css?'.AKEEBAMEDIATAG);
+			$bar = & JToolBar::getInstance('toolbar');
+			$bar->appendButton( 'Link', 'restore', JText::_('DISCOVER'), 'index.php?option=com_akeeba&view=discover' );
+			JToolBarHelper::publish('restore', JText::_('STATS_LABEL_RESTORE'));
+		}
 
-				$id = JRequest::getInt('id',0);
-				$record = AEPlatform::getInstance()->get_statistics($id);
-				$this->assign('record', $record);
-				$this->assign('record_id', $id);
+		if(($task == 'default')) {
+			JToolBarHelper::editList('showcomment', JText::_('STATS_LOG_EDITCOMMENT'));
 
-				JRequest::setVar('tpl','comment');
-				break;
+			$pModel = FOFModel::getTmpInstance('Profiles','AkeebaModel');
+			$enginesPerPprofile = $pModel->getPostProcessingEnginePerProfile();
+			$this->assign('enginesPerProfile', $enginesPerPprofile);
+		}
+		JToolBarHelper::spacer();
 
-			default:
-				$aeconfig = AEFactory::getConfiguration();
-
-				if($task == 'default') {
-					JToolBarHelper::title(JText::_('AKEEBA').': <small>'.JText::_('BUADMIN').'</small>','akeeba');
-				} else {
-					JToolBarHelper::title(JText::_('AKEEBA').': <small>'.JText::_('BUADMINSRP').'</small>','akeeba');
-				}
-
-				JToolBarHelper::back('AKEEBA_CONTROLPANEL', 'index.php?option='.JRequest::getCmd('option'));
-				JToolBarHelper::spacer();
-				JToolBarHelper::deleteList();
-				JToolBarHelper::custom( 'deletefiles', 'delete.png', 'delete_f2.png', JText::_('STATS_LABEL_DELETEFILES'), true );
-
-				// Add custom submenus
-				if(AKEEBA_PRO) {
-					JSubMenuHelper::addEntry(
-						JText::_('BUADMIN_LABEL_BACKUPS'),
-						JURI::base().'index.php?option=com_akeeba&view='.JRequest::getCmd('view').'&task=default',
-						($task == 'default')
-					);
-					JSubMenuHelper::addEntry(
-						JText::_('BUADMIN_LABEL_SRP'),
-						JURI::base().'index.php?option=com_akeeba&view='.JRequest::getCmd('view').'&task=restorepoint',
-						($task == 'restorepoint')
-					);
-				}
-				
-				if(AKEEBA_PRO && ($task == 'default'))
-				{
-					$bar = & JToolBar::getInstance('toolbar');
-					$bar->appendButton( 'Link', 'restore', JText::_('DISCOVER'), 'index.php?option=com_akeeba&view=discover' );
-					JToolBarHelper::publish('restore', JText::_('STATS_LABEL_RESTORE'));
-				}
-
-				if(($task == 'default')) {
-					JToolBarHelper::editList('showcomment', JText::_('STATS_LOG_EDITCOMMENT'));
-					
-					$pModel = JModel::getInstance('Profiles','AkeebaModel');
-					$enginesPerPprofile = $pModel->getPostProcessingEnginePerProfile();
-					$this->assign('enginesPerProfile', $enginesPerPprofile);
-				}
-				JToolBarHelper::spacer();
-
-				// "Show warning first" download button. Joomlantastic!
-				$confirmationText = AkeebaHelperEscape::escapeJS( JText::_('STATS_LOG_DOWNLOAD_CONFIRM'), "'\n" );
-				$baseURI = JURI::base();
-				$js = <<<ENDSCRIPT
+		// "Show warning first" download button. Joomlantastic!
+		$confirmationText = AkeebaHelperEscape::escapeJS( JText::_('STATS_LOG_DOWNLOAD_CONFIRM'), "'\n" );
+		$baseURI = JURI::base();
+		$js = <<<ENDSCRIPT
 function confirmDownloadButton()
 {
 	var answer = confirm('$confirmationText');
@@ -118,49 +102,47 @@ function confirmDownload(id, part)
 
 ENDSCRIPT;
 
-				$document = JFactory::getDocument();
-				$document->addScriptDeclaration($js);				
-				$document->addStyleSheet(JURI::base().'../media/com_akeeba/theme/akeebaui.css?'.AKEEBAMEDIATAG);
-				
-				$hash = 'akeebabuadmin';
-		
-				// ...ordering
-				$app = JFactory::getApplication();
-				$this->lists->set('order',			$app->getUserStateFromRequest($hash.'filter_order',
-					'filter_order', 'backupstart'));
-				$this->lists->set('order_Dir',		$app->getUserStateFromRequest($hash.'filter_order_Dir',
-					'filter_order_Dir', 'DESC'));
-				
-				// ...filter state
-				$this->lists->set('fltDescription',	$app->getUserStateFromRequest($hash.'filter_description',
-					'description', null));
-				$this->lists->set('fltFrom',		$app->getUserStateFromRequest($hash.'filter_from',
-					'from', null));
-				$this->lists->set('fltTo',			$app->getUserStateFromRequest($hash.'filter_to',
-					'to', null));
-				$this->lists->set('fltOrigin',		$app->getUserStateFromRequest($hash.'filter_origin',
-					'origin', null));
-				$this->lists->set('fltProfile',		$app->getUserStateFromRequest($hash.'filter_profile',
-					'profile', null));
-				
-				$filters = $this->_getFilters();
-				$ordering = $this->_getOrdering();
+		$document = JFactory::getDocument();
+		$document->addScriptDeclaration($js);				
+		$document->addStyleSheet(JURI::base().'../media/com_akeeba/theme/akeebaui.css?'.AKEEBAMEDIATAG);
 
-				require_once JPATH_COMPONENT_ADMINISTRATOR.'/models/statistics.php';
-				$model = new AkeebaModelStatistics();
-				$list = $model->getStatisticsListWithMeta(false, $filters, $ordering);
+		$hash = 'akeebabuadmin';
 
-				// Assign data to the view
-				$this->assignRef( 'lists',		$this->lists); // Filter lists
-				$this->assignRef( 'list',		$list); // Data
-				$this->assignRef( 'pagination',	$model->getPagination($filters)); // Pagination object
-				break;
-		}
+		// ...ordering
+		$app = JFactory::getApplication();
+		$this->lists->set('order',			$app->getUserStateFromRequest($hash.'filter_order',
+			'filter_order', 'backupstart'));
+		$this->lists->set('order_Dir',		$app->getUserStateFromRequest($hash.'filter_order_Dir',
+			'filter_order_Dir', 'DESC'));
+
+		// ...filter state
+		$this->lists->set('fltDescription',	$app->getUserStateFromRequest($hash.'filter_description',
+			'description', null));
+		$this->lists->set('fltFrom',		$app->getUserStateFromRequest($hash.'filter_from',
+			'from', null));
+		$this->lists->set('fltTo',			$app->getUserStateFromRequest($hash.'filter_to',
+			'to', null));
+		$this->lists->set('fltOrigin',		$app->getUserStateFromRequest($hash.'filter_origin',
+			'origin', null));
+		$this->lists->set('fltProfile',		$app->getUserStateFromRequest($hash.'filter_profile',
+			'profile', null));
+
+		$filters = $this->_getFilters();
+		$ordering = $this->_getOrdering();
+
+		require_once JPATH_COMPONENT_ADMINISTRATOR.'/models/statistics.php';
+		$model = new AkeebaModelStatistics();
+		$list = $model->getStatisticsListWithMeta(false, $filters, $ordering);
+
+		// Assign data to the view
+		$this->assignRef( 'lists',		$this->lists); // Filter lists
+		$this->assignRef( 'list',		$list); // Data
+		$this->assignRef( 'pagination',	$model->getPagination($filters)); // Pagination object
 
 		// Add live help
-		AkeebaHelperIncludes::addHelp();
-
-		parent::display(JRequest::getVar('tpl'));
+		AkeebaHelperIncludes::addHelp('buadmin');
+		
+		return true;
 	}
 	
 	private function _getFilters()
@@ -215,7 +197,8 @@ ENDSCRIPT;
 			);
 		}
 		
-		$task = JRequest::getCmd('task','default');
+		$session = JFactory::getSession();
+		$task = $session->get('buadmin.task', 'browse', 'akeeba');
 		if($task == 'restorepoint') {
 			$filters[] = array(
 				'field'			=> 'tag',

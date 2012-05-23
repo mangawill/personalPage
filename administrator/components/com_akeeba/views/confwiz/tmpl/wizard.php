@@ -3,12 +3,12 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id: wizard.php 698 2011-06-03 22:33:44Z nikosdion $
+ *
  * @since 1.3
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
+defined('_JEXEC') or die();
 
 ?>
 

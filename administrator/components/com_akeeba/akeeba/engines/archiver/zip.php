@@ -5,7 +5,7 @@
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU GPL version 3 or, at your option, any later version
  * @package akeebaengine
- * @version $Id: zip.php 930 2011-09-19 12:54:04Z nikosdion $
+ *
  */
 
 // Protection against direct access

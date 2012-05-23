@@ -2,13 +2,15 @@
 /**
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
- * @license GNU General Public License version 2, or later
- * @version $Id$
+ * @license GNU General Public License version 3, or later
+ *
  * @since 1.3
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
+defined('_JEXEC') or die();
+
+JDEBUG ? define('AKEEBADEBUG', 1) : null;
 
 // Check for PHP4
 if(defined('PHP_VERSION')) {
@@ -21,91 +23,15 @@ if(defined('PHP_VERSION')) {
 }
 
 // Old PHP version detected. EJECT! EJECT! EJECT!
-if(!version_compare($version, '5.0.0', '>='))
+if(!version_compare($version, '5.2.0', '>='))
 {
-	return JError::raise(E_ERROR, 500, 'PHP 4 is not supported by Akeeba Backup');
+	return JError::raise(E_ERROR, 500, 'Unsupported PHP version');
 }
 
-// Timezone fix; avoids errors printed out by PHP 5.3.3+ (thanks Yannick!)
-if(function_exists('date_default_timezone_get') && function_exists('date_default_timezone_set') && !version_compare(JVERSION,'1.6','ge')) {
-	if(function_exists('error_reporting')) {
-		$oldLevel = error_reporting(0);
-	}
-	$serverTimezone = @date_default_timezone_get();
-	if(empty($serverTimezone) || !is_string($serverTimezone)) $serverTimezone = 'UTC';
-	if(function_exists('error_reporting')) {
-		error_reporting($oldLevel);
-	}
-	@date_default_timezone_set( $serverTimezone);
-}
+jimport('joomla.application.component.model');
 
-if(!version_compare( JVERSION, '1.6.0', 'ge' )) {
-	define('AKEEBA_JVERSION','15');
-} else {
-	define('AKEEBA_JVERSION','16');
-}
+// Load FOF
+include_once JPATH_SITE.'/libraries/fof/include.php';
+if(!defined('FOF_INCLUDED')) JError::raiseError ('500', 'Your Akeeba Backup installation is broken; please re-install. Alternatively, extract the installation archive and copy the fof directory inside your site\'s libraries directory.');
 
-if(!defined('AKEEBAENGINE'))
-{
-	define('AKEEBAENGINE', 1); // Required for accessing Akeeba Engine's factory class
-	define('AKEEBAROOT', JPATH_ROOT.'/administrator/components/com_akeeba/akeeba'); 
-	define('AKEEBAPLATFORM', 'joomla15'); // So that platform-specific stuff can get done!
-}
-
-if(!defined('JPATH_COMPONENT_ADMINISTRATOR'))
-{
-	define('JPATH_COMPONENT_ADMINISTRATOR', JPATH_ADMINISTRATOR.'/components/com_akeeba' );
-}
-
-require_once(JPATH_SITE.'/administrator/components/com_akeeba/version.php');
-
-// Apply profile selection, if any
-$profile = JRequest::getInt('profile',1);
-if(!is_numeric($profile)) $profile = 1;
-$session = JFactory::getSession();
-$session->set('profile', $profile, 'akeeba');
-JRequest::setVar('profile', $profile);
-
-// Get the view and controller from the request, or set to default if they weren't set
-JRequest::setVar('view', JRequest::getCmd('view','backup'));
-JRequest::setVar('c', JRequest::getCmd('view')); // Black magic: Get controller based on the selected view
-
-// Black Magic II: merge the default translation with the current translation
-$jlang = JFactory::getLanguage();
-$jlang->load('com_akeeba', JPATH_SITE, 'en-GB', true);
-$jlang->load('com_akeeba', JPATH_SITE, $jlang->getDefault(), true);
-$jlang->load('com_akeeba', JPATH_SITE, null, true);
-$jlang->load('com_akeeba', JPATH_ADMINISTRATOR, 'en-GB', true);
-$jlang->load('com_akeeba', JPATH_ADMINISTRATOR, $jlang->getDefault(), true);
-$jlang->load('com_akeeba', JPATH_ADMINISTRATOR, null, true);
-
-// Preload the factory
-jimport('joomla.filesystem.file');
-require_once JPATH_COMPONENT_ADMINISTRATOR.'/akeeba/factory.php';
-
-// Load the utils helper library
-AEPlatform::getInstance()->load_version_defines();
-
-// Load the appropriate controller
-$c = JRequest::getCmd('c','cpanel');
-$path = JPATH_COMPONENT.'/controllers/'.$c.'.php';
-jimport('joomla.filesystem.file');
-if(JFile::exists($path))
-{
-	// The requested controller exists and there you load it...
-	require_once($path);
-}
-else
-{
-	// Hmm... an invalid controller was passed
-	JError::raiseError('500',JText::_('Unknown controller'));
-}
-
-// Instanciate and execute the controller
-jimport('joomla.utilities.string');
-$c = 'AkeebaController'.ucfirst($c);
-$controller = new $c();
-$controller->execute(JRequest::getCmd('task','display'));
-
-// Redirect
-$controller->redirect();
+FOFDispatcher::getTmpInstance('com_akeeba')->dispatch();

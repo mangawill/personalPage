@@ -3,32 +3,20 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id$
  * @since 1.3
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
-
-// Load framework base classes
-jimport('joomla.application.component.view');
+defined('_JEXEC') or die();
 
 /**
  * Akeeba Backup Configuration view class
  *
  */
-class AkeebaViewConfig extends JView
+class AkeebaViewConfig extends FOFViewHtml
 {
-	function display()
+	public function onAdd($tpl = null)
 	{
-		// Toolbar buttons
-		JToolBarHelper::title(JText::_('AKEEBA').':: <small>'.JText::_('CONFIGURATION').'</small>','akeeba');
-		JToolBarHelper::preferences('com_akeeba', '500', '660');
-		JToolBarHelper::spacer();
-		JToolBarHelper::apply();
-		JToolBarHelper::save();
-		JToolBarHelper::cancel();
-		JToolBarHelper::spacer();
 		
 		// Add references to scripts and CSS
 		AkeebaHelperIncludes::includeMedia(AKEEBA_PRO);
@@ -43,11 +31,11 @@ class AkeebaViewConfig extends JView
 		$this->assign('profileid', $profileid);
 
 		// Get profile name
-		if(!class_exists('AkeebaModelProfiles')) JLoader::import('models.profiles', JPATH_COMPONENT_ADMINISTRATOR);
-		$model = new AkeebaModelProfiles();
-		$model->setId($profileid);
-		$profile_data = $model->getProfile();
-		$this->assign('profilename', $profile_data->description);
+		$profileName = FOFModel::getTmpInstance('Profiles','AkeebaModel')
+			->setId($profileid)
+			->getItem()
+			->description;
+		$this->assign('profilename', $profileName);
 
 		// Get the root URI for media files
 		$this->assign( 'mediadir', AkeebaHelperEscape::escapeJS($media_folder.'theme/') );
@@ -68,8 +56,6 @@ class AkeebaViewConfig extends JView
 		}
 		
 		// Add live help
-		AkeebaHelperIncludes::addHelp();
-
-		parent::display();
+		AkeebaHelperIncludes::addHelp('config');
 	}
 }

@@ -67,6 +67,12 @@ class LiveUpdateView extends JView
 				
 				break;
 				
+			case 'nagscreen':
+				$this->setLayout('nagscreen');
+				$this->assign('updateInfo', LiveUpdate::getUpdateInformation());
+				$this->assign('runUpdateURL','index.php?option='.JRequest::getCmd('option','').'&view='.JRequest::getCmd('view','liveupdate').'&task=startupdate&skipnag=1');
+				break;
+			
 			case 'overview':
 			default:
 				$this->setLayout('overview');

@@ -3,11 +3,11 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id: default.php 698 2011-06-03 22:33:44Z nikosdion $
+ *
  * @since 1.3
  */
 
-defined('_JEXEC') or die('Restricted access');
+defined('_JEXEC') or die();
 if(empty($this->tag)) $this->tag = null;
 ?>
 <div id="akeeba-container" style="width:100%">
@@ -21,7 +21,7 @@ if(empty($this->tag)) $this->tag = null;
 <form name="adminForm" action="index.php" method="post">
 	<input name="option" value="com_akeeba" type="hidden" />
 	<input name="view" value="log" type="hidden" />
-	<?php echo JHTML::_( 'form.token' ); ?>
+	<input type="hidden" name="<?php echo JFactory::getSession()->getToken()?>" value="1" />
 	<fieldset>
 		<label for="tag"><?php echo JText::_('LOG_CHOOSE_FILE_TITLE'); ?></label>
 		<?php echo JHTML::_('select.genericlist', $this->logs, 'tag', 'onchange=submitform()', 'value', 'text', $this->tag, 'tag') ?>

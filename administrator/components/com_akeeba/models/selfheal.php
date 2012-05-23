@@ -3,20 +3,17 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id$
  * @since 3.3
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
-
-jimport('joomla.application.component.model');
+defined('_JEXEC') or die();
 
 /**
  * Self-healing database schema features
  *
  */
-class AkeebaModelSelfheal extends JModel
+class AkeebaModelSelfheal extends FOFModel
 {
 	private $schemata = array();
 	
@@ -82,6 +79,9 @@ ENDSQL;
 	 */
 	public function healSchema()
 	{
+		// Only run when this component runs under the MySQL database engine
+		if(!$this->isMySQL()) return true;
+		
 		$db = JFactory::getDBO();
 		
 		// Fix missing tables
@@ -170,11 +170,6 @@ ENDSQL;
 			return false;
 		}
 		
-		if(!version_compare(JVERSION, '1.6.0', 'ge')) {
-			// Joomla! 1.5 returns the error message on failure
-			if($db->getError()) return false;
-		}
-		
 		return true;
 	}
 
@@ -224,5 +219,11 @@ ENDSQL;
 	{
 		$db = JFactory::getDBO();
 		return $this->runSQL('SELECT COUNT(*) FROM '.$db->nameQuote($table));
-	}	
+	}
+	
+	private function isMySQL()
+	{
+		$db = JFactory::getDbo();
+		return strtolower(substr($db->name, 0, 5)) == 'mysql';
+	}
 }

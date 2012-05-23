@@ -3,12 +3,11 @@
  * @package Akeeba
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id$
  * @since 3.0
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
+defined('_JEXEC') or die();
 
 ?>
 <form name="adminForm" method="post" action="index.php" >
@@ -71,10 +70,10 @@ defined('_JEXEC') or die('Restricted Access');
 	</p>
 </fieldset>
 
-<input type="hidden" name="option" value="<?php echo JRequest::getCmd('option') ?>" />
+<input type="hidden" name="option" value="com_akeeba" />
 <input type="hidden" name="view" value="config" />
 <input type="hidden" name="task" value="" />
-<?php echo JHTML::_( 'form.token' ); ?>
+<input type="hidden" name="<?php echo JFactory::getSession()->getToken()?>" value="1" />
 
 <!-- This div contains dynamically generated user interface elements -->
 <div id="akeebagui">

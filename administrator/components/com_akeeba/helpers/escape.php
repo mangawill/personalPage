@@ -3,11 +3,11 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id: escape.php 409 2011-01-24 09:30:22Z nikosdion $
+ *
  * @since 3.0.1
  */
 
-defined('_JEXEC') or die('Restricted access');
+defined('_JEXEC') or die();
 
 class AkeebaHelperEscape
 {

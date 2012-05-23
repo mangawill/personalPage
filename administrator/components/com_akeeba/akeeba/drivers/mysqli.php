@@ -5,7 +5,6 @@
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU GPL version 3 or, at your option, any later version
  * @package akeebaengine
- * @version $Id: mysqli.php 409 2011-01-24 09:30:22Z nikosdion $
  */
 
 // Protection against direct access
@@ -13,15 +12,27 @@ defined('AKEEBAENGINE') or die('Restricted access');
 
 /**
  * MySQL Improved (mysqli) database driver for Akeeba Engine
+ * 
+ * Based on Joomla! Platform 11.2
  */
-class AEDriverMysqli extends AEAbstractDriver
+class AEDriverMysqli extends AEDriverMysql
 {
+	/**
+	 * The name of the database driver.
+	 *
+	 * @var    string
+	 * @since  11.1
+	 */
+	public $name = 'mysqli';
+	
 	/**
 	 * Database object constructor
 	 * @param	array	List of options used to configure the connection
 	 */
 	public function __construct( $options )
 	{
+		$this->driverType = 'mysql';
+		
 		// Init
 		$this->nameQuote = '`';
 
@@ -66,12 +77,16 @@ class AEDriverMysqli extends AEAbstractDriver
 		$this->password = $password;
 		$this->port = $port;
 		$this->socket = $socket;
-		$this->database = $database;
-		$this->open();
+		$this->_database = $database;
+		$this->selectDatabase = $select;
+		
+		if(!is_object($this->connection)) $this->open();
 	}
 
 	public function open()
 	{
+		if(is_object($this->connection)) return;
+		
 		// perform a number of fatality checks, then return gracefully
 		if (!function_exists( 'mysqli_connect' )) {
 			$this->errorNum = 1;
@@ -80,15 +95,18 @@ class AEDriverMysqli extends AEAbstractDriver
 		}
 
 		// connect to the server
-		if (!($this->resource = @mysqli_connect($this->host, $this->user, $this->password, NULL, $this->port, $this->socket))) {
+		if (!($this->connection = @mysqli_connect($this->host, $this->user, $this->password, NULL, $this->port, $this->socket))) {
 			$this->errorNum = 2;
 			$this->errorMsg = 'Could not connect to MySQL';
 			return;
 		}
-
-		parent::open();
-
-		$this->select($this->database);
+		
+		// Set sql_mode to non_strict mode
+		mysqli_query($this->connection, "SET @@SESSION.sql_mode = '';");
+		
+		if ($this->selectDatabase && !empty($this->_database)) {
+			$this->select($this->_database);
+		}
 	}
 
 	public function close()
@@ -97,44 +115,113 @@ class AEDriverMysqli extends AEAbstractDriver
 		if (is_resource($this->cursor)) {
 			mysqli_free_result($this->cursor);
 		}
-		if (is_resource($this->resource)) {
-			$return = mysqli_close($this->resource);
+		if (is_object($this->connection)) {
+			$return = @mysqli_close($this->connection);
 		}
-		$this->resource = null;
+		$this->connection = null;
 		return $return;
 	}
 
 	/**
-	 * Select a database for use
-	 * @param	string $database
-	 * @return	boolean True if the database has been successfully selected
+	 * Method to escape a string for usage in an SQL statement.
+	 *
+	 * @param   string   $text   The string to be escaped.
+	 * @param   boolean  $extra  Optional parameter to provide extra escaping.
+	 *
+	 * @return  string  The escaped string.
 	 */
-	public function select($database)
+	public function escape($text, $extra = false)
 	{
-		if ( ! $database )
+		$result = @mysqli_real_escape_string($this->getConnection(), $text);
+
+		if ($extra)
 		{
-			return false;
+			$result = addcslashes($result, '%_');
 		}
 
-		if ( !mysqli_select_db($this->resource, $database)) {
-			$this->errorNum = 3;
-			$this->errorMsg = 'Could not connect to database';
-			return false;
-		}
-
-		$verParts = explode( '.', $this->getVersion() );
-		if ( $verParts[0] == 5 ) {
-			$this->setQuery( "SET sql_mode = 'HIGH_NOT_PRECEDENCE'" );
-			$this->query();
-			$this->resetErrors();
-		}
-
-		return true;
+		return $result;
 	}
 
 	/**
-	 * Determines UTF support
-	 * @return bool
+	 * Test to see if the MySQL connector is available.
+	 *
+	 * @return  boolean  True on success, false otherwise.
+	 */
+	public static function test()
+	{
+		return (function_exists('mysqli_connect'));
+	}
+
+	/**
+	 * Determines if the connection to the server is active.
+	 *
+	 * @return  boolean  True if connected to the database engine.
+	 */
+	public function connected()
+	{
+		if (is_object($this->connection))
+		{
+			return mysqli_ping($this->connection);
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get the number of affected rows for the previous executed SQL statement.
+	 *
+	 * @return  integer  The number of affected rows.
+	 */
+	public function getAffectedRows()
+	{
+		return mysqli_affected_rows($this->connection);
+	}
+
+	/**
+	 * Get the number of returned rows for the previous executed SQL statement.
+	 *
+	 * @param   resource  $cursor  An optional database cursor resource to extract the row count from.
+	 *
+	 * @return  integer   The number of returned rows.
+	 */
+	public function getNumRows($cursor = null)
+	{
+		return mysqli_num_rows($cursor ? $cursor : $this->cursor);
+	}
+
+	/**
+	 * Get the current or query, or new JDatabaseQuery object.
+	 *
+	 * @param   boolean  $new  False to return the last query set, True to return a new JDatabaseQuery object.
+	 *
+	 * @return  mixed  The current value of the internal SQL variable or a new JDatabaseQuery object.
+	 */
+	public function getQuery($new = false)
+	{
+		if ($new)
+		{
+			return new AEQueryMysql($this);
+		}
+		else
+		{
+			return $this->sql;
+		}
+	}
+
+	/**
+	 * Get the version of the database connector.
+	 *
+	 * @return  string  The database connector version.
+	 */
+	public function getVersion()
+	{
+		return mysqli_get_server_info($this->connection);
+	}
+
+	/**
+	 * Determines if the database engine supports UTF-8 character encoding.
+	 *
+	 * @return  boolean  True if supported.
 	 */
 	public function hasUTF()
 	{
@@ -143,184 +230,131 @@ class AEDriverMysqli extends AEAbstractDriver
 	}
 
 	/**
-	 * Custom settings for UTF support
+	 * Method to get the auto-incremented value from the last INSERT statement.
+	 *
+	 * @return  integer  The value of the auto-increment field from the last inserted row.
 	 */
-	public function setUTF()
+	public function insertid()
 	{
-		mysqli_query( $this->resource, "SET NAMES 'utf8'" );
+		return mysqli_insert_id($this->connection);
 	}
 
 	/**
-	 * Get a database escaped string
-	 * @param	string	The string to be escaped
-	 * @param	bool	Optional parameter to provide extra escaping
-	 * @return	string
-	 */
-	public function getEscaped( $text, $extra = false )
-	{
-		$result = @mysqli_real_escape_string( $this->resource, $text );
-		if ($extra) {
-			$result = addcslashes( $result, '%_' );
-		}
-		return $result;
-	}
-
-	/**
-	 * Execute the query
-	 * @return mixed A database resource if successful, FALSE if not.
+	 * Execute the SQL statement.
+	 *
+	 * @return  mixed  A database cursor resource on success, boolean false on failure.
 	 */
 	public function query()
 	{
-		if (!is_object($this->resource)) {
+		if (!is_object($this->connection))
+		{
 			return false;
 		}
-
-		if(is_object($this->cursor)) @mysqli_free_result($this->cursor);
 
 		// Take a local copy so that we don't modify the original query and cause issues later
-		$sql = $this->sql;
-		if ($this->limit > 0 || $this->offset > 0) {
-			$sql .= ' LIMIT '.$this->offset.', '.$this->limit;
+		$sql = $this->replacePrefix((string) $this->sql);
+		if ($this->limit > 0 || $this->offset > 0)
+		{
+			$sql .= ' LIMIT ' . $this->offset . ', ' . $this->limit;
 		}
+
+		// Reset the error values.
 		$this->errorNum = 0;
 		$this->errorMsg = '';
-		$this->cursor = mysqli_query( $this->resource, $sql, MYSQLI_USE_RESULT );
 
+		// Execute the query.
+		$this->cursor = mysqli_query($this->connection, $sql);
+
+		// If an error occurred handle it.
 		if (!$this->cursor)
 		{
-			$this->errorNum = mysqli_errno( $this->resource );
-			$this->errorMsg = mysqli_error( $this->resource )." SQL=$sql";
+			$this->errorNum = (int) mysqli_errno($this->connection);
+			$this->errorMsg = (string) mysqli_error($this->connection) . ' SQL=' . $sql;
 
 			return false;
 		}
+
 		return $this->cursor;
 	}
 
 	/**
-	 * This method loads the first field of the first row returned by the query.
-	 * @return mixed The value returned in the query or null if the query failed.
+	 * Select a database for use.
+	 *
+	 * @param   string  $database  The name of the database to select for use.
+	 *
+	 * @return  boolean  True if the database was successfully selected.
 	 */
-	public function loadResult()
+	public function select($database)
 	{
-		if (!($cur = $this->query())) {
-			return null;
-		}
-		$ret = null;
-		if ($row = mysqli_fetch_row( $cur )) {
-			$ret = $row[0];
-		}
-		mysqli_free_result( $cur );
-		return $ret;
-	}
-
-	/**
-	 * Load an array of single field results into an array
-	 * @return mixed An array, or null if query failed
-	 */
-	public function loadResultArray($numinarray = 0)
-	{
-		if (!($cur = $this->query())) {
-			return null;
-		}
-		$array = array();
-		while ($row = mysqli_fetch_row( $cur )) {
-			$array[] = $row[$numinarray];
-		}
-		mysqli_free_result( $cur );
-		return $array;
-	}
-
-	/**
-	 * Fetch a result row as an associative array
-	 * @param bool $free_cursor If true, frees the cursor after returning the result
-	 * @return array An associative array, null if query failed or false on end of data
-	 */
-	public function loadAssoc($free_cursor = false)
-	{
-		if( !is_resource($this->cursor) && !is_object($this->cursor) )
+		if (!$database)
 		{
-			if (!($this->cursor = $this->query())) {
-				return null;
-			}
+			return false;
 		}
-		$ret = null;
-		if ($array = mysqli_fetch_assoc( $this->cursor )) {
-			$ret = $array;
-		}
-		else
+
+		if (!mysqli_select_db($this->connection, $database))
 		{
-			$ret = false;
-			$free_cursor = true;
+			return false;
 		}
-		if( $free_cursor ) {
-			mysqli_free_result( $this->cursor );
-		}
-		return $ret;
+
+		return true;
 	}
 
 	/**
-	 * Load a associactive list of database rows
-	 * @param string The field name of a primary key
-	 * @return array If key is empty as sequential list of returned records.
+	 * Set the connection to use UTF-8 character encoding.
+	 *
+	 * @return  boolean  True on success.
 	 */
-	public function loadAssocList( $key=null )
+	public function setUTF()
 	{
-		if (!($cur = $this->query())) {
-			return null;
-		}
-		$array = array();
-		while ($row = mysqli_fetch_assoc( $cur )) {
-			if ($key) {
-				$array[$row[$key]] = $row;
-			} else {
-				$array[] = $row;
-			}
-		}
-		mysqli_free_result( $cur );
-		return $array;
+		mysqli_query($this->connection, "SET NAMES 'utf8'");
 	}
 
 	/**
-	 * Load a list of database rows (numeric column indexing)
-	 * If <var>key</var> is not empty then the returned array is indexed by the value
-	 * the database key.  Returns <var>null</var> if the query fails.
-	 * @param string The field name of a primary key
-	 * @return array
+	 * Method to fetch a row from the result set cursor as an array.
+	 *
+	 * @param   mixed  $cursor  The optional result set cursor from which to fetch the row.
+	 *
+	 * @return  mixed  Either the next row from the result set or false if there are no more rows.
 	 */
-	public function loadRowList( $key=null )
+	protected function fetchArray($cursor = null)
 	{
-		if (!($cur = $this->query())) {
-			return null;
-		}
-		$array = array();
-		while ($row = mysqli_fetch_row( $cur )) {
-			if ($key !== null) {
-				$array[$row[$key]] = $row;
-			} else {
-				$array[] = $row;
-			}
-		}
-		mysqli_free_result( $cur );
-		return $array;
+		return mysqli_fetch_row($cursor ? $cursor : $this->cursor);
 	}
 
 	/**
-	 * Get the version of the database connector
-	 * @return string The database server's version number
+	 * Method to fetch a row from the result set cursor as an associative array.
+	 *
+	 * @param   mixed  $cursor  The optional result set cursor from which to fetch the row.
+	 *
+	 * @return  mixed  Either the next row from the result set or false if there are no more rows.
 	 */
-	public function getVersion()
+	public function fetchAssoc($cursor = null)
 	{
-		return mysqli_get_server_info( $this->resource );
+		return mysqli_fetch_assoc($cursor ? $cursor : $this->cursor);
 	}
 
 	/**
-	 * Returns the last INSERT auto_increase column's value
-	 * @return int
+	 * Method to fetch a row from the result set cursor as an object.
+	 *
+	 * @param   mixed   $cursor  The optional result set cursor from which to fetch the row.
+	 * @param   string  $class   The class name to use for the returned row object.
+	 *
+	 * @return  mixed   Either the next row from the result set or false if there are no more rows.
 	 */
-	public function insertid()
+	protected function fetchObject($cursor = null, $class = 'stdClass')
 	{
-		return mysqli_insert_id( $this->resource );
+		return mysqli_fetch_object($cursor ? $cursor : $this->cursor, $class);
 	}
 
-
+	/**
+	 * Method to free up the memory used for the result set.
+	 *
+	 * @param   mixed  $cursor  The optional result set cursor from which to fetch the row.
+	 *
+	 * @return  void
+	 */
+	public function freeResult($cursor = null)
+	{
+		mysqli_free_result($cursor ? $cursor : $this->cursor);
+	}
 }

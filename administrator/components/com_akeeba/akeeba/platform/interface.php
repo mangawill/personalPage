@@ -5,7 +5,7 @@
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU GPL version 3 or, at your option, any later version
  * @package akeebaengine
- * @version $Id: platform.php 900 2011-09-11 07:10:50Z nikosdion $
+ *
  */
 
 interface AEPlatformInterface
@@ -101,6 +101,12 @@ interface AEPlatformInterface
 	 * @return string
 	 */
 	public function get_host();
+	
+	/**
+	 * Returns the current site's name
+	 * @return string
+	 */
+	public function get_site_name();
 	
 	/**
 	 * Creates or updates the statistics record of the current backup attempt

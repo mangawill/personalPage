@@ -1,13 +1,13 @@
 <?php
 /**
  * @package AkeebaBackup
- * @version $Id$
+ *
  * @license GNU General Public License, version 2 or later
  * @author Nicholas K. Dionysopoulos
  * @copyright Copyright 2006-2009 Nicholas K. Dionysopoulos
  * @since 1.3
  */
-defined('_JEXEC') or die('Restricted access');
+defined('_JEXEC') or die();
 
 jimport('joomla.application.component.model');
 
@@ -16,7 +16,7 @@ jimport('joomla.application.component.model');
  * used for all requirements of backup statistics in JP
  *
  */
-class AkeebaModelStatistics extends JModel
+class AkeebaModelStatistics extends FOFModel
 {
 	/** @var JPagination The JPagination object, used in the GUI */
 	private $_pagination;
@@ -24,9 +24,9 @@ class AkeebaModelStatistics extends JModel
 	/**
 	 * Constructor.
 	 */
-	public function __construct()
+	public function __construct($config = array())
 	{
-		parent::__construct();
+		parent::__construct($config);
 
 		// Get the pagination request variables
 		$app = JFactory::getApplication();
@@ -35,12 +35,14 @@ class AkeebaModelStatistics extends JModel
 			$limitstart = 0;
 		} else {
 			$limit = $app->getUserStateFromRequest('global.list.limit', 'limit', $app->getCfg('list_limit'));
-			$limitstart = $app->getUserStateFromRequest(JRequest::getCmd('option','com_akeeba') .'profileslimitstart','limitstart',0);
+			$limitstart = $app->getUserStateFromRequest('com_akeebaprofileslimitstart','limitstart',0);
 		}
 
 		// Set the page pagination variables
 		$this->setState('limit',$limit);
 		$this->setState('limitstart',$limitstart);
+		
+		$this->table = 'stat';
 	}
 
 
@@ -162,7 +164,10 @@ class AkeebaModelStatistics extends JModel
 	public function getLatestBackupDetails()
 	{
 		$db = $this->getDBO();
-		$query = 'SELECT max(id) FROM #__ak_stats WHERE `origin` != "restorepoint"';
+		$query = $db->getQuery(true)
+			->select('MAX('.$db->nq('id').')')
+			->from($db->nq('#__ak_stats'))
+			->where($db->nq('origin') .' != '.$db->q('restorepoint'));
 		$db->setQuery($query);
 		$id = $db->loadResult();
 
@@ -220,11 +225,7 @@ class AkeebaModelStatistics extends JModel
 		$startTime = new JDate($record['backupstart']);
 
 		$html = '<table>';
-		if( AKEEBA_JVERSION == '16' ) {
-			$html .= '<tr><td>'.JText::_('STATS_LABEL_START').'</td><td>'.$startTime->format(JText::_('DATE_FORMAT_LC4'), true).'</td></tr>';
-		} else {
-			$html .= '<tr><td>'.JText::_('STATS_LABEL_START').'</td><td>'.$startTime->toFormat(JText::_('DATE_FORMAT_LC4')).'</td></tr>';
-		}
+		$html .= '<tr><td>'.JText::_('STATS_LABEL_START').'</td><td>'.$startTime->format(JText::_('DATE_FORMAT_LC4'), true).'</td></tr>';
 		$html .= '<tr><td>'.JText::_('STATS_LABEL_DESCRIPTION').'</td><td>'.$record['description'].'</td></tr>';
 		$html .= '<tr><td>'.JText::_('STATS_LABEL_STATUS').'</td><td>'.$status.'</td></tr>';
 		$html .= '<tr><td>'.JText::_('STATS_LABEL_ORIGIN').'</td><td>'.$origin.'</td></tr>';

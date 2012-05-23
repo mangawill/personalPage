@@ -1,4 +1,44 @@
 <?php die();?>
+Akeeba Backup 3.5.0
+================================================================================
+~ Default minimum update stability is now set to stable
+~ Akeeba Backup Core always updates to Stable only, irrespective of the user's preferences
+~ The Post-Installation page now allows you to select the minimum update stability level
+~ Auto-disable the Akeeba Backup icon module if a crash is detected, making sure that failed updates won't bring down your site
+# Accessing Live Update threw a Not Authorized error
+# Forgot to include the frontend dispatcher in the XML manifest. Thank you,	Daniele!
+# The CLI scripts weren't copied when installing the Professional release
+# The SRP and Update Check plugins wouldn't get installed in the Professional release
+# The remote API for the SRP backup was broken. Thank you Daniele!
+# FOF wasn't loaded by mod_akadmin, causing a fatal error to be thrown in the Joomla! control panel
+
+Akeeba Backup 3.5.a2
+================================================================================
+! THIS IS AN ALPHA (TESTING) RELEASE. IT SHOULD NOT BE INSTALLED ON PRODUCTION (LIVE) SITES.
++ Allow Dropbox tokens to be copied across sites, allowing you to authenticate many sites to the same Dropbox account
+# Live Update wouldn't work in Akeeba Backup 3.5.a1
+# The warning about the Download ID would never go away
+# Content-Disposition should wrap the filename in double quotes when downloading files
+
+Akeeba Backup 3.5.a1
+================================================================================
+! THIS IS AN ALPHA (TESTING) RELEASE. IT SHOULD NOT BE INSTALLED ON PRODUCTION (LIVE) SITES.
++ Overhauled backup engine
++ Multi-db support (work in progress)
++ You can now add the Joomla! version in the archive's name using the [PLATFORM_VERSION] tag
++ Making sure you won't forget to enter your Download ID
++ Configure button next to profile's name in Profiles view
++ You can now override the site's root and/or database connection details, allowing you to backup any accessible on the server
++ #368 SugarSync integration
++ #396 Google Storage integration
++ New backup archive naming variable: [SITENAME]
++ #326 Added SRP support to the JSON API
+~ Automatically update the XML update stream in Joomla! 2.5 to make use of the Download ID in the Pro release
+~ ABI: Remove J! 1.5 support
+# Accessing Akeeba Backup without adequate ACL priileges would cause an infinite redirection loop
+# ABI: No progress bar shown in database restoration
+# Functions, procedures and triggers were not being backed up correctly when their definition contained comments
+
 Akeeba Backup 3.4.3
 ================================================================================
 # Call time pass by reference removed in PHP 5.4.0, causing a fatal error when using Akeeba Backup on PHP 5.4

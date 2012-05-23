@@ -13,7 +13,7 @@ defined('_JEXEC') or die;
 <form action="<?php echo JRoute::_('index.php');?>" method="post">
 	<div class="controls<?php echo $moduleclass_sfx ?>">
 		<?php
-			$output = '<div class="input-prepend"><span class="add-on"><i class="icon-search"></i></span><input name="searchword" id="prependedInput" class="span3" type="search" placeholder="'.$text.'" /></div>';
+			$output = '<div class="input-prepend"><span class="add-on"><i class="icon-search"></i></span><input name="searchword" id="prependedInput" class="span3" type="text" placeholder="'.$text.'" /></div>';
 
 			if ($button) :
 				if ($imagebutton) :

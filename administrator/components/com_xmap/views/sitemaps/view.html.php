@@ -1,6 +1,6 @@
 <?php
 /**
- * @version		$Id: view.html.php 61 2011-07-21 04:32:16Z guille $
+ * @version		$Id$
  * @copyright           Copyright (C) 2007 - 2009 Joomla! Vargas. All rights reserved.
  * @license		GNU General Public License version 2 or later; see LICENSE.txt
  * @author		Guillermo Vargas (guille@vargas.co.cr)

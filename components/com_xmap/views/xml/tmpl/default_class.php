@@ -1,6 +1,6 @@
 <?php
 /**
- * @version         $Id: default_class.php 71 2011-10-15 20:52:55Z guille $
+ * @version         $Id$
  * @copyright        Copyright (C) 2005 - 2009 Joomla! Vargas. All rights reserved.
  * @license        GNU General Public License version 2 or later; see LICENSE.txt
  * @author        Guillermo Vargas (guille@vargas.co.cr)
@@ -36,6 +36,13 @@ class XmapXmlDisplayer extends XmapDisplayer
     {
         parent::__construct($config, $sitemap);
         $this->uids = array();
+        
+        $this->defaultLanguage = strtolower(JFactory::getLanguage()->getTag());
+        if (preg_match('/^([a-z]+)-.*/',$this->defaultLanguage,$matches) && !in_array($this->defaultLanguage, array(' zh-cn',' zh-tw')) ) {
+            $this->defaultLanguage = $matches[1];
+        }
+        
+        $this->showTitle = JRequest::getBool('filter_showtitle', 0);
     }
 
     /**
@@ -53,23 +60,13 @@ class XmapXmlDisplayer extends XmapDisplayer
             return true;
         }
 
-        static $live_site, $len_live_site;
-        if (!isset($live_site)) {
-            $live_site = substr_replace(JURI::root(), "", -1, 1);
-            $len_live_site = strlen($live_site);
-        }
-
         // Get the item's URL
-        $link = JRoute::_($node->link, true, -1);
-
-        // Determines if this node is a link to a external page
-        $is_extern = ( 0 != strcasecmp(substr($link, 0, $len_live_site), $live_site) );
+        $link = JRoute::_($node->link, true, (@$node->secure? 1: -1));
 
         if (!isset($node->browserNav))
             $node->browserNav = 0;
 
         if ($node->browserNav != 3   // ignore "no link"
-                && !$is_extern     // ignore external links
                 && empty($this->_links[$link])) { // ignore links that have been added already
             $this->count++;
             $this->_links[$link] = 1;
@@ -87,28 +84,45 @@ class XmapXmlDisplayer extends XmapDisplayer
             echo '<url>' . "\n";
             echo '<loc>', $link, '</loc>' . "\n";
             if ($this->canEdit) {
+                if ($this->showTitle) {
+                    echo '<title><![CDATA['.$node->name.']]></title>' . "\n";
+                }
                 echo '<uid>', $node->uid, '</uid>' . "\n";
                 echo '<itemid>', $node->id, '</itemid>' . "\n";
             }
-            $timestamp = (isset($node->modified) && $node->modified != FALSE && $node->modified != -1) ? $node->modified : time();
-            $modified = gmdate('Y-m-d\TH:i:s\Z', $timestamp);
+            $modified = (isset($node->modified) && $node->modified != FALSE && $node->modified != -1) ? $node->modified : NULL;
+            if (!$modified && $this->isNews) {
+                $modified = time();
+            }
+            if ($modified) {
+                $modified = gmdate('Y-m-d\TH:i:s\Z', $modified);
+            }
 
-            // If this is a news sitemap
+            // If this is not a news sitemap
             if (!$this->isNews) {
-                echo '<lastmod>', $modified, '</lastmod>' . "\n";
+                if ($modified){
+                    echo '<lastmod>', $modified, '</lastmod>' . "\n";
+                }
                 echo '<changefreq>', $changefreq, '</changefreq>' . "\n";
                 echo '<priority>', $priority, '</priority>' . "\n";
             } else {
                 if (isset($node->keywords)) {
-                    # $keywords = str_replace(array('&amp;','&'),array('&','&amp;'),$node->keywords);
-                    # $keywords = str_replace('&','&amp;',$node->keywords);
                     $keywords = htmlspecialchars($node->keywords);
                 } else {
                     $keywords = '';
                 }
+                
+                if (!isset($node->language) || $node->language == '*') {
+                    $node->language = $this->defaultLanguage;
+                }
 
                 echo "<news:news>\n";
+                echo '<news:publication>'."\n";
+                echo '  <news:name>'.(htmlspecialchars($this->sitemap->params->get('news_publication_name'))).'</news:name>'."\n";
+                echo '  <news:language>'.$node->language.'</news:language>'."\n";
+                echo '</news:publication>'."\n";
                 echo '<news:publication_date>', $modified, '</news:publication_date>' . "\n";
+                echo '<news:title><![CDATA['.$node->name.']]></news:title>' . "\n";
                 if ($keywords) {
                     echo '<news:keywords>', $keywords, '</news:keywords>' . "\n";
                 }

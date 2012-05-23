@@ -3,58 +3,62 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id$
+ *
  * @since 1.3
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
-
-// Load framework base classes
-jimport('joomla.application.component.controller');
+defined('_JEXEC') or die();
 
 /**
  * Log view controller class
  *
  */
-class AkeebaControllerLog extends JController
+class AkeebaControllerLog extends FOFController
 {
 	public function  __construct($config = array()) {
 		parent::__construct($config);
-		if(AKEEBA_JVERSION=='16')
-		{
-			// Access check, Joomla! 1.6 style.
-			$user = JFactory::getUser();
-			if (!$user->authorise('akeeba.download', 'com_akeeba')) {
-				$this->setRedirect('index.php?option=com_akeeba');
-				return JError::raiseWarning(403, JText::_('JERROR_ALERTNOAUTHOR'));
-				$this->redirect();
-			}
-		} else {
-			// Custom ACL for Joomla! 1.5
-			$aclModel = JModel::getInstance('Acl','AkeebaModel');
-			if(!$aclModel->authorizeUser('download')) {
-				$this->setRedirect('index.php?option=com_akeeba');
-				return JError::raiseWarning(403, JText::_('Access Forbidden'));
-				$this->redirect();
-			}
+		// Access check, Joomla! 1.6 style.
+		$user = JFactory::getUser();
+		if (!$user->authorise('akeeba.download', 'com_akeeba')) {
+			$this->setRedirect('index.php?option=com_akeeba');
+			return JError::raiseWarning(403, JText::_('JERROR_ALERTNOAUTHOR'));
+			$this->redirect();
 		}
 	}
 
+	public function execute($task)
+	{
+		if(!in_array($task, array('iframe','download'))) {
+			$task = 'browse';
+		}
+		parent::execute($task);
+	}
+	
 	/**
 	 * Display the log page
 	 *
 	 */
-	public function display()
+	public function browse($cachable = false, $urlparams = false)
 	{
+		$tag = FOFInput::getCmd('tag', null, $this->input);
+		if(empty($tag)) $tag = null;
+		$model = $this->getThisModel();
+		$model->setState('tag', $tag);
+		
 		AEPlatform::getInstance()->load_configuration(AEPlatform::getInstance()->get_active_profile());
 
-		parent::display();
+		parent::display($cachable, $urlparams);
 	}
 
 	// Renders the contents of the log's iframe
-	public function iframe()
+	public function iframe($cachable = false, $urlparams = false)
 	{
+		$tag = FOFInput::getCmd('tag', null, $this->input);
+		if(empty($tag)) $tag = null;
+		$model = $this->getThisModel();
+		$model->setState('tag', $tag);
+		
 		AEPlatform::getInstance()->load_configuration(AEPlatform::getInstance()->get_active_profile());
 
 		parent::display();
@@ -63,13 +67,12 @@ class AkeebaControllerLog extends JController
 		JFactory::getApplication()->close();
 	}
 
-	public function download()
+	public function download($cachable = false, $urlparams = false)
 	{
 		AEPlatform::getInstance()->load_configuration(AEPlatform::getInstance()->get_active_profile());
 
-		$tag = JRequest::getCmd('tag',null);
-
-		$filename = AEUtilLogger::logName($tag);
+		$tag = FOFInput::getCmd('tag', null, $this->input);
+		if(empty($tag)) $tag = null;
 
 		@ob_end_clean(); // In case some braindead plugin spits its own HTML
 		header("Cache-Control: no-cache, must-revalidate"); // HTTP/1.1
@@ -77,13 +80,11 @@ class AkeebaControllerLog extends JController
 		header("Content-Description: File Transfer");
 		header('Content-Type: text/plain');
 		header('Content-Disposition: attachment; filename="Akeeba Backup Debug Log.txt"');
-		echo "WARNING: Do not copy and paste lines from this file!\r\n";
-		echo "You are supposed to ZIP and attach it in your support forum post.\r\n";
-		echo "If you fail to do so, your support request will receive minimal priority.\r\n";
-		echo "\r\n";
-		echo "--- START OF RAW LOG --\r\n";
-		@readfile($filename); // The at sign is necessary to skip showing PHP errors if the file doesn't exist or isn't readable for some reason
-		echo "--- END OF RAW LOG ---\r\n";
+		
+		$model = $this->getThisModel();
+		$model->setState('tag', $tag);
+		$model->echoRawLog();
+		
 		flush();
 		JFactory::getApplication()->close();
 	}

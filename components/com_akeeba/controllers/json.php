@@ -3,25 +3,32 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 2, or later
- * @version $Id: json.php 615 2011-05-19 13:01:52Z nikosdion $
+ *
  * @since 1.3
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
+defined('_JEXEC') or die();
 
 defined('AKEEBA_BACKUP_ORIGIN') or define('AKEEBA_BACKUP_ORIGIN','json');
 
-// Load framework base classes
-jimport('joomla.application.component.controller');
-
-class AkeebaControllerJson extends JController
+class AkeebaControllerJson extends FOFController
 {
+	public function __construct($config = array()) {
+		$config['csrf_protection'] = false;
+		parent::__construct($config);
+	}
+	public function execute($task)
+	{
+		$task = 'json';
+		
+		parent::execute($task);
+	}
+	
 	/**
-	 * Starts a backup
-	 * @return
+	 * Handles API calls
 	 */
-	public function display()
+	public function json()
 	{
 		// Many versions of PHP suffer from a brain-dead buggy JSON library. Let's
 		// load our own (actually it's PEAR's Services_JSON).
@@ -29,7 +36,8 @@ class AkeebaControllerJson extends JController
 
 		// Use the model to parse the JSON message
 		if(function_exists('ob_start')) @ob_start();
-		$sourceJSON = JRequest::getVar('json', null, 'default', 'raw', 2);
+		$sourceJSON = FOFInput::getVar('json', null, $this->input, 'raw', 2);
+		
 		// On some !@#$%^& servers where magic_quotes_gpc is On we might get extra slashes added
 		if(function_exists('get_magic_quotes_gpc')) {
 			if(get_magic_quotes_gpc()) {
@@ -37,7 +45,7 @@ class AkeebaControllerJson extends JController
 			}
 		}
 		
-		$model = JModel::getInstance('Json','AkeebaModel');
+		$model = $this->getThisModel();
 		$json = $model->execute($sourceJSON);
 		if(function_exists('ob_clean')) @ob_clean();
 		

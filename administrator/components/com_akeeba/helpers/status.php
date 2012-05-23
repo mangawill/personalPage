@@ -3,11 +3,11 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id: status.php 409 2011-01-24 09:30:22Z nikosdion $
+ *
  * @since 1.3
  */
 
-defined('_JEXEC') or die('Restricted access');
+defined('_JEXEC') or die();
 
 /**
  * A class with utility functions to get the backup readiness status,
@@ -32,7 +32,7 @@ class AkeebaHelperStatus extends JObject
 	 *
 	 * @return AkeebaHelperStatus
 	 */
-	public function &getInstance()
+	public static function &getInstance()
 	{
 		static $instance;
 

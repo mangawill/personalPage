@@ -13,6 +13,5 @@ defined('_JEXEC') or die;
 
 
 <div class="customtweet" <?php if ($params->get('backgroundimage')): ?> style="background-image:url(<?php echo $params->get('backgroundimage');?>)"<?php endif;?> >
-<img src="templates/jure/images/followTwitter.png" />
 	<?php echo $module->content;?>
 </div>

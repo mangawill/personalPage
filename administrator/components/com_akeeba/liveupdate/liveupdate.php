@@ -76,7 +76,7 @@ class LiveUpdate
 		$extInfo = $config->getExtensionInformation();
 		
 		$info->extInfo = (object)$extInfo;
-		
+
 		return $info;
 	}
 	

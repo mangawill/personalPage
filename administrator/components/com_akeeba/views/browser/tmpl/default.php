@@ -3,12 +3,12 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id: default.php 698 2011-06-03 22:33:44Z nikosdion $
+ *
  * @since 1.3
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
+defined('_JEXEC') or die();
 
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -43,7 +43,7 @@ defined('_JEXEC') or die('Restricted Access');
 	<input type="hidden" name="tmpl" value="component" />
 	<input type="hidden" name="folder" id="folder" value="" />
 	<input type="hidden" name="processfolder" id="processfolder" value="0" />
-	<?php echo JHTML::_( 'form.token' ); ?>
+	<input type="hidden" name="<?php echo JFactory::getSession()->getToken()?>" value="1" />
 </form>
 	<?php else: ?>
 <div id="controls">
@@ -64,7 +64,7 @@ $image .= $this->writable ? 'ok_small.png' : 'error_small.png';
 		<input type="hidden" name="folderraw" id="folderraw" value="<?php echo $this->folder_raw ?>"/>
 		<button onclick="document.form.adminForm.submit(); return false;"><?php echo JText::_('BROWSER_LBL_GO'); ?></button>
 		<button onclick="akeeba_browser_useThis(); return false;"><?php echo JText::_('BROWSER_LBL_USE'); ?></button>
-		<?php echo JHTML::_( 'form.token' ); ?>
+		<input type="hidden" name="<?php echo JFactory::getSession()->getToken()?>" value="1" />
 	</form>
 </div>
 <div id="akeeba-browser-clear"></div>

@@ -3,44 +3,53 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id: view.raw.php 409 2011-01-24 09:30:22Z nikosdion $
+ *
  * @since 2.1
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
+defined('_JEXEC') or die();
 
-// Load framework base classes
-jimport('joomla.application.component.view');
-
-class AkeebaViewLight extends JView
+class AkeebaViewLight extends FOFViewHtml
 {
-	public function display($tpl = null)
+	public function onBrowse($tpl = null)
 	{
-		$task = JRequest::getCmd('task','default');
-
-		switch($task)
-		{
-			case 'step':
-				$kettenrad = AEFactory::getKettenrad();
-				$array = $kettenrad->getStatusArray();
-				$this->assign('array', $array);
-				break;
-
-			case 'error':
-				$this->assign('errormessage', JRequest::getVar('error',''));
-				break;
-
-			case 'done':
-				break;
-
-			case 'default':
-			default:
-				$model = $this->getModel();
-				$this->assignRef('profilelist', $model->getProfiles());
-				break;
-		}
-
-		parent::display(JRequest::getCmd('tpl',null));
+		$this->setLayout('default');
+		
+		$model = $this->getModel();
+		$this->assignRef('profilelist', $model->getProfiles());
+		return true;
+	}
+	
+	public function onStep($tpl = null)
+	{
+		$this->setLayout('step');
+		
+		$kettenrad = AEFactory::getKettenrad();
+		$array = $kettenrad->getStatusArray();
+		
+		$model = $this->getModel();
+		$key = $model->getState('key', '');
+		
+		$this->assign('array', $array);
+		$this->assign('key', $key);
+		return true;
+	}
+	
+	public function onError($tpl = null)
+	{
+		$this->setLayout('error');
+		
+		$model = $this->getModel();
+		$this->assign('errormessage', $model->getState('error', ''));
+		
+		return true;
+	}
+	
+	public function onDone($tpl = null)
+	{
+		$this->setLayout('done');
+		
+		return true;
 	}
 }

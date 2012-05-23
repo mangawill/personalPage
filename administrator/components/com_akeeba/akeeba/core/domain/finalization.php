@@ -5,7 +5,7 @@
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU GPL version 3 or, at your option, any later version
  * @package akeebaengine
- * @version $Id$
+ *
  */
 
 // Protection against direct access
@@ -928,15 +928,27 @@ class AECoreDomainFinalization extends AEAbstractPart
 
 		$statsTable = AEPlatform::getInstance()->tableNameStats;
 		$db = AEFactory::getDatabase( AEPlatform::getInstance()->get_platform_database_options() );
-		$query = 'SELECT `id` FROM '.$db->nameQuote($statsTable).' WHERE `status` = \'complete\' AND `filesexist` = 0 ORDER BY `id` DESC LIMIT '.$limit.',100000';
-		$db->setQuery($query);
+		$query = $db->getQuery(true)
+			->select($db->nq('id'))
+			->from($db->nq($statsTable))
+			->where($db->nq('status').' = '.$db->q('complete'))
+			->where($db->nq('filesexist').'='.$db->q('0'))
+			->order($db->nq('id').' DESC');
+		
+		$db->setQuery($query, $limit, 100000);
 		$array = $db->loadResultArray();
 
 		if(empty($array)) return;
 
-		$ids = implode(',', $array);
+		$ids = array();
+		foreach($array as $id) {
+			$ids[] = $db->q($id);
+		}
+		$ids = implode(',', $ids);
 
-		$query = "DELETE FROM ".$db->nameQuote($statsTable)." WHERE ".$db->nameQuote('id')." IN ($ids)";
+		$query = $db->getQuery(true)
+			->delete($db->nq($statsTable))
+			->where($db->nq('id')." IN ($ids)");
 		$db->setQuery($query);
 		$db->query();
 	}

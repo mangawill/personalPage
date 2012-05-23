@@ -3,12 +3,12 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id$
+ *
  * @since 1.3
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
+defined('_JEXEC') or die();
 
 // Apply error container chrome if there are errors detected
 $quirks_style = $this->haserrors ? 'class="ui-state-error"' : "";
@@ -134,7 +134,7 @@ akeeba.jQuery(document).ready(function($){
 		<input type="hidden" name="returnurl" value="<?php htmlentities($this->returnurl, ENT_COMPAT, 'UTF-8', false) ?>" />
 		<input type="hidden" name="description" id="flipDescription" value="" />
 		<input type="hidden" name="comment" id="flipComment" value="" />
-		<?php echo JHTML::_( 'form.token' ); ?>
+		<input type="hidden" name="<?php echo JFactory::getSession()->getToken()?>" value="1" />
 		<table id="backup-setup-parameters" width="100%">
 			<tr class="row<?php $row = 1 - $row; echo $row ?>">
 				<td width="200">

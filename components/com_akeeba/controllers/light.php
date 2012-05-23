@@ -3,30 +3,24 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 2, or later
- * @version $Id$
+ *
  * @since 2.1
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
+defined('_JEXEC') or die();
 
 defined('AKEEBA_BACKUP_ORIGIN') or define('AKEEBA_BACKUP_ORIGIN','lite');
 
-// Load framework base classes
-jimport('joomla.application.component.controller');
-
-class AkeebaControllerLight extends JController
+class AkeebaControllerLight extends FOFController
 {
-	/**
-	 * Controller for the default task (login & profile selection)
-	 */
-	public function display()
+	public function __construct($config = array()) {
+		$config['csrf_protection'] = false;
+		parent::__construct($config);
+	}
+	
+	public function execute($task)
 	{
-		$febEnabled = AEPlatform::getInstance()->get_platform_configuration_option('frontend_enable',0) != 0;
-		if(!$febEnabled) {
-			JError::raiseError('500','Access Denied');
-		}
-		
 		// Enforce raw mode - I need to be in full control!
 		$document = JFactory::getDocument();
 		if( $document->getType() != 'raw' )
@@ -36,7 +30,25 @@ class AkeebaControllerLight extends JController
 			$this->redirect();
 			return;
 		}
-		$document->setType('raw');
+		
+		// Map default/unknown tasks to "browse"
+		if(!in_array($task, array('authenticate','step','error','done')))
+		{
+			$task = 'browse';
+		}
+		parent::execute($task);
+	}
+	
+	/**
+	 * Controller for the default task (login & profile selection)
+	 */
+	public function browse()
+	{
+		$febEnabled = AEPlatform::getInstance()->get_platform_configuration_option('frontend_enable',0) != 0;
+		if(!$febEnabled) {
+			JError::raiseError('500','Access Denied');
+		}
+		
 		parent::display(false);
 	}
 
@@ -46,8 +58,6 @@ class AkeebaControllerLight extends JController
 	public function authenticate()
 	{
 		// Enforce raw mode - I need to be in full control!
-		$document = JFactory::getDocument();
-		$document->setType('raw');
 		if(!$this->_checkPermissions())
 		{
 			parent::redirect();
@@ -69,11 +79,7 @@ class AkeebaControllerLight extends JController
 			$userTZ = $user->getParam('timezone',0);
 			$dateNow = new JDate();
 			$dateNow->setOffset($userTZ);
-			if( AKEEBA_JVERSION == '16' ) {
-				$description = JText::_('BACKUP_DEFAULT_DESCRIPTION').' '.$dateNow->format(JText::_('DATE_FORMAT_LC2'), true);
-			} else {
-				$description = JText::_('BACKUP_DEFAULT_DESCRIPTION').' '.$dateNow->toFormat(JText::_('DATE_FORMAT_LC2'));
-			}
+			$description = JText::_('BACKUP_DEFAULT_DESCRIPTION').' '.$dateNow->format(JText::_('DATE_FORMAT_LC2'), true);
 			$options = array(
 				'description'	=> $description,
 				'comment'		=> ''
@@ -81,7 +87,7 @@ class AkeebaControllerLight extends JController
 			$kettenrad->setup($options);
 			$ret = $kettenrad->tick();
 			AECoreKettenrad::save(AKEEBA_BACKUP_ORIGIN);
-			$this->setRedirect(JURI::base().'index.php?option=com_akeeba&view=light&task=step&key='.urlencode(JRequest::getVar('key')).'&profile='.JRequest::getInt('profile').'&format=raw');
+			$this->setRedirect(JURI::base().'index.php?option=com_akeeba&view=light&task=step&key='.urlencode(FOFInput::getVar('key', '', $this->input)).'&profile='.FOFInput::getInt('profile', 1, $this->input).'&format=raw');
 		}
 	}
 
@@ -90,18 +96,15 @@ class AkeebaControllerLight extends JController
 	 */
 	public function step()
 	{
-		// Enforce raw mode - I need to be in full control!
-		$document = JFactory::getDocument();
-		$document->setType('raw');
-		
-		$key = JRequest::getVar('key');
+		$key = FOFInput::getVar('key', '', $this->input);
 		
 		if(!$this->_checkPermissions()) {
 			parent::redirect();
 			return;
 		}
-
-		JRequest::setVar('tpl','step');
+		
+		$model = $this->getThisModel();
+		$model->setState('key', $key);
 
 		$kettenrad = AECoreKettenrad::load(AKEEBA_BACKUP_ORIGIN);
 		$array = $kettenrad->getStatusArray();
@@ -131,16 +134,15 @@ class AkeebaControllerLight extends JController
 	 */
 	public function error()
 	{
-		// Enforce raw mode - I need to be in full control!
-		$document = JFactory::getDocument();
-		$document->setType('raw');
-		
 		if(!$this->_checkPermissions()) {
 			parent::redirect();
 			return;
 		}
 		
-		JRequest::setVar('tpl','error');
+		$model = $this->getThisModel();
+		$error = JRequest::getString('error', '', $this->input);
+		$model->setState('error', $error);
+		
 		parent::display();
 	}
 
@@ -149,16 +151,11 @@ class AkeebaControllerLight extends JController
 	 */
 	public function done()
 	{
-		// Enforce raw mode - I need to be in full control!
-		$document = JFactory::getDocument();
-		$document->setType('raw');
-		
 		if(!$this->_checkPermissions()) {
 			parent::redirect();
 			return;
 		}
 		
-		JRequest::setVar('tpl','done');
 		parent::display();
 	}
 
@@ -178,7 +175,7 @@ class AkeebaControllerLight extends JController
 		}
 
 		// Is the key good?
-		$key = JRequest::getVar('key');
+		$key = FOFInput::getVar('key', '', $this->input);
 		$validKey=AEPlatform::getInstance()->get_platform_configuration_option('frontend_secret_word','');
 		$validKeyTrim = trim($validKey);
 		if( ($key != $validKey) || (empty($validKeyTrim)) )
@@ -194,7 +191,7 @@ class AkeebaControllerLight extends JController
 	private function _setProfile()
 	{
 		// Set profile
-		$profile = JRequest::getInt('profile', 1);
+		$profile = FOFInput::getInt('profile', 1, $this->input);
 		if(!is_numeric($profile)) $profile = 1;
 		$session = JFactory::getSession();
 		$session->set('profile', $profile, 'akeeba');

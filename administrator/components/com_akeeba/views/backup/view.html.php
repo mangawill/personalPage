@@ -3,29 +3,23 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id$
  * @since 1.3
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
+defined('_JEXEC') or die();
 
-// Load framework base classes
-jimport('joomla.application.component.view');
-
-class AkeebaViewBackup extends JView
+class AkeebaViewBackup extends FOFViewHtml
 {
 	/**
 	 * This mess of a code is probably not one of my highlights in my code
 	 * writing career. It's logically organized, badly architectured but I can
 	 * still maintain it - and it works!
 	 */
-	function display()
+	public function onAdd($tpl = null)
 	{
-		// Add some buttons
-		JToolBarHelper::back('AKEEBA_CONTROLPANEL', 'index.php?option='.JRequest::getCmd('option'));
-		JToolBarHelper::spacer();
-
+		$model = $this->getModel();
+		
 		// Load the Status Helper
 		if(!class_exists('AkeebaHelperStatus')) JLoader::import('helpers.status', JPATH_COMPONENT_ADMINISTRATOR);
 		$helper = AkeebaHelperStatus::getInstance();
@@ -36,30 +30,21 @@ class AkeebaViewBackup extends JView
 		$tzDefault = $jregistry->getValue('config.offset');
 		$user = JFactory::getUser();
 		$tz = $user->getParam('timezone', $tzDefault);
-		if( AKEEBA_JVERSION == '16' ) {
-			$dateNow = new JDate('now', $tz);
-			$backup_description = JText::_('BACKUP_DEFAULT_DESCRIPTION').' '.$dateNow->format(JText::_('DATE_FORMAT_LC2'), true);
-		} else {
-			$dateNow = new JDate();
-			$dateNow->setOffset($tz);
-			$backup_description = JText::_('BACKUP_DEFAULT_DESCRIPTION').' '.$dateNow->toFormat(JText::_('DATE_FORMAT_LC2'));
-		}
-		$backup_description = AkeebaHelperEscape::escapeJS($backup_description,"'");
+		$dateNow = new JDate('now', $tz);
+		$default_description = JText::_('BACKUP_DEFAULT_DESCRIPTION').' '.$dateNow->format(JText::_('DATE_FORMAT_LC2'), true);
+		$default_description = AkeebaHelperEscape::escapeJS($default_description,"'");
 
-		$default_description = $backup_description;
-		$backup_description = JRequest::getVar('description', $default_description);
-
-		$comment = JRequest::getVar('comment', '', 'default', 'none', 2);
+		$backup_description = $model->getState('description', $default_description);
+		$comment = $model->getState('comment', '');
 
 		// Get a potential return URL
-		$returnurl = JRequest::getVar('returnurl',null);
+		$returnurl = $model->getState('returnurl');
 		if(empty($returnurl)) $returnurl = '';
 
 		// If a return URL is set *and* the profile's name is "Site Transfer
 		// Wizard", we are running the Site Transfer Wizard
 		if(!class_exists('AkeebaModelProfiles')) JLoader::import('models.profiles', JPATH_COMPONENT_ADMINISTRATOR);
-		if(!class_exists('AkeebaModelCpanel')) JLoader::import('models.cpanel', JPATH_COMPONENT_ADMINISTRATOR);
-		$cpanelmodel = new AkeebaModelCpanel();
+		$cpanelmodel = FOFModel::getAnInstance('Cpanels','AkeebaModel');
 		$profilemodel = new AkeebaModelProfiles();
 		$profilemodel->setId($cpanelmodel->getProfileID());
 		$profile_data = $profilemodel->getProfile();
@@ -112,34 +97,23 @@ class AkeebaViewBackup extends JView
 		{
 			$this->assign('showjpskey', 0);
 		}
-		$this->assign('autostart', JRequest::getInt('autostart',0));
+		$this->assign('autostart', $model->getState('autostart'));
 
 		// Pass on profile info
 		$this->assign('profileid', $cpanelmodel->getProfileID()); // Active profile ID
 		$this->assign('profilelist', $cpanelmodel->getProfilesList()); // List of available profiles
 		
 		// Pass on state information pertaining to SRP
-		$srpinfo = array(
-			'tag'				=> JRequest::getCmd('tag','backend'),
-			'type'				=> JRequest::getCmd('type',''),
-			'name'				=> JRequest::getCmd('name',''),
-			'group'				=> JRequest::getCmd('group',''),
-			'customdirs'		=> JRequest::getVar('customdirs',array(),'default','array',2),
-			'extraprefixes'		=> JRequest::getVar('extraprefixes',array(),'default','array',2),
-			'customtables'		=> JRequest::getVar('customtables',array(),'default','array',2),
-			'skiptables'		=> JRequest::getVar('skiptables',array(),'default','array',2),
-			'xmlname'			=> JRequest::getString('xmlname','')
-		);
-		$this->assign('srpinfo',	$srpinfo);
+		$this->assign('srpinfo',	$model->getState('srpinfo'));
 
 		// Add references to CSS and JS files
 		AkeebaHelperIncludes::includeMedia(false);
 
 		// Add live help
-		AkeebaHelperIncludes::addHelp();
+		AkeebaHelperIncludes::addHelp('backup');
 		
 		// Set the toolbar title
-		if($srpinfo['tag'] == 'restorepoint') {
+		if($this->srpinfo['tag'] == 'restorepoint') {
 			$subtitle = JText::_('AKEEBASRP');
 		} elseif($isSTW) {
 			$subtitle = JText::_('SITETRANSFERWIZARD');
@@ -148,6 +122,6 @@ class AkeebaViewBackup extends JView
 		}
 		JToolBarHelper::title(JText::_('AKEEBA').':: <small>'.$subtitle.'</small>','akeeba');
 
-		parent::display(JRequest::getCmd('tpl',null));
+		return true;
 	}
 }

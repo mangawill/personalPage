@@ -85,7 +85,7 @@ class LiveUpdateXMLSlurp extends JObject
 			return array('version' => '', 'date' => '', 'xmlfile' => '');
 		}
 		
-		$xml = & JFactory::getXMLParser('Simple');
+		$xml = JFactory::getXMLParser('Simple');
 		if (!$xml->loadFile($filename)) {
 			unset($xml);
 			return array('version' => '', 'date' => '', 'xmlfile' => '');

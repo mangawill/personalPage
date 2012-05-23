@@ -5,7 +5,7 @@
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU GPL version 3 or, at your option, any later version
  * @package akeebaengine
- * @version $Id$
+ *
  */
 
 // Protection against direct access
@@ -92,6 +92,20 @@ class AEUtilFilesystem
 		{
 			$host = AEPlatform::getInstance()->get_host();
 			$version = defined('AKEEBA_VERSION') ? AKEEBA_VERSION : 'svn';
+			$platformVars = AEPlatform::getInstance()->getPlatformVersion();
+			
+			$siteName = AEPlatform::getInstance()->get_site_name();
+			$siteName = htmlentities(utf8_decode($siteName));
+			$siteName = preg_replace(
+				array('/&szlig;/','/&(..)lig;/', '/&([aouAOU])uml;/','/&(.)[^;]*;/'),
+				array('ss',"$1","$1".'e',"$1"),
+				$siteName);
+			$siteName = trim(strtolower($siteName));
+			$siteName = preg_replace(array('/\s+/','/[^A-Za-z0-9\-]/'), array('-',''), $siteName);
+			if (strlen($siteName) > 50) {
+				$siteName = substr($siteName, 0, 50);
+			}
+			
 			$variables = array(
 				'[DATE]' => AEPlatform::getInstance()->get_local_timestamp("%Y%m%d"),
 				'[YEAR]' => AEPlatform::getInstance()->get_local_timestamp("%Y"),
@@ -102,7 +116,10 @@ class AEUtilFilesystem
 				'[WEEKDAY]' => AEPlatform::getInstance()->get_local_timestamp("%A"),
 				'[HOST]' => empty($host) ? 'unknown_host' : $host,
 				'[RANDOM]' => md5(microtime()),
-				'[VERSION]'	=> $version
+				'[VERSION]'	=> $version,
+				'[PLATFORM_NAME]' => $platformVars['name'],
+				'[PLATFORM_VERSION]' => $platformVars['version'],
+				'[SITENAME]' => $siteName
 			);
 		}
 

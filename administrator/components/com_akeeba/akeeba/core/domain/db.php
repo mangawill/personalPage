@@ -5,7 +5,7 @@
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU GPL version 3 or, at your option, any later version
  * @package akeebaengine
- * @version $Id: db.php 600 2011-05-13 11:35:28Z nikosdion $
+ *
  */
 
 // Protection against direct access
@@ -245,9 +245,13 @@ class AECoreDomainDb extends AEAbstractPart
 		foreach( $this->dumpedDatabases as $definition )
 		{
 			$section = basename($definition['dumpFile']);
+			
+			$dboInstance = AEFactory::getDatabase($definition);
+			$tech = $dboInstance->getDriverType();
 
 			$this->databases_ini .= <<<ENDDEF
 [$section]
+dbtype = "$tech"
 dbname = "{$definition['database']}"
 sqlfile = "{$definition['dumpFile']}"
 dbhost = "{$definition['host']}"

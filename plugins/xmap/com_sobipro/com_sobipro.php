@@ -1,7 +1,7 @@
 <?php
 /**
 * @author Guillermo Vargas guille@vargas.co.cr
-* @version $Id: com_sobipro.php 70 2011-10-15 20:51:08Z guille $
+* @version $Id$
 * @package xmap
 * @license GNU/GPL
 * @authorSite http://joomla.vargas.co.cr
@@ -37,7 +37,7 @@ class xmap_com_sobipro {
     /** Get the content tree for this kind of content */
     function getTree( $xmap, $parent, &$params ) {
 
-        if (!$xmap->isNews) // This component does not provide news content. don't waste time/resources
+        if ($xmap->isNews) // This component does not provide news content. don't waste time/resources
             return false;
 
         if ( !self::loadSobi() ){
@@ -119,7 +119,7 @@ class xmap_com_sobipro {
     }
 
     /** SobiPro support */
-    function getCategoryTree( &$xmap, &$parent, $sid, &$params ) {
+    function getCategoryTree( $xmap, $parent, $sid, &$params ) {
         $database =& JFactory::getDBO();
 
         $query  =
@@ -146,10 +146,11 @@ class xmap_com_sobipro {
             $node->name = html_entity_decode($row->name);
             $node->modified = $modified;
             #$node->link = 'index.php?option=com_sobipro&sid='.$row->id.':'.trim( SPLang::urlSafe( $row->name ) ).'&Itemid='.$parent->id;
-            $node->link = SPJoomlaMainFrame::url( array('sid' => $row->id, 'title' => $row->name) );
+            $node->link = SPJoomlaMainFrame::url( array('sid' => $row->id, 'title' => $row->name), false, false );
             $node->priority = $params['cat_priority'];
             $node->changefreq = $params['cat_changefreq'];
             $node->expandible = true;
+            $node->secure = $parent->secure;
             if ( $xmap->printNode($node) !== FALSE ) {
                 xmap_com_sobipro::getCategoryTree($xmap, $parent, $row->id, $params);
             }
@@ -186,8 +187,9 @@ class xmap_com_sobipro {
                 $node->priority = $params['entry_priority'];
                 $node->changefreq = $params['entry_changefreq'];
                 $node->expandible = false;
+                $node->secure = $parent->secure;
                 # $node->link = 'index.php?option=com_sobipro&pid='.$row->catid . '&sid=' . $row->id.':'.trim( SPLang::urlSafe( $row->name )).'&Itemid='.$parent->id;
-                $node->link = SPJoomlaMainFrame::url( array('sid' => $row->id, 'pid' => $row->catid, 'title' => $row->name) );
+                $node->link = SPJoomlaMainFrame::url( array('sid' => $row->id, 'pid' => $row->catid, 'title' => $row->name), false, false );
                 $xmap->printNode($node);
             }
 

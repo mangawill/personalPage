@@ -1,6 +1,6 @@
 <?php
 /**
- * @version        $Id: sitemap.php 64 2011-10-14 23:54:00Z guille $
+ * @version        $Id$
  * @copyright    Copyright (C) 2005 - 2010 Open Source Matters, Inc. All rights reserved.
  * @license        GNU General Public License version 2 or later; see LICENSE.txt
  */
@@ -247,5 +247,14 @@ class XmapModelSitemap extends JModelAdmin
             $cache->clean();
             return true;
         }
+    }
+    
+    /**
+     * Override to avoid warnings
+     *
+     */
+    public function checkout($pk = null)
+    {
+        return true;
     }
 }

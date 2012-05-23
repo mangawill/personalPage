@@ -126,7 +126,7 @@ $canEdit	= $this->item->params->get('access-edit');
   <div class="hits">
     <i class="icon-eye-open"></i><?php echo JText::sprintf('COM_CONTENT_ARTICLE_HITS', $this->item->hits); ?>
   </div>
-<?php endif; ?>
+
 
 <div class="share">
   <a class="addthis_button_twitter"></a>
@@ -136,6 +136,7 @@ $canEdit	= $this->item->params->get('access-edit');
   <a class="addthis_button_compact"></a>
   <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=ra-4e5bd2ec4d28157e"></script>
 </div><!-- share -->
+<?php endif; ?>
 
 <?php if (($params->get('show_author')) or ($params->get('show_category')) or ($params->get('show_create_date')) or ($params->get('show_modify_date')) or ($params->get('show_publish_date')) or ($params->get('show_parent_category')) or ($params->get('show_hits'))) : ?>
     </div><!-- postData -->

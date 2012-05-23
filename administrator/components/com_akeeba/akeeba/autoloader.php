@@ -5,7 +5,7 @@
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU GPL version 3 or, at your option, any later version
  * @package akeebaengine
- * @version $Id$
+ *
  */
 
 // Protection against direct access
@@ -26,6 +26,7 @@ if(empty($Akeeba_Class_Map))
 		'AEFilterPlatform'	=> 'filters',
 		'AEDriverPlatform'	=> 'drivers',
 		'AEArchiver'		=> 'engines'.DIRECTORY_SEPARATOR.'archiver',
+		'AEDumpNative'		=> 'engines'.DIRECTORY_SEPARATOR.'dump'.DIRECTORY_SEPARATOR.'native',
 		'AEDump'			=> 'engines'.DIRECTORY_SEPARATOR.'dump',
 		'AEFinalization'	=> 'engines'.DIRECTORY_SEPARATOR.'finalization',
 		'AEScan'			=> 'engines'.DIRECTORY_SEPARATOR.'scan',
@@ -33,7 +34,9 @@ if(empty($Akeeba_Class_Map))
 		'AEPostproc'		=> 'engines'.DIRECTORY_SEPARATOR.'proc',
 		'AEFilterStack'		=> 'filters'.DIRECTORY_SEPARATOR.'stack',
 		'AEFilter'			=> 'filters',
-		'AEDriver'			=> 'drivers'
+		'AEDriver'			=> 'drivers',
+		'AEQuery'			=> 'drivers'.DIRECTORY_SEPARATOR.'query',
+		'AEQueryPlatform'	=> 'drivers'.DIRECTORY_SEPARATOR.'query',
 	);
 }
 

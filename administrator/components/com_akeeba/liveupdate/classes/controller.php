@@ -54,6 +54,15 @@ class LiveUpdateController extends JController
 	 */
 	public function startupdate()
 	{
+		$updateInfo = LiveUpdate::getUpdateInformation();
+		if($updateInfo->stability != 'stable') {
+			$skipNag = JRequest::getBool('skipnag', false);
+			if(!$skipNag) {
+				$this->setRedirect('index.php?option='.JRequest::getCmd('option','').'&view='.JRequest::getCmd('view','liveupdate').'&task=nagscreen');
+				$this->redirect();
+			}
+		}
+		
 		$ftp = $this->setCredentialsFromRequest('ftp');
 		if($ftp === true) {
 			// The user needs to supply the FTP credentials

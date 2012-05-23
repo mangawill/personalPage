@@ -1,6 +1,6 @@
 <?php
 /**
- * @version             $Id: com_content.php 70 2011-10-15 20:51:08Z guille $
+ * @version             $Id$
  * @copyright           Copyright (C) 2007 - 2009 Joomla! Vargas. All rights reserved.
  * @license             GNU General Public License version 2 or later; see LICENSE.txt
  * @author              Guillermo Vargas (guille@vargas.co.cr)
@@ -32,7 +32,7 @@ class xmap_com_content
      * @return void
      * @since  1.2
      */
-    static function prepareMenuItem($node,$params)
+    static function prepareMenuItem($node, &$params)
     {
         $db = JFactory::getDbo();
         $link_query = parse_url($node->link);
@@ -277,6 +277,7 @@ class xmap_com_content
                 $node->changefreq = $params['cat_changefreq'];
                 $node->name = $item->title;
                 $node->expandible = true;
+                $node->secure = $parent->secure;
                 // TODO: Should we include category name or metakey here?
                 // $node->keywords = $item->metakey;
                 $node->newsItem = 0;
@@ -353,10 +354,10 @@ class xmap_com_content
 
         $query = 'SELECT a.id, a.title, a.alias, a.title_alias, a.catid, '
                . 'UNIX_TIMESTAMP(a.created) created, UNIX_TIMESTAMP(a.modified) modified'
-               //. ',c.path AS category_route '
-               . (($params['add_images'] || $params['add_pagebreaks']) ? ',a.introtext, a.fulltext ' : '')
+               . ',a.language'
+               . (($params['add_images'] || $params['add_pagebreaks']) ? ',a.introtext, a.fulltext ' : ' ')
                . 'FROM #__content AS a '
-               . ($catid =='featured'? 'LEFT JOIN #__content_frontpage AS fp ON a.id = fp.content_id ' : '')
+               . ($catid =='featured'? 'LEFT JOIN #__content_frontpage AS fp ON a.id = fp.content_id ' : ' ')
                . 'WHERE ' . implode(' AND ',$where) . ' AND '
                . '      (a.publish_up = ' . $params['nullDate']
                . ' OR a.publish_up <= ' . $params['nowDate'] . ') AND '
@@ -381,9 +382,11 @@ class xmap_com_content
                 $node->name = $item->title;
                 $node->modified = $item->modified;
                 $node->expandible = false;
+                $node->secure = $parent->secure;
                 // TODO: Should we include category name or metakey here?
                 // $node->keywords = $item->metakey;
                 $node->newsItem = 1;
+                $node->language = $item->language;
 
                 // For the google news we should use te publication date instead
                 // the last modification date. See
@@ -417,6 +420,7 @@ class xmap_com_content
                         $subnode->browserNav = $parent->browserNav;
                         $subnode->priority = $params['art_priority'];
                         $subnode->changefreq = $params['art_changefreq'];
+                        $subnode->secure = $parent->secure;
                         $xmap->printNode($subnode);
                     }
                     $xmap->changeLevel(-1);

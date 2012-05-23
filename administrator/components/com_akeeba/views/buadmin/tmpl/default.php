@@ -3,12 +3,12 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id$
+ *
  * @since 1.3
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
+defined('_JEXEC') or die();
 
 JHTML::_('behavior.mootools');
 JHTML::_('behavior.calendar');
@@ -51,7 +51,7 @@ foreach($scripting['scripts'] as $key => $data)
 	<input type="hidden" name="task" id="task" value="default" />
 	<input type="hidden" name="filter_order" id="filter_order" value="<?php echo $this->lists->order ?>" />
 	<input type="hidden" name="filter_order_Dir" id="filter_order_Dir" value="<?php echo $this->lists->order_Dir ?>" />	
-	<?php echo JHTML::_( 'form.token' ); ?>
+	<input type="hidden" name="<?php echo JFactory::getSession()->getToken()?>" value="1" />
 <table class="adminlist">
 	<thead>
 		<tr>
@@ -171,7 +171,7 @@ foreach($scripting['scripts'] as $key => $data)
 <a
 	class="modal akeeba_remote_management_link"
 	href="index.php?option=com_akeeba&view=remotefiles&tmpl=component&task=listactions&id={$record['id']}";
-	rel="{handler: 'iframe', size: {x: 450, y: 280}}"
+	rel="{handler: 'iframe', size: {x: 450, y: 280}, onClose: function(){window.location='index.php?option=com_akeeba&view=buadmin'}}"
 >&raquo; $remotemgmttext &laquo;</a>
 ENDHTML;
 		if($record['meta'] != 'obsolete') {
@@ -183,7 +183,7 @@ ENDHTML;
 			$filename_col .= '<a '
 				.'class="modal akeeba_upload" '
 				.'href="index.php?option=com_akeeba&view=upload&tmpl=component&task=start&id='.$record['id'].'" '
-				.'rel="{handler: \'iframe\', size: {x: 350, y: 200}}" '
+				.'rel="{handler: \'iframe\', size: {x: 350, y: 200}, onClose: function(){window.location=\'index.php?option=com_akeeba&view=buadmin\'}}" '
 				.'title="'.JText::sprintf('AKEEBA_TRANSFER_DESC', JText::_("ENGINE_POSTPROC_{$postProcEngine}_TITLE")).'">'.
 				JText::_('AKEEBA_TRANSFER_TITLE').' (<em>'.$postProcEngine.'</em>)'.
 				'</a>';
@@ -242,11 +242,7 @@ ENDHTML;
 				<a href="<?php echo $edit_link; ?>"><?php echo $this->escape($record['description']) ?></a>
 			</td>
 			<td>
-				<?php if( AKEEBA_JVERSION == '16' ): ?>
-					<?php echo $startTime->format(JText::_('DATE_FORMAT_LC4'), true); ?>
-				<?php else: ?>
-					<?php echo $startTime->toFormat(JText::_('DATE_FORMAT_LC4')); ?>
-				<?php endif; ?>
+				<?php echo $startTime->format(JText::_('DATE_FORMAT_LC4'), true); ?>
 			</td>
 			<td><?php echo $duration; ?></td>
 			<td class="bufa-<?php echo $record['meta']; ?>"><?php echo $status ?></td>

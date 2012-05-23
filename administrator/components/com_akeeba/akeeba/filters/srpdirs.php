@@ -5,7 +5,7 @@
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU GPL version 3 or, at your option, any later version
  * @package akeebaengine
- * @version $Id: srpdirs.php 641 2011-05-23 17:23:38Z nikosdion $
+ *
  */
 
 // Protection against direct access

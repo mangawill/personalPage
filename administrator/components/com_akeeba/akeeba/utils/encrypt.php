@@ -3,7 +3,7 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id: encrypt.php 422 2011-01-31 09:39:33Z nikosdion $
+ *
  * @since 3.0
  */
 

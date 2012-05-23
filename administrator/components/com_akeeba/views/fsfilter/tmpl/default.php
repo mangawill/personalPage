@@ -3,11 +3,11 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id$
+ *
  * @since 1.3
  */
 
-defined('_JEXEC') or die('Restricted access');
+defined('_JEXEC') or die();
 ?>
 <div id="akeeba-container" style="width:100%">
 

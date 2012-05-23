@@ -3,36 +3,28 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id$
  * @since 3.3.b1
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
-
-// Load framework base classes
-jimport('joomla.application.component.view');
+defined('_JEXEC') or die();
 
 /**
  * MVC View for Profiles management
  *
  */
-class AkeebaViewPostsetup extends JView
+class AkeebaViewPostsetup extends FOFViewHtml
 {
-	public function display($tpl = null)
+	public function onBrowse($tpl = null)
 	{
-		JToolBarHelper::title(JText::_('AKEEBA').': <small>'.JText::_('AKEEBA_POSTSETUP').'</small>','akeeba');
-		
-		// Add a spacer, a help button and show the template
-		JToolBarHelper::spacer();
-		
 		$this->_setSRPStatus();
 		$this->_setAutoupdateStatus();
 		$this->_setConfWizStatus();
+		$this->assign('showsrp', $this->isMySQL());
 
 		AkeebaHelperIncludes::includeMedia(false);
-
-		parent::display($tpl);
+		
+		return true;
 	}
 	
 	private function _setAutoupdateStatus()
@@ -44,18 +36,20 @@ class AkeebaViewPostsetup extends JView
 		
 		$db = JFactory::getDBO();
 		
-		if( version_compare( JVERSION, '1.6.0', 'ge' ) ) {
-			$db->setQuery("SELECT `enabled` FROM `#__extensions` WHERE element='oneclickaction' AND folder='system'");
-		} else {
-			$db->setQuery("SELECT `published` FROM `#__plugins` WHERE element='oneclickaction' AND folder='system'");
-		}
+		$query = $db->getQuery(true)
+			->select($db->nq('enabled'))
+			->from($db->nq('#__extensions'))
+			->where($db->nq('element').' = '.$db->q('oneclickaction'))
+			->where($db->nq('folder').' = '.$db->q('system'));
+		$db->setQuery($query);
 		$enabledOCA = $db->loadResult();
 		
-		if( version_compare( JVERSION, '1.6.0', 'ge' ) ) {
-			$db->setQuery("SELECT `enabled` FROM `#__extensions` WHERE element='akeebaupdatecheck' AND folder='system'");
-		} else {
-			$db->setQuery("SELECT `published` FROM `#__plugins` WHERE element='akeebaupdatecheck' AND folder='system'");
-		}
+		$query = $db->getQuery(true)
+			->select($db->nq('enabled'))
+			->from($db->nq('#__extensions'))
+			->where($db->nq('element').' = '.$db->q('akeebaupdatecheck'))
+			->where($db->nq('folder').' = '.$db->q('system'));
+		$db->setQuery($query);
 		$enabledAUC = $db->loadResult();
 		
 		if(!AKEEBA_PRO) {
@@ -69,21 +63,26 @@ class AkeebaViewPostsetup extends JView
 	private function _setSRPStatus()
 	{
 		if($this->_setConfWizStatus()) {
-			$this->assign('enablesrp', true);
+			$this->assign('enablesrp', $this->isMySQL());
 			return;
 		}
 		
 		$db = JFactory::getDBO();
 		
-		if( version_compare( JVERSION, '1.6.0', 'ge' ) ) {
-			$db->setQuery("SELECT `enabled` FROM `#__extensions` WHERE element='srp' AND folder='system'");
-		} else {
-			$db->setQuery("SELECT `published` FROM `#__plugins` WHERE element='srp' AND folder='system'");
-		}
+		$query = $db->getQuery(true)
+			->select($db->nq('enabled'))
+			->from($db->nq('#__extensions'))
+			->where($db->nq('element').' = '.$db->q('srp'))
+			->where($db->nq('folder').' = '.$db->q('system'));
+		$db->setQuery($query);
 		$enableSRP = $db->loadResult();
 		
 		if(!AKEEBA_PRO) {
 			$enableSRP = false;
+		}
+		if(!$this->isMySQL()) {
+			$enableSRP = false;
+			return;
 		}
 		
 		$this->assign('enablesrp', $enableSRP ? true : false);	
@@ -101,11 +100,19 @@ class AkeebaViewPostsetup extends JView
 				$params = new JParameter($component->params);
 			}
 			$lv = $params->get( 'lastversion', '' );
+			$minStability = $params->get( 'minstability', 'stable' );
 			
 			$enableconfwiz = empty($lv);
 		}
 		
 		$this->assign('enableconfwiz', $enableconfwiz);
+		$this->assign('minstability', $minStability);
 		return $enableconfwiz;
+	}
+	
+	private function isMySQL()
+	{
+		$db = JFactory::getDbo();
+		return strtolower(substr($db->name, 0, 5)) == 'mysql';
 	}
 }

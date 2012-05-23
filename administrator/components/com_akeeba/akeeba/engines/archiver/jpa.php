@@ -5,7 +5,7 @@
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU GPL version 3 or, at your option, any later version
  * @package akeebaengine
- * @version $Id: jpa.php 545 2011-04-09 10:01:17Z nikosdion $
+ *
  */
 
 // Protection against direct access

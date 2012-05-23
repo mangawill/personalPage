@@ -60,6 +60,8 @@ class LiveUpdateFetch extends JObject
 				break;
 		}
 		
+		if(empty($updateInfo->version) && empty($updateInfo->date)) return 0;
+		
 		// Use the version strategy to determine the availability of an update
 		switch($config->getVersionStrategy()) {
 			case 'newest':
@@ -289,6 +291,32 @@ class LiveUpdateFetch extends JObject
 		
 		require_once dirname(__FILE__).'/inihelper.php';
 		$iniData = LiveUpdateINIHelper::parse_ini_file($rawData, false, true);
+		
+		// Get the supported platforms
+		$supportedPlatform = false;
+		$versionParts = explode('.',JVERSION);
+		$currentPlatform = $versionParts[0].'.'.$versionParts[1];
+		
+		if(array_key_exists('platforms', $iniData)) {
+			$rawPlatforms = explode(',', $iniData['platforms']);
+			foreach($rawPlatforms as $platform) {
+				$platform = trim($platform);
+				if(substr($platform,0,7) != 'joomla/') {
+					continue;
+				}
+				$platform = substr($platform, 7);
+				if($currentPlatform == $platform) {
+					$supportedPlatform = true;
+				}
+			}
+		} else {
+			// Lies, damn lies
+			$supportedPlatform = true;
+		}
+		
+		if(!$supportedPlatform) {
+			return $ret;
+		}
 		
 		$ret['version'] = $iniData['version'];
 		$ret['date'] = $iniData['date'];

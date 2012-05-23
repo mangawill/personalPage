@@ -1,6 +1,6 @@
 <?php
 /**
- * @version		$Id: xmap.php 48 2011-07-15 05:03:06Z guille $
+ * @version		$Id$
  * @copyright   Copyright (C) 2007 - 2009 Joomla! Vargas. All rights reserved.
  * @license		GNU General Public License version 2 or later; see LICENSE.txt
  * @author		Guillermo Vargas (guille@vargas.co.cr)

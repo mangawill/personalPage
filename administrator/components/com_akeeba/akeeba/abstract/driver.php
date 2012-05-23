@@ -5,51 +5,102 @@
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU GPL version 3 or, at your option, any later version
  * @package akeebaengine
- * @version $Id: driver.php 409 2011-01-24 09:30:22Z nikosdion $
  */
 
 // Protection against direct access
 defined('AKEEBAENGINE') or die('Restricted access');
 
 /**
- * Database driver superclass. Used as the base of all Akeeba Engine database drivers.
- * Strongly based on Joomla!'s JDatabase class.
+ * Database interface class.
+ * 
+ * Based on Joomla! Platform 11.2
  */
-abstract class AEAbstractDriver extends AEAbstractObject
+interface AEAbstractDriverInterface
 {
-	/** @var string The SQL query string */
+	/**
+	 * Test to see if the connector is available.
+	 *
+	 * @return  boolean  True on success, false otherwise.
+	 */
+	public static function test();
+}
+
+
+/**
+ * Database driver superclass. Used as the base of all Akeeba Engine database drivers.
+ * Strongly based on Joomla Platform's JDatabase class.
+ */
+abstract class AEAbstractDriver extends AEAbstractObject implements AEAbstractDriverInterface
+{
+	/** @var string The name of the database. */
+	private $_database;
+	
+	/** @var string The name of the database driver. */
+	public $name;
+	
+	/** @var resource The db conenction resource */
+	protected $connection = '';
+
+	/** @var resource The database connection cursor from the last query. */
+	protected $cursor;
+
+	/** @var int Query's limit */
+	protected $limit = 0;
+	
+	/** @var string Quote for named objects */
+	protected $nameQuote = '';
+
+	/** @var string  The null or zero representation of a timestamp for the database driver. */
+	protected $nullDate;
+	
+	/** @var int Query's offset */
+	protected $offset = 0;
+
+	/** @var mixed The SQL query string */
 	protected $sql = '';
 
+	/** @var string The prefix used in the database, if any */
+	protected $tablePrefix = '';
+	
+	/** @var bool Support for UTF-8 */
+	protected $utf = true;
+	
 	/** @var int The db server's error number */
 	protected $errorNum = 0;
 
 	/** @var string The db server's error string */
 	protected $errorMsg = '';
+	
+	/** @var string Driver type, e.g. mysql, mssql, pgsql and so on */
+	protected $driverType = '';
+	
+	/**
+	 * Magic method to provide method alias support for quote() and quoteName().
+	 *
+	 * @param   string  $method  The called method.
+	 * @param   array   $args    The array of arguments passed to the method.
+	 *
+	 * @return  string  The aliased method's return value or null.
+	 */
+	public function __call($method, $args)
+	{
+		if (empty($args))
+		{
+			return;
+		}
 
-	/** @var string The prefix used in the database, if any */
-	protected $table_prefix = '';
-
-	/** @var string The database name */
-	protected $database;
-
-	/** @var resource The db conenction resource */
-	protected $resource = '';
-
-	/** @var resource The internal db cursor */
-	protected $cursor = null;
-
-	/** @var int Query's limit */
-	protected $limit = 0;
-
-	/** @var int Query's offset */
-	protected $offset = 0;
-
-	/** @var string Quote for named objects */
-	protected $nameQuote = '';
-
-	/** @var bool Support for UTF-8 */
-	protected $utf;
-
+		switch ($method)
+		{
+			case 'q':
+				return $this->quote($args[0], isset($args[1]) ? $args[1] : true);
+				break;
+			case 'nq':
+			case 'qn':
+				return $this->quoteName($args[0]);
+				break;
+		}
+	}
+	
 	/**
 	 * Database object constructor
 	 * @param	array	List of options used to configure the connection
@@ -58,9 +109,14 @@ abstract class AEAbstractDriver extends AEAbstractObject
 	{
 		$prefix		= array_key_exists('prefix', $options)		? $options['prefix']	: '';
 		$database	= array_key_exists('database', $options)	? $options['database']	: '';
+		$connection	= array_key_exists('connection', $options)	? $options['connection']: null;
 
-		$this->table_prefix	= $prefix;
-		$this->database	= $database;
+		$this->tablePrefix	= $prefix;
+		$this->_database	= $database;
+		$this->connection	= $connection;
+		$this->errorNum		= 0;
+		
+		$this->setUTF();
 	}
 
 	/**
@@ -87,10 +143,13 @@ abstract class AEAbstractDriver extends AEAbstractObject
 
 	/**
 	 * Opens a database connection. It MUST be overriden by children classes
-	 * @return bool
+	 * @return AEAbstractDriver
 	 */
 	public function open()
 	{
+		// Don't try to reconnect if we're already connected
+		if(is_resource($this->connection)) return $this;
+		
 		// Determine utf-8 support
 		$this->utf = $this->hasUTF();
 
@@ -99,15 +158,11 @@ abstract class AEAbstractDriver extends AEAbstractObject
 			$this->setUTF();
 		}
 
+		// Select the current database
 		$this->select($this->database);
+		
+		return $this;
 	}
-
-	/**
-	 * Select a database for use
-	 * @param	string $database
-	 * @return	boolean True if the database has been successfully selected
-	 */
-	abstract public function select($database);
 
 	/**
 	 * Closes the database connection
@@ -115,24 +170,973 @@ abstract class AEAbstractDriver extends AEAbstractObject
 	abstract public function close();
 
 	/**
-	 * Determines UTF support
-	 * @return bool
+	 * Determines if the connection to the server is active.
+	 *
+	 * @return  boolean  True if connected to the database engine.
+	 */
+	abstract public function connected();
+
+	/**
+	 * Drops a table from the database.
+	 *
+	 * @param   string   $table     The name of the database table to drop.
+	 * @param   boolean  $ifExists  Optionally specify that the table must exist before it is dropped.
+	 *
+	 * @return  AEAbstractDriver  Returns this object to support chaining.
+	 */
+	public abstract function dropTable($table, $ifExists = true);
+
+	/**
+	 * Method to escape a string for usage in an SQL statement.
+	 *
+	 * @param   string   $text   The string to be escaped.
+	 * @param   boolean  $extra  Optional parameter to provide extra escaping.
+	 *
+	 * @return  string   The escaped string.
+	 */
+	abstract public function escape($text, $extra = false);
+
+	/**
+	 * Method to fetch a row from the result set cursor as an array.
+	 *
+	 * @param   mixed  $cursor  The optional result set cursor from which to fetch the row.
+	 *
+	 * @return  mixed  Either the next row from the result set or false if there are no more rows.
+	 */
+	abstract protected function fetchArray($cursor = null);
+
+	/**
+	 * Method to fetch a row from the result set cursor as an associative array.
+	 *
+	 * @param   mixed  $cursor  The optional result set cursor from which to fetch the row.
+	 *
+	 * @return  mixed  Either the next row from the result set or false if there are no more rows.
+	 */
+	abstract public function fetchAssoc($cursor = null);
+
+	/**
+	 * Method to fetch a row from the result set cursor as an object.
+	 *
+	 * @param   mixed   $cursor  The optional result set cursor from which to fetch the row.
+	 * @param   string  $class   The class name to use for the returned row object.
+	 *
+	 * @return  mixed   Either the next row from the result set or false if there are no more rows.
+	 */
+	abstract protected function fetchObject($cursor = null, $class = 'stdClass');
+
+	/**
+	 * Method to free up the memory used for the result set.
+	 *
+	 * @param   mixed  $cursor  The optional result set cursor from which to fetch the row.
+	 *
+	 * @return  void
+	 */
+	abstract public function freeResult($cursor = null);
+	
+	/**
+	 * Get the number of affected rows for the previous executed SQL statement.
+	 *
+	 * @return  integer  The number of affected rows.
+	 */
+	abstract public function getAffectedRows();
+
+	/**
+	 * Method to get the database collation in use by sampling a text field of a table in the database.
+	 *
+	 * @return  mixed  The collation in use by the database or boolean false if not supported.
+	 */
+	abstract public function getCollation();
+
+	/**
+	 * Method that provides access to the underlying database connection. Useful for when you need to call a
+	 * proprietary method such as postgresql's lo_* methods.
+	 *
+	 * @return  resource  The underlying database connection resource.
+	 */
+	public function getConnection()
+	{
+		return $this->connection;
+	}
+
+	/**
+	 * Inherits the connection of another database driver. Useful for cloning
+	 * the CMS database connection into an Akeeba Engine database driver.
+	 * 
+	 * @param resource $connection 
+	 */
+	public function setConnection($connection)
+	{
+		$this->connection = $connection;
+	}
+
+	/**
+	 * Gets the name of the database used by this conneciton.
+	 *
+	 * @return  string
+	 */
+	protected function getDatabase()
+	{
+		return $this->_database;
+	}
+
+	/**
+	 * Returns a PHP date() function compliant date format for the database driver.
+	 *
+	 * @return  string  The format string.
+	 */
+	public function getDateFormat()
+	{
+		return 'Y-m-d H:i:s';
+	}
+	
+	/**
+	 * Get the null or zero representation of a timestamp for the database driver.
+	 *
+	 * @return  string  Null or zero representation of a timestamp.
+	 */
+	public function getNullDate()
+	{
+		return $this->nullDate;
+	}
+
+	/**
+	 * Get the number of returned rows for the previous executed SQL statement.
+	 *
+	 * @param   resource  $cursor  An optional database cursor resource to extract the row count from.
+	 *
+	 * @return  integer   The number of returned rows.
+	 */
+	abstract public function getNumRows($cursor = null);
+	
+	/**
+	 * Get the database table prefix
+	 * 
+	 * @return string The database prefix
+	 */
+	public final function getPrefix()
+	{
+		return $this->tablePrefix;
+	}
+
+	/**
+	 * Get the current query object or a new AEAbstractQuery object.
+	 *
+	 * @param   boolean  $new  False to return the current query object, True to return a new AEAbstractQuery object.
+	 *
+	 * @return  AEAbstractQuery  The current query object or a new object extending the AEAbstractQuery class.
+	 */
+	abstract public function getQuery($new = false);
+	
+	/**
+	 * Retrieves field information about the given tables.
+	 *
+	 * @param   string   $table     The name of the database table.
+	 * @param   boolean  $typeOnly  True (default) to only return field types.
+	 *
+	 * @return  array  An array of fields by table.
+	 */
+	abstract public function getTableColumns($table, $typeOnly = true);
+
+	/**
+	 * Shows the table CREATE statement that creates the given tables.
+	 *
+	 * @param   mixed  $tables  A table name or a list of table names.
+	 *
+	 * @return  array  A list of the create SQL for the tables.
+	 */
+	abstract public function getTableCreate($tables);
+	
+	/**
+	 * Retrieves field information about the given tables.
+	 *
+	 * @param   mixed  $tables  A table name or a list of table names.
+	 *
+	 * @return  array  An array of keys for the table(s).
+	 */
+	abstract public function getTableKeys($tables);
+
+	/**
+	 * Method to get an array of all tables in the database.
+	 *
+	 * @return  array  An array of all the tables in the database.
+	 */
+	abstract public function getTableList();
+
+	/**
+	 * Determine whether or not the database engine supports UTF-8 character encoding.
+	 *
+	 * @return  boolean  True if the database engine supports UTF-8 character encoding.
+	 */
+	public function getUTFSupport()
+	{
+		return $this->utf;
+	}
+
+	/**
+	 * Get the version of the database connector
+	 *
+	 * @return  string  The database connector version.
+	 */
+	abstract public function getVersion();
+
+	/**
+	 * Determines if the database engine supports UTF-8 character encoding.
+	 *
+	 * @return  boolean  True if supported.
 	 */
 	abstract public function hasUTF();
 
 	/**
-	 * Custom settings for UTF support
+	 * Method to get the auto-incremented value from the last INSERT statement.
+	 *
+	 * @return  integer  The value of the auto-increment field from the last inserted row.
+	 */
+	abstract public function insertid();
+
+	/**
+	 * Inserts a row into a table based on an object's properties.
+	 *
+	 * @param   string  $table    The name of the database table to insert into.
+	 * @param   object  &$object  A reference to an object whose public properties match the table fields.
+	 * @param   string  $key      The name of the primary key. If provided the object property is updated.
+	 *
+	 * @return  boolean    True on success.
+	 */
+	public function insertObject($table, &$object, $key = null)
+	{
+		// Initialise variables.
+		$fields = array();
+		$values = array();
+
+		// Create the base insert statement.
+		$statement = 'INSERT INTO ' . $this->quoteName($table) . ' (%s) VALUES (%s)';
+
+		// Iterate over the object variables to build the query fields and values.
+		foreach (get_object_vars($object) as $k => $v)
+		{
+			// Only process non-null scalars.
+			if (is_array($v) or is_object($v) or $v === null)
+			{
+				continue;
+			}
+
+			// Ignore any internal fields.
+			if ($k[0] == '_')
+			{
+				continue;
+			}
+
+			// Prepare and sanitize the fields and values for the database query.
+			$fields[] = $this->quoteName($k);
+			$values[] = $this->quote($v);
+		}
+
+		// Set the query and execute the insert.
+		$this->setQuery(sprintf($statement, implode(',', $fields), implode(',', $values)));
+		if (!$this->query())
+		{
+			return false;
+		}
+
+		// Update the primary key if it exists.
+		$id = $this->insertid();
+		if ($key && $id)
+		{
+			$object->$key = $id;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Method to get the first row of the result set from the database query as an associative array
+	 * of ['field_name' => 'row_value'].
+	 *
+	 * @return  mixed  The return value or null if the query failed.
+	 */
+	public function loadAssoc()
+	{
+		// Initialise variables.
+		$ret = null;
+
+		// Execute the query and get the result set cursor.
+		if (!($cursor = $this->query()))
+		{
+			return null;
+		}
+
+		// Get the first row from the result set as an associative array.
+		if ($array = $this->fetchAssoc($cursor))
+		{
+			$ret = $array;
+		}
+
+		// Free up system resources and return.
+		$this->freeResult($cursor);
+
+		return $ret;
+	}
+
+	/**
+	 * Method to get an array of the result set rows from the database query where each row is an associative array
+	 * of ['field_name' => 'row_value'].  The array of rows can optionally be keyed by a field name, but defaults to
+	 * a sequential numeric array.
+	 *
+	 * NOTE: Chosing to key the result array by a non-unique field name can result in unwanted
+	 * behavior and should be avoided.
+	 *
+	 * @param   string  $key     The name of a field on which to key the result array.
+	 * @param   string  $column  An optional column name. Instead of the whole row, only this column value will be in
+	 * the result array.
+	 *
+	 * @return  mixed   The return value or null if the query failed.
+	 */
+	public function loadAssocList($key = null, $column = null)
+	{
+		// Initialise variables.
+		$array = array();
+
+		// Execute the query and get the result set cursor.
+		if (!($cursor = $this->query()))
+		{
+			return null;
+		}
+
+		// Get all of the rows from the result set.
+		while ($row = $this->fetchAssoc($cursor))
+		{
+			$value = ($column) ? (isset($row[$column]) ? $row[$column] : $row) : $row;
+			if ($key)
+			{
+				$array[$row[$key]] = $value;
+			}
+			else
+			{
+				$array[] = $value;
+			}
+		}
+
+		// Free up system resources and return.
+		$this->freeResult($cursor);
+
+		return $array;
+	}
+
+	/**
+	 * Method to get an array of values from the <var>$offset</var> field in each row of the result set from
+	 * the database query.
+	 *
+	 * @param   integer  $offset  The row offset to use to build the result array.
+	 *
+	 * @return  mixed    The return value or null if the query failed.
+	 */
+	public function loadColumn($offset = 0)
+	{
+		// Initialise variables.
+		$array = array();
+
+		// Execute the query and get the result set cursor.
+		if (!($cursor = $this->query()))
+		{
+			return null;
+		}
+
+		// Get all of the rows from the result set as arrays.
+		while ($row = $this->fetchArray($cursor))
+		{
+			$array[] = $row[$offset];
+		}
+
+		// Free up system resources and return.
+		$this->freeResult($cursor);
+
+		return $array;
+	}
+
+	/**
+	 * Method to get the next row in the result set from the database query as an object.
+	 *
+	 * @param   string  $class  The class name to use for the returned row object.
+	 *
+	 * @return  mixed   The result of the query as an array, false if there are no more rows.
+	 */
+	public function loadNextObject($class = 'stdClass')
+	{
+		static $cursor;
+
+		// Execute the query and get the result set cursor.
+		if (!($cursor = $this->query()))
+		{
+			return $this->errorNum ? null : false;
+		}
+
+		// Get the next row from the result set as an object of type $class.
+		if ($row = $this->fetchObject($cursor, $class))
+		{
+			return $row;
+		}
+
+		// Free up system resources and return.
+		$this->freeResult($cursor);
+		$cursor = null;
+
+		return false;
+	}
+
+	/**
+	 * Method to get the next row in the result set from the database query as an array.
+	 *
+	 * @return  mixed  The result of the query as an array, false if there are no more rows.
+	 */
+	public function loadNextRow()
+	{
+		static $cursor;
+
+		// Execute the query and get the result set cursor.
+		if (!($cursor = $this->query()))
+		{
+			return $this->errorNum ? null : false;
+		}
+
+		// Get the next row from the result set as an object of type $class.
+		if ($row = $this->fetchArray($cursor))
+		{
+			return $row;
+		}
+
+		// Free up system resources and return.
+		$this->freeResult($cursor);
+		$cursor = null;
+
+		return false;
+	}
+
+	/**
+	 * Method to get the first row of the result set from the database query as an object.
+	 *
+	 * @param   string  $class  The class name to use for the returned row object.
+	 *
+	 * @return  mixed   The return value or null if the query failed.
+	 */
+	public function loadObject($class = 'stdClass')
+	{
+		// Initialise variables.
+		$ret = null;
+
+		// Execute the query and get the result set cursor.
+		if (!($cursor = $this->query()))
+		{
+			return null;
+		}
+
+		// Get the first row from the result set as an object of type $class.
+		if ($object = $this->fetchObject($cursor, $class))
+		{
+			$ret = $object;
+		}
+
+		// Free up system resources and return.
+		$this->freeResult($cursor);
+
+		return $ret;
+	}
+
+	/**
+	 * Method to get an array of the result set rows from the database query where each row is an object.  The array
+	 * of objects can optionally be keyed by a field name, but defaults to a sequential numeric array.
+	 *
+	 * NOTE: Choosing to key the result array by a non-unique field name can result in unwanted
+	 * behavior and should be avoided.
+	 *
+	 * @param   string  $key    The name of a field on which to key the result array.
+	 * @param   string  $class  The class name to use for the returned row objects.
+	 *
+	 * @return  mixed   The return value or null if the query failed.
+	 */
+	public function loadObjectList($key = '', $class = 'stdClass')
+	{
+		// Initialise variables.
+		$array = array();
+
+		// Execute the query and get the result set cursor.
+		if (!($cursor = $this->query()))
+		{
+			return null;
+		}
+
+		// Get all of the rows from the result set as objects of type $class.
+		while ($row = $this->fetchObject($cursor, $class))
+		{
+			if ($key)
+			{
+				$array[$row->$key] = $row;
+			}
+			else
+			{
+				$array[] = $row;
+			}
+		}
+
+		// Free up system resources and return.
+		$this->freeResult($cursor);
+
+		return $array;
+	}
+
+	/**
+	 * Method to get the first field of the first row of the result set from the database query.
+	 *
+	 * @return  mixed  The return value or null if the query failed.
+	 */
+	public function loadResult()
+	{
+		// Initialise variables.
+		$ret = null;
+
+		// Execute the query and get the result set cursor.
+		if (!($cursor = $this->query()))
+		{
+			return null;
+		}
+
+		// Get the first row from the result set as an array.
+		if ($row = $this->fetchArray($cursor))
+		{
+			$ret = $row[0];
+		}
+
+		// Free up system resources and return.
+		$this->freeResult($cursor);
+
+		return $ret;
+	}
+
+	/**
+	 * Method to get the first row of the result set from the database query as an array.  Columns are indexed
+	 * numerically so the first column in the result set would be accessible via <var>$row[0]</var>, etc.
+	 *
+	 * @return  mixed  The return value or null if the query failed.
+	 */
+	public function loadRow()
+	{
+		// Initialise variables.
+		$ret = null;
+
+		// Execute the query and get the result set cursor.
+		if (!($cursor = $this->query()))
+		{
+			return null;
+		}
+
+		// Get the first row from the result set as an array.
+		if ($row = $this->fetchArray($cursor))
+		{
+			$ret = $row;
+		}
+
+		// Free up system resources and return.
+		$this->freeResult($cursor);
+
+		return $ret;
+	}
+
+	/**
+	 * Method to get an array of the result set rows from the database query where each row is an array.  The array
+	 * of objects can optionally be keyed by a field offset, but defaults to a sequential numeric array.
+	 *
+	 * NOTE: Choosing to key the result array by a non-unique field can result in unwanted
+	 * behavior and should be avoided.
+	 *
+	 * @param   string  $key  The name of a field on which to key the result array.
+	 *
+	 * @return  mixed   The return value or null if the query failed.
+	 */
+	public function loadRowList($key = null)
+	{
+		// Initialise variables.
+		$array = array();
+
+		// Execute the query and get the result set cursor.
+		if (!($cursor = $this->query()))
+		{
+			return null;
+		}
+
+		// Get all of the rows from the result set as arrays.
+		while ($row = $this->fetchArray($cursor))
+		{
+			if ($key !== null)
+			{
+				$array[$row[$key]] = $row;
+			}
+			else
+			{
+				$array[] = $row;
+			}
+		}
+
+		// Free up system resources and return.
+		$this->freeResult($cursor);
+
+		return $array;
+	}
+
+	/**
+	 * Locks a table in the database.
+	 *
+	 * @param   string  $tableName  The name of the table to unlock.
+	 *
+	 * @return  AEAbstractDriver  Returns this object to support chaining.
+	 */
+	public abstract function lockTable($tableName);
+
+	/**
+	 * Execute the SQL statement.
+	 *
+	 * @return  mixed  A database cursor resource on success, boolean false on failure.
+	 */
+	abstract public function query();
+
+	/**
+	 * Method to quote and optionally escape a string to database requirements for insertion into the database.
+	 *
+	 * @param   string   $text    The string to quote.
+	 * @param   boolean  $escape  True (default) to escape the string, false to leave it unchanged.
+	 */
+	public function quote($text, $escape = true)
+	{
+		return '\'' . ($escape ? $this->escape($text) : $text) . '\'';
+	}
+
+	/**
+	 * Wrap an SQL statement identifier name such as column, table or database names in quotes to prevent injection
+	 * risks and reserved word conflicts.
+	 *
+	 * @param   mixed  $name  The identifier name to wrap in quotes, or an array of identifier names to wrap in quotes.
+	 * 							Each type supports dot-notation name.
+	 * @param   mixed  $as    The AS query part associated to $name. It can be string or array, in latter case it has to be
+	 * 							same length of $name; if is null there will not be any AS part for string or array element.
+	 */
+	public function quoteName($name, $as = null)
+	{
+		if (is_string($name))
+		{
+			$quotedName = $this->quoteNameStr(explode('.', $name));
+
+			$quotedAs = '';
+			if (!is_null($as))
+			{
+				settype($as, 'array');
+				$quotedAs .= ' AS ' . $this->quoteNameStr($as);
+			}
+
+			return $quotedName . $quotedAs;
+		}
+		else
+		{
+			$fin = array();
+
+			if (is_null($as))
+			{
+				foreach ($name as $str)
+				{
+					$fin[] = $this->quoteName($str);
+				}
+			}
+			elseif (is_array($name) && (count($name) == count($as)))
+			{
+				for ($i = 0; $i < count($name); $i++)
+				{
+					$fin[] = $this->quoteName($name[$i], $as[$i]);
+				}
+			}
+
+			return $fin;
+		}
+	}
+
+	/**
+	 * Quote strings coming from quoteName call.
+	 *
+	 * @param   array  $strArr  Array of strings coming from quoteName dot-explosion.
+	 *
+	 * @return  string  Dot-imploded string of quoted parts.
+	 */
+	protected function quoteNameStr($strArr)
+	{
+		$parts = array();
+		$q = $this->nameQuote;
+
+		foreach ($strArr as $part)
+		{
+			if (is_null($part))
+			{
+				continue;
+			}
+
+			if (strlen($q) == 1)
+			{
+				$parts[] = $q . $part . $q;
+			}
+			else
+			{
+				$parts[] = $q{0} . $part . $q{1};
+			}
+		}
+
+		return implode('.', $parts);
+	}
+
+	/**
+	 * This function replaces a string identifier <var>$prefix</var> with the string held is the
+	 * <var>tablePrefix</var> class variable.
+	 *
+	 * @param   string  $sql     The SQL statement to prepare.
+	 * @param   string  $prefix  The common table prefix.
+	 *
+	 * @return  string  The processed SQL statement.
+	 */
+	public function replacePrefix($sql, $prefix = '#__')
+	{
+		// Initialize variables.
+		$escaped = false;
+		$startPos = 0;
+		$quoteChar = '';
+		$literal = '';
+
+		$sql = trim($sql);
+		$n = strlen($sql);
+
+		while ($startPos < $n)
+		{
+			$ip = strpos($sql, $prefix, $startPos);
+			if ($ip === false)
+			{
+				break;
+			}
+
+			$j = strpos($sql, "'", $startPos);
+			$k = strpos($sql, '"', $startPos);
+			if (($k !== false) && (($k < $j) || ($j === false)))
+			{
+				$quoteChar = '"';
+				$j = $k;
+			}
+			else
+			{
+				$quoteChar = "'";
+			}
+
+			if ($j === false)
+			{
+				$j = $n;
+			}
+
+			$literal .= str_replace($prefix, $this->tablePrefix, substr($sql, $startPos, $j - $startPos));
+			$startPos = $j;
+
+			$j = $startPos + 1;
+
+			if ($j >= $n)
+			{
+				break;
+			}
+
+			// quote comes first, find end of quote
+			while (true)
+			{
+				$k = strpos($sql, $quoteChar, $j);
+				$escaped = false;
+				if ($k === false)
+				{
+					break;
+				}
+				$l = $k - 1;
+				while ($l >= 0 && $sql{$l} == '\\')
+				{
+					$l--;
+					$escaped = !$escaped;
+				}
+				if ($escaped)
+				{
+					$j = $k + 1;
+					continue;
+				}
+				break;
+			}
+			if ($k === false)
+			{
+				// error in the query - no end quote; ignore it
+				break;
+			}
+			$literal .= substr($sql, $startPos, $k - $startPos + 1);
+			$startPos = $k + 1;
+		}
+		if ($startPos < $n)
+		{
+			$literal .= substr($sql, $startPos, $n - $startPos);
+		}
+
+		return $literal;
+	}
+
+	/**
+	 * Renames a table in the database.
+	 *
+	 * @param   string  $oldTable  The name of the table to be renamed
+	 * @param   string  $newTable  The new name for the table.
+	 * @param   string  $backup    Table prefix
+	 * @param   string  $prefix    For the table - used to rename constraints in non-mysql databases
+	 *
+	 * @return  AEAbstractDriver  Returns this object to support chaining.
+	 */
+	public abstract function renameTable($oldTable, $newTable, $backup = null, $prefix = null);
+
+	/**
+	 * Select a database for use.
+	 *
+	 * @param   string  $database  The name of the database to select for use.
+	 *
+	 * @return  boolean  True if the database was successfully selected.
+	 */
+	abstract public function select($database);
+
+	/**
+	 * Sets the SQL statement string for later execution.
+	 *
+	 * @param   mixed    $query   The SQL statement to set either as a AEAbstractQuery object or a string.
+	 * @param   integer  $offset  The affected row offset to set.
+	 * @param   integer  $limit   The maximum affected rows to set.
+	 *
+	 * @return  AEAbstractDriver  This object to support method chaining.
+	 */
+	public function setQuery($query, $offset = 0, $limit = 0)
+	{
+		$this->sql = $query;
+		$this->limit = (int) $limit;
+		$this->offset = (int) $offset;
+
+		return $this;
+	}
+
+	/**
+	 * Set the connection to use UTF-8 character encoding.
+	 *
+	 * @return  boolean  True on success.
 	 */
 	abstract public function setUTF();
 
 	/**
-	 * Get the error number
-	 * @return int The error number for the most recent query
+	 * Method to commit a transaction.
+	 *
+	 * @return  void
 	 */
-	public final function getErrorNum() {
-		return $this->errorNum;
+	abstract public function transactionCommit();
+
+	/**
+	 * Method to roll back a transaction.
+	 *
+	 * @return  void
+	 */
+	abstract public function transactionRollback();
+
+	/**
+	 * Method to initialize a transaction.
+	 *
+	 * @return  void
+	 */
+	abstract public function transactionStart();
+
+	/**
+	 * Method to truncate a table.
+	 *
+	 * @param   string  $table  The table to truncate
+	 *
+	 * @return  void
+	 */
+	public function truncateTable($table)
+	{
+		$this->setQuery('TRUNCATE TABLE ' . $this->quoteName($table));
+		$this->query();
 	}
 
+	/**
+	 * Updates a row in a table based on an object's properties.
+	 *
+	 * @param   string   $table    The name of the database table to update.
+	 * @param   object   &$object  A reference to an object whose public properties match the table fields.
+	 * @param   string   $key      The name of the primary key.
+	 * @param   boolean  $nulls    True to update null fields or false to ignore them.
+	 *
+	 * @return  boolean  True on success.
+	 */
+	public function updateObject($table, &$object, $key, $nulls = false)
+	{
+		// Initialise variables.
+		$fields = array();
+		$where = '';
+
+		// Create the base update statement.
+		$statement = 'UPDATE ' . $this->quoteName($table) . ' SET %s WHERE %s';
+
+		// Iterate over the object variables to build the query fields/value pairs.
+		foreach (get_object_vars($object) as $k => $v)
+		{
+			// Only process scalars that are not internal fields.
+			if (is_array($v) or is_object($v) or $k[0] == '_')
+			{
+				continue;
+			}
+
+			// Set the primary key to the WHERE clause instead of a field to update.
+			if ($k == $key)
+			{
+				$where = $this->quoteName($k) . '=' . $this->quote($v);
+				continue;
+			}
+
+			// Prepare and sanitize the fields and values for the database query.
+			if ($v === null)
+			{
+				// If the value is null and we want to update nulls then set it.
+				if ($nulls)
+				{
+					$val = 'NULL';
+				}
+				// If the value is null and we do not want to update nulls then ignore this field.
+				else
+				{
+					continue;
+				}
+			}
+			// The field is not null so we prep it for update.
+			else
+			{
+				$val = $this->quote($v);
+			}
+
+			// Add the field to be updated.
+			$fields[] = $this->quoteName($k) . '=' . $val;
+		}
+
+		// We don't have any fields to update.
+		if (empty($fields))
+		{
+			return true;
+		}
+
+		// Set the query and execute the update.
+		$this->setQuery(sprintf($statement, implode(",", $fields), $where));
+		return $this->query();
+	}
+
+	/**
+	 * Unlocks tables in the database.
+	 *
+	 * @return  AEAbstractDriver  Returns this object to support chaining.
+	 */
+	public abstract function unlockTables();
+	
 	/**
 	 * Get the error message
 	 * @return string The error message for the most recent query
@@ -147,427 +1151,72 @@ abstract class AEAbstractDriver extends AEAbstractObject
 	}
 
 	/**
-	 * Get a database escaped string
-	 * @param	string	The string to be escaped
-	 * @param	bool	Optional parameter to provide extra escaping
-	 * @return	string
+	 * Get the error number
+	 * @return int The error number for the most recent query
 	 */
-	abstract public function getEscaped( $text, $extra = false );
-
-	/**
-	 * Quote an identifier name (field, table, etc)
-	 * @param	string	The name
-	 * @return	string	The quoted name
-	 */
-	public final function nameQuote( $s )
-	{
-		// Only quote if the name is not using dot-notation
-		if (strpos( $s, '.' ) === false)
-		{
-			$q = $this->nameQuote;
-			if (strlen( $q ) == 1) {
-				return $q . $s . $q;
-			} else {
-				return $q{0} . $s . $q{1};
-			}
-		}
-		else {
-			return $s;
-		}
+	public final function getErrorNum() {
+		return $this->errorNum;
 	}
 
 	/**
-	 * Get the database table prefix
-	 * @return string The database prefix
-	 */
-	public final function getPrefix()
-	{
-		return $this->table_prefix;
-	}
-
-	/**
-	 * Sets the SQL query string for later execution.
-	 * This function replaces a string identifier <var>$prefix</var> with the
-	 * string held is the <var>table_prefix</var> class variable.
-	 * @param string The SQL query
-	 * @param string The offset to start selection
-	 * @param string The number of results to return
-	 * @param string The common table prefix
-	 */
-	public function setQuery( $sql, $offset = 0, $limit = 0, $prefix='#__' )
-	{
-		$this->sql		= $this->replacePrefix( $sql, $prefix );
-		$this->limit	= (int) $limit;
-		$this->offset	= (int) $offset;
-		$this->cursor	= null;
-	}
-
-	/**
-	 * This function replaces a string identifier <var>$prefix</var> with the
-	 * string held is the <var>table_prefix</var> class variable.
-	 * @access public
-	 * @param string The SQL query
-	 * @param string The common table prefix
-	 */
-	public final function replacePrefix( $sql, $prefix='#__' )
-	{
-		$sql = trim( $sql );
-
-		$escaped = false;
-		$quoteChar = '';
-
-		$n = strlen( $sql );
-
-		$startPos = 0;
-		$literal = '';
-		while ($startPos < $n) {
-			$ip = strpos($sql, $prefix, $startPos);
-			if ($ip === false) {
-				break;
-			}
-
-			$j = strpos( $sql, "'", $startPos );
-			$k = strpos( $sql, '"', $startPos );
-			if (($k !== FALSE) && (($k < $j) || ($j === FALSE))) {
-				$quoteChar	= '"';
-				$j			= $k;
-			} else {
-				$quoteChar	= "'";
-			}
-
-			if ($j === false) {
-				$j = $n;
-			}
-
-			$literal .= str_replace( $prefix, $this->table_prefix,substr( $sql, $startPos, $j - $startPos ) );
-			$startPos = $j;
-
-			$j = $startPos + 1;
-
-			if ($j >= $n) {
-				break;
-			}
-
-			// quote comes first, find end of quote
-			while (TRUE) {
-				$k = strpos( $sql, $quoteChar, $j );
-				$escaped = false;
-				if ($k === false) {
-					break;
-				}
-				$l = $k - 1;
-				while ($l >= 0 && $sql{$l} == '\\') {
-					$l--;
-					$escaped = !$escaped;
-				}
-				if ($escaped) {
-					$j	= $k+1;
-					continue;
-				}
-				break;
-			}
-			if ($k === FALSE) {
-				// error in the query - no end quote; ignore it
-				break;
-			}
-			$literal .= substr( $sql, $startPos, $k - $startPos + 1 );
-			$startPos = $k+1;
-		}
-		if ($startPos < $n) {
-			$literal .= substr( $sql, $startPos, $n - $startPos );
-		}
-		return $literal;
-	}
-
-	/**
-	 * Get the active query
-	 * @return string The current value of the internal SQL vairable
-	 */
-	public function getQuery()
-	{
-		return $this->sql;
-	}
-
-	/**
-	 * Execute the query
-	 * @return mixed A database resource if successful, FALSE if not.
-	 */
-	abstract public function query();
-
-	/**
-	 * This method loads the first field of the first row returned by the query.
-	 * @return mixed The value returned in the query or null if the query failed.
-	 */
-	abstract public function loadResult();
-
-	/**
-	 * Load an array of single field results into an array
-	 * @return mixed An array, or null if query failed
-	 */
-	abstract public function loadResultArray($numinarray = 0);
-
-	/**
-	 * Fetch a result row as an associative array
-	 * @param bool $free_cursor If true, frees the cursor after returning the result
-	 * @return array An associative array, null if query failed or false on end of data
-	 */
-	abstract public function loadAssoc($free_cursor = false);
-
-	/**
-	 * Load a associactive list of database rows
-	 * @param string The field name of a primary key
-	 * @return array If key is empty as sequential list of returned records.
-	 */
-	abstract public function loadAssocList( $key=null );
-
-	/**
-	 * Load a list of database rows (numeric column indexing)
-	 * If <var>key</var> is not empty then the returned array is indexed by the value
-	 * the database key.  Returns <var>null</var> if the query fails.
-	 * @param string The field name of a primary key
-	 * @return array
-	 */
-	abstract public function loadRowList( $key=null );
-
-	/**
-	 * Get the version of the database connector
-	 * @return string The database server's version number
-	 */
-	abstract public function getVersion();
-
-	/**
-	 * Get a quoted database escaped string
+	 * Method to escape a string for usage in an SQL statement.
 	 *
-	 * @param	string	A string
-	 * @param	boolean	Default true to escape string, false to leave the string unchanged
-	 * @return	string
-	 */
-	public final function Quote( $text, $escaped = true )
-	{
-		return '\''.($escaped ? $this->getEscaped( $text ) : $text).'\'';
-	}
-
-	/**
-	 * Returns the last INSERT auto_increase column's value
-	 * @return int
-	 */
-	abstract public function insertid();
-
-	/**
-	 * Returns an array with the names of tables, views, procedures, functions and triggers
-	 * in the database. The table names are the keys of the tables, whereas the value is
-	 * the type of each element: table, view, merge, temp, procedure, function or trigger.
-	 * Note that merge are MRG_MYISAM tables and temp is non-permanent data table, usually
-	 * set up as temporary, black hole or federated tables. These two types should never,
-	 * ever, have their data dumped in the SQL dump file.
+	 * @param   string   $text   The string to be escaped.
+	 * @param   boolean  $extra  Optional parameter to provide extra escaping.
 	 *
-	 * @param bool $abstract Return abstract or normal names? Defaults to true (abstract names)
-	 * @return array
+	 * @return  string  The escaped string.
 	 */
-	public function getTables($abstract = true)
+	public function getEscaped($text, $extra = false)
 	{
-		static $tables = array();
-
-		if(!empty($tables)) return $tables;
-
-		$sql = "SHOW TABLES";
-		$this->setQuery($sql);
-		$all_tables = $this->loadResultArray();
-
-		if(!empty($all_tables))
-		{
-			// Start by adding tables and views to the list
-			foreach($all_tables as $table_name)
-			{
-				if($abstract) $table_name = $this->getAbstract($table_name);
-				$tables[$table_name] = 'table';
-			}
-
-			// Loop all metadatas
-			foreach($all_tables as $table_metadata)
-			{
-				$table_name = $table_metadata;
-				$table_abstract = $this->getAbstract($table_metadata);
-				$type = 'table';
-
-				if($abstract) $table_metadata = $table_abstract;
-
-				$create = $this->get_create($table_abstract, $table_name, $type);
-				// Scan for the table engine.
-				$engine = null; // So that we detect VIEWs correctly
-
-				if( $type == 'table' )
-				{
-					$engine = 'MyISAM'; // So that even with MySQL 4 hosts we don't screw this up
-					$engine_keys = array('ENGINE=', 'TYPE=');
-					foreach($engine_keys as $engine_key)
-					{
-						$start_pos = strrpos($create, $engine_key);
-						if( $start_pos !== false )
-						{
-							// Advance the start position just after the position of the ENGINE keyword
-							$start_pos += strlen($engine_key);
-							// Try to locate the space after the engine type
-							$end_pos = stripos($create, ' ', $start_pos);
-							if( $end_pos === false)
-							{
-								// Uh... maybe it ends with ENGINE=EngineType;
-								$end_pos = stripos($create, ';');
-							}
-							if( $end_pos !== '')
-							{
-								// Grab the string
-								$engine = substr( $create, $start_pos, $end_pos - $start_pos );
-							}
-						}
-					}
-					$engine = strtoupper($engine);
-				}
-
-				switch($engine)
-				{
-					// Views -- FIX: They are detected based on their CREATE STATEMENT
-					case null:
-						$tables[$table_metadata] = 'view';
-						break;
-
-					// Merge tables
-					case 'MRG_MYISAM':
-						$tables[$table_metadata] = 'merge';
-						break;
-
-					// Tables whose data we do not back up (memory, federated and can-have-no-data tables)
-					case 'MEMORY':
-					case 'EXAMPLE':
-					case 'BLACKHOLE':
-					case 'FEDERATED':
-						$tables[$table_metadata] = 'temp';
-						break;
-
-					// Normal tables
-					default:
-						break;
-				} // switch
-			} // foreach
-		} // if !empty
-
-		// If we have MySQL > 5.0 add the list of stored procedures, stored functions
-		// and triggers
-		$registry = AEFactory::getConfiguration();
-		$enable_entities = $registry->get('engine.dump.native.advanced_entitites', true);
-		$compatibility = $registry->get('engine.dump.common.mysql_compatibility', 0);
-		$verParts = explode( '.', $this->getVersion() );
-		if ( ($verParts[0] == 5) && $enable_entities && ($compatibility == 0) )
-		{
-			// 1. Stored procedures
-			$sql = "SHOW PROCEDURE STATUS WHERE ".$this->nameQuote('Db') ."=".$this->Quote($this->database);
-			$this->setQuery( $sql );
-			$all_entries = $this->loadResultArray(1);
-			if(is_array($all_entries))
-			if(count($all_entries))
-			foreach( $all_entries as $table_name )
-			{
-				if($abstract) $table_name = $this->getAbstract($table_name);
-				$tables[$table_name] = 'procedure';
-			}
-
-			// 2. Stored functions
-			$sql = "SHOW FUNCTION STATUS WHERE ".$this->nameQuote('Db') ."=".$this->Quote($this->database);
-			$this->setQuery( $sql );
-			$all_entries = $this->loadResultArray(1);
-			// If we have filters, make sure the tables pass the filtering
-			if(is_array($all_entries))
-			if(count($all_entries))
-			foreach( $all_entries as $table_name )
-			{
-				if($abstract) $table_name = $this->getAbstract($table_name);
-				$tables[$table_name] = 'function';
-			}
-
-			// 3. Triggers
-			$sql = "SHOW TRIGGERS";
-			$this->setQuery( $sql );
-			$all_entries = $this->loadResultArray();
-			// If we have filters, make sure the tables pass the filtering
-			if(is_array($all_entries))
-			if(count($all_entries))
-			foreach( $all_entries as $table_name )
-			{
-				if($abstract) $table_name = $this->getAbstract($table_name);
-				$tables[$table_name] = 'trigger';
-			}
-
-		}
-
-		return $tables;
+		return $this->escape($text, $extra);
 	}
 
 	/**
-	 * Gets the CREATE TABLE command for a given table/view
-	 * @param string $table_abstract The abstracted name of the entity
-	 * @param string $table_name The name of the table
-	 * @param string $type The type of the entity to scan. If it's found to differ, the correct type is returned.
-	 * @return string The CREATE command, w/out newlines
+	 * Retrieves field information about the given tables.
+	 *
+	 * @param   mixed    $tables    A table name or a list of table names.
+	 * @param   boolean  $typeOnly  True to only return field types.
+	 *
+	 * @return  array  An array of fields by table.
 	 */
-	protected function get_create( $table_abstract, $table_name, &$type )
+	public function getTableFields($tables, $typeOnly = true)
 	{
-		$sql = "SHOW CREATE TABLE `$table_abstract`";
-		$this->setQuery( $sql );
-		$temp = $this->loadRowList();
-		$table_sql = $temp[0][1];
-		unset( $temp );
+		$results = array();
 
-		// Smart table type detection
-		if( in_array($type, array('table','merge','view')) )
+		settype($tables, 'array');
+
+		foreach ($tables as $table)
 		{
-			// Check for CREATE VIEW
-			$pattern = '/^CREATE(.*) VIEW (.*)/i';
-			$result = preg_match($pattern, $table_sql);
-			if($result === 1)
-			{
-				// This is a view.
-				$type = 'view';
-			}
-			else
-			{
-				// This is a table.
-				$type = 'table';
-			}
-
-			// Is it a VIEW but we don't have SHOW VIEW privileges?
-			if(empty($table_sql)) $type = 'view';
+			$results[$table] = $this->getTableColumns($table, $typeOnly);
 		}
 
-		$table_sql = str_replace( $table_name , $table_abstract, $table_sql );
+		return $results;
+	}
 
-		// Replace newlines with spaces
-		$table_sql = str_replace( "\n", " ", $table_sql ) . ";\n";
-		$table_sql = str_replace( "\r", " ", $table_sql );
-		$table_sql = str_replace( "\t", " ", $table_sql );
+	/**
+	 * Method to get an array of values from the <var>$offset</var> field in each row of the result set from
+	 * the database query.
+	 *
+	 * @param   integer  $offset  The row offset to use to build the result array.
+	 *
+	 * @return  mixed    The return value or null if the query failed.
+	 */
+	public function loadResultArray($offset = 0)
+	{
+		return $this->loadColumn($offset);
+	}
 
-		// Post-process CREATE VIEW
-		if($type == 'view')
-		{
-			$pos_view = strpos($table_sql, ' VIEW ');
-
-			if($pos_view > 7 )
-			{
-				// Only post process if there are view properties between the CREATE and VIEW keywords
-				$propstring = substr($table_sql, 7, $pos_view - 7); // Properties string
-				// Fetch the ALGORITHM={UNDEFINED | MERGE | TEMPTABLE} keyword
-				$algostring = '';
-				$algo_start = strpos($propstring, 'ALGORITHM=');
-				if($algo_start !== false)
-				{
-					$algo_end = strpos($propstring, ' ', $algo_start);
-					$algostring = substr($propstring, $algo_start, $algo_end - $algo_start + 1);
-				}
-				// Create our modified create statement
-				$table_sql = 'CREATE OR REPLACE '.$algostring.substr($table_sql, $pos_view);
-			}
-		}
-
-		return $table_sql;
+	/**
+	 * Wrap an SQL statement identifier name such as column, table or database names in quotes to prevent injection
+	 * risks and reserved word conflicts.
+	 *
+	 * @param   string  $name  The identifier name to wrap in quotes.
+	 *
+	 * @return  string  The quote wrapped name.
+	 */
+	public function nameQuote($name)
+	{
+		return $this->quoteName($name);
 	}
 
 	/**
@@ -604,5 +1253,9 @@ abstract class AEAbstractDriver extends AEAbstractObject
 				break;
 		}
 	}
-
+	
+	public final function getDriverType()
+	{
+		return $this->driverType;
+	}
 }

@@ -5,7 +5,7 @@
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU GPL version 3 or, at your option, any later version
  * @package akeebaengine
- * @version $Id: timer.php 495 2011-03-14 16:12:11Z nikosdion $
+ *
  */
 
 // Protection against direct access

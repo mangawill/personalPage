@@ -5,7 +5,7 @@
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU GPL version 3 or, at your option, any later version
  * @package akeebaengine
- * @version $Id: platform.php 900 2011-09-11 07:10:50Z nikosdion $
+ *
  */
 
 abstract class AEPlatformAbstract implements AEPlatformInterface
@@ -62,11 +62,10 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 		// Encrypt the registry dump if required
 		$dump_profile = AEUtilSecuresettings::encryptSettings($dump_profile);
 
-		// Write the local profile's configuration data
-		$sql = 'UPDATE '.$db->nameQuote($this->tableNameProfiles).' SET '.
-			$db->nameQuote('configuration').' = '.$db->Quote($dump_profile)
-			.' WHERE '.
-			$db->nameQuote('id').' = '.	$db->Quote($profile_id);
+		$sql = $db->getQuery(true)
+			->update($db->nq($this->tableNameProfiles))
+			->set($db->nq('configuration').' = '.$db->q($dump_profile))
+			->where($db->nq('id').' = '.	$db->q($profile_id));
 		$db->setQuery($sql);
 		if($db->query() === false)
 		{
@@ -98,9 +97,11 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 		$registry->reset();
 
 		// Load the INI format local configuration dump off the database
-		$sql = "SELECT ".$db->nameQuote('configuration').' FROM '.$db->nameQuote($this->tableNameProfiles)
-		.' WHERE '.
-		$db->nameQuote('id').' = '.$db->Quote($profile_id);
+		$sql = $db->getQuery(true)
+			->select($db->nq('configuration'))
+			->from($db->nq($this->tableNameProfiles))
+			->where($db->nq('id').' = '.$db->q($profile_id));
+
 		$db->setQuery($sql);
 		$ini_data_local = $db->loadResult();
 		if( empty($ini_data_local) || is_null($ini_data_local) )
@@ -192,6 +193,11 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 		return '';
 	}
 	
+	public function get_site_name()
+	{
+		return '';
+	}
+	
 	public function get_default_database_driver( $use_platform = true )
 	{
 		return 'AEDriverMysqli';
@@ -214,15 +220,17 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 		if( is_null($id) )
 		{
 			// Create a new record
-			$sql_fields = '';
+			$sql_fields = array();
 			$sql_values = '';
 			foreach($data as $key => $value)
 			{
-				$sql_fields .= ( !empty($sql_fields) ? ',' : '' ) . $db->nameQuote($key);
+				$sql_fields[] = $db->nq($key);
 				$sql_values .= ( !empty($sql_values) ? ',' : '' ) . $db->Quote($value);
 			}
-			$sql = 'INSERT INTO '.$db->nameQuote($this->tableNameStats).' ('.$sql_fields.') VALUES ('.
-				$sql_values.')';
+			$sql = $db->getQuery(true)
+				->insert($db->nameQuote($this->tableNameStats))
+				->columns($sql_fields)
+				->values($sql_values);
 			$db->setQuery($sql);
 			if($db->query() == false)
 			{
@@ -233,15 +241,17 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 		}
 		else
 		{
-			$sql_set = '';
+			$sql_set = array();
 			foreach($data as $key => $value)
 			{
 				if($key == 'id') continue;
-				$sql_set .= ( !empty($sql_set) ? ',' : '' );
-				$sql_set .= $db->nameQuote($key).'='.$db->Quote($value);
+				
+				$sql_set[] = $db->nq($key).'='.$db->q($value);
 			}
-			$sql = 'UPDATE '.$db->nameQuote($this->tableNameStats).' SET '.$sql_set.' WHERE '.
-				$db->nameQuote('id').'='.$db->Quote($id);
+			$sql = $db->getQuery(true)
+				->update($db->nq($this->tableNameStats))
+				->set($sql_set)
+				->where($db->nq('id').'='.$db->q($id));
 			$db->setQuery($sql);
 			$ret = $db->query();
 
@@ -259,8 +269,10 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 	public function get_statistics($id)
 	{
 		$db = AEFactory::getDatabase( $this->get_platform_database_options() );
-		$query = 'SELECT * FROM '.$db->nameQuote($this->tableNameStats).' WHERE '.
-			$db->nameQuote('id').' = '.$db->Quote($id);
+		$query = $db->getQuery(true)
+			->select('*')
+			->from($db->nq($this->tableNameStats))
+			->where($db->nq('id').' = '.$db->q($id));
 		$db->setQuery($query);
 		return $db->loadAssoc(true);
 	}
@@ -274,8 +286,9 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 	public function delete_statistics($id)
 	{
 		$db = AEFactory::getDatabase( $this->get_platform_database_options() );
-		$query = 'DELETE FROM '.$db->nameQuote($this->tableNameStats).' WHERE '.
-			$db->nameQuote('id').' = '.$db->Quote($id);
+		$query = $db->getQuery(true)
+			->delete($db->nq($this->tableNameStats))
+			->where($db->nq('id').' = '.$db->q($id));
 		$db->setQuery($query);
 		$result = $db->query();
 		return !($result === false);
@@ -305,7 +318,8 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 		
 		$db = AEFactory::getDatabase( $this->get_platform_database_options() );
 		
-		$whereArray = array();
+		$query = $db->getQuery(true);
+		
 		if(!empty($config->filters))
 		{
 			if(is_array($config->filters)) {
@@ -313,31 +327,26 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 					// Parse the filters array
 					foreach($config->filters as $f)
 					{
-						$clause = $db->nameQuote($f['field']);
+						$clause = $db->nq($f['field']);
 						if(array_key_exists('operand', $f)) {
 							$clause .= ' '.strtoupper($f['operand']).' ';
 						} else {
 							$clause .= ' = ';
 						}
 						if($f['operand'] == 'BETWEEN') {
-							$clause .= $db->Quote($f['value']) . ' AND ' . $db->Quote($f['value2']);
+							$clause .= $db->q($f['value']) . ' AND ' . $db->q($f['value2']);
 						} elseif($f['operand'] == 'LIKE') {
 							$clause .= '\'%'.$db->getEscaped($f['value']).'%\'';
 						} else {
-							$clause .= $db->Quote($f['value']);
+							$clause .= $db->q($f['value']);
 						}
-						$whereArray[] = "($clause)";
+						$query->where($clause);
 					}
 				}
 			} else {
 				// Legacy mode: profile ID given
-				$whereArray[] = '('.$db->nameQuote('profile_id').' = '.$db->Quote($config->filters).')';
+				$query->where($db->nq('profile_id').' = '.$db->q($config->filters));
 			}
-		}
-		if(empty($whereArray)) {
-			$where = '';
-		} else {
-			$where = implode(' AND ', $whereArray);
 		}
 		
 		if(empty($config->order) || !is_array($config->order)) {
@@ -347,9 +356,10 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 			);
 		}
 		
-		$query = "SELECT * FROM ".$db->nameQuote($this->tableNameStats).
-			(empty($where) ? '' : ' WHERE '.$where).
-			" ORDER BY ".$db->nameQuote($config->order['by'])." ".strtoupper($config->order['order']);
+		$query->select('*')
+			->from($db->nq($this->tableNameStats))
+			->order($db->nq($config->order['by'])." ".strtoupper($config->order['order']));
+		
 		$db->setQuery($query, $config->limitstart, $config->limit);
 
 		$list = $db->loadAssocList();
@@ -368,7 +378,8 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 	{
 		$db = AEFactory::getDatabase( $this->get_platform_database_options() );
 		
-		$whereArray = array();
+		$query = $db->getQuery(true);
+		
 		if(!empty($filters))
 		{
 			if(is_array($filters)) {
@@ -383,27 +394,23 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 							$clause .= ' = ';
 						}
 						if($f['operand'] == 'BETWEEN') {
-							$clause .= $db->Quote($f['value']) . ' AND ' . $db->Quote($f['value2']);
+							$clause .= $db->q($f['value']) . ' AND ' . $db->q($f['value2']);
 						} elseif($f['operand'] == 'LIKE') {
 							$clause .= '\'%'.$db->getEscaped($f['value']).'%\'';
 						} else {
-							$clause .= $db->Quote($f['value']);
+							$clause .= $db->q($f['value']);
 						}
-						$whereArray[] = "($clause)";
+						$query->where($clause);
 					}
 				}
 			} else {
 				// Legacy mode: profile ID given
-				$whereArray[] = '('.$db->nameQuote('profile_id').' = '.$db->Quote($filters).')';
+				$query->where($db->nq('profile_id').' = '.$db->q($filters));
 			}
 		}
-		if(empty($whereArray)) {
-			$where = '';
-		} else {
-			$where = implode(' AND ', $whereArray);
-		}
-		
-		$query = 'SELECT COUNT(*) FROM '.$db->nameQuote($this->tableNameStats). (empty($where) ? '' : ' WHERE '.$where);
+
+		$query->select('COUNT(*)')
+			->from($db->nameQuote($this->tableNameStats));
 		$db->setQuery($query);
 		return $db->loadResult();
 	}
@@ -415,11 +422,13 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 	public function get_running_backups($tag = null)
 	{
 		$db = AEFactory::getDatabase( $this->get_platform_database_options() );
-		$query = "SELECT * FROM ".$db->nameQuote($this->tableNameStats) .
-			' WHERE ('.$db->nameQuote('status').' = '.$db->Quote('run').') AND '.
-			'NOT('.$db->nameQuote('archivename').' = '.$db->Quote('').')';
+		$query = $db->getQuery(true)
+			->select('*')
+			->from($db->nq($this->tableNameStats))
+			->where($db->nq('status').' = '.$db->q('run'))
+			->where(' NOT '.$db->nq('archivename').' = '.$db->q(''));
 		if(!empty($tag)) {
-			$query .= ' AND ('.$db->nameQuote('origin').'='.$db->Quote($tag).')';
+			$query->where($db->nq('origin').'='.$db->q($tag));
 		}
 		$db->setQuery($query);
 		return $db->loadAssocList();
@@ -438,21 +447,26 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 	public function &get_valid_backup_records($useprofile = false, $tagFilters = array(), $ordering = 'DESC')
 	{
 		$db = AEFactory::getDatabase( $this->get_platform_database_options() );
+		
+		$query2 = $db->getQuery(true)
+			->select('MAX('.$db->nq('id').') AS '.$db->nq('id'))
+			->from($db->nq($this->tableNameStats))
+			->where($db->nq('status').' = '.$db->q('complete'))
+			->group($db->nq('absolute_path'));
+		;
+		
+		$query = $db->getQuery(true)
+			->select($db->nq('id'))
+			->from($db->nq($this->tableNameStats))
+			->where($db->nq('filesexist').' = '.$db->q(1))
+			->where($db->nq('id').' IN ('.$query2.')')
+			->where('NOT '.$db->nq('absolute_path').' = '.$db->q(''))
+			->order($db->nq('id').' '.$ordering);
 
-		$query =
-			'SELECT '.$db->nameQuote('id').' FROM '.$db->nameQuote($this->tableNameStats).
-			' WHERE '.
-			'`filesexist` = 1 AND'.
-			$db->nameQuote('id').' IN ('.
-				'SELECT MAX('.$db->nameQuote('id').') AS '.$db->nameQuote('id').
-				' FROM '.$db->nameQuote($this->tableNameStats).' WHERE '.
-				$db->nameQuote('status').' = '.$db->Quote('complete').' GROUP BY '.
-				$db->nameQuote('absolute_path').
-			') AND NOT ('.$db->nameQuote('absolute_path').' = '.$db->Quote('').')';
 		if($useprofile)
 		{
 			$profile_id = $this->get_active_profile();
-			$query .= " AND (".$db->nameQuote('profile_id')." = ".$db->Quote($profile_id).")";
+			$query->where($db->nq('profile_id')." = ".$db->q($profile_id));
 		}
 		if(!empty($tagFilters)) {
 			$operator = '';
@@ -464,14 +478,14 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 			}
 			
 			$quotedTags = array();
-			foreach($tagFilters as $tag) $quotedTags[] = $db->Quote($tag);
+			foreach($tagFilters as $tag) $quotedTags[] = $db->q($tag);
 			$filter = implode(', ', $quotedTags);
 			unset($quotedTags);
-			$query .= " AND $operator (".$db->nameQuote('tag').' IN ('.$filter.'))';
+			$query->where($operator.' '.$db->nameQuote('tag').' IN ('.$filter.')');
 		}
-		$query .= ' ORDER BY '.$db->nameQuote('id').' '.$ordering;
 		$db->setQuery($query);
 		$array = $db->loadResultArray();
+
 		return $array;
 	}
 
@@ -484,10 +498,12 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 		AEUtilLogger::WriteLog(_AE_LOG_DEBUG,"Removing any old records with $archivename filename");
 		$db = AEFactory::getDatabase( $this->get_platform_database_options() );
 
-		$query = 'SELECT '.$db->nameQuote('id').' FROM '.$db->nameQuote($this->tableNameStats).
-			' WHERE '.
-			$db->nameQuote('archivename').' = '.$db->Quote($archivename).
-			' ORDER BY '.$db->nameQuote('id').' DESC';
+		$query = $db->getQuery(true)
+			->select($db->nq('id'))
+			->from($db->nq($this->tableNameStats))
+			->where($db->nq('archivename').' = '.$db->q($archivename))
+			->order($db->nq('id').' DESC');
+		
 		$db->setQuery($query);
 		$array = $db->loadResultArray();
 
@@ -513,8 +529,16 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 	{
 		if(empty($ids)) return false;
 		$db = AEFactory::getDatabase( $this->get_platform_database_options() );
-		$list = implode(',', $ids);
-		$sql = 'UPDATE '.$db->nameQuote($this->tableNameStats).' SET `filesexist` = 0 WHERE `id` IN ('.$list.')';
+		$temp = array();
+		foreach($ids as $id) {
+			$temp[] = $db->q($id);
+		}
+		$list = implode(',', $temp);
+		$sql = $db->getQuery(true)
+			->update($db->nq($this->tableNameStats))
+			->set($db->nq('filesexist').' = '.$db->q('0'))
+			->where($db->nq('id').' IN ('.$list.')');
+			;
 		$db->setQuery($sql);
 		return $db->query();
 	}
@@ -538,10 +562,14 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 		if(empty($engine)) return $result;
 		
 		$db = AEFactory::getDatabase( $this->get_platform_database_options() );
-		$sql = 'SELECT * FROM '.$db->nameQuote($this->tableNameStats).' WHERE '.
-			$db->nameQuote('profile_id').' = '.$db->Quote($profile).' AND '.
-			$db->nameQuote('remote_filename').' LIKE \''.$db->getEscaped($engine).'://%\' ORDER BY '.
-			$db->nameQuote('id').' ASC';
+		$sql = $db->getQuery(true)
+			->select('*')
+			->from($db->nq($this->tableNameStats))
+			->where($db->nq('profile_id').' = '.$db->q($profile))
+			->where($db->nq('remote_filename').' LIKE '.$db->q($engine.'://%'))
+			->order($db->nq('id').' ASC')
+		;
+		
 		$db->setQuery($sql);
 		return $db->loadAssocList();
 	}
@@ -557,9 +585,10 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 		$db = AEFactory::getDatabase( $this->get_platform_database_options() );
 
 		// Load the INI format local configuration dump off the database
-		$sql = "SELECT ".$db->nameQuote('filters').' FROM '.$db->nameQuote($this->tableNameProfiles)
-			.' WHERE '.
-			$db->nameQuote('id').' = '.$db->Quote($profile_id);
+		$sql = $db->getQuery(true)
+			->select($db->nq('filters'))
+			->from($db->nq($this->tableNameProfiles))
+			->where($db->nq('id').' = '.$db->q($profile_id));
 		$db->setQuery($sql);
 		$all_filter_data = $db->loadResult();
 
@@ -593,11 +622,10 @@ abstract class AEPlatformAbstract implements AEPlatformInterface
 		$profile_id = $this->get_active_profile();
 		$db = AEFactory::getDatabase( $this->get_platform_database_options() );
 
-		// Load the INI format local configuration dump off the database
-		$sql = "UPDATE ".$db->nameQuote($this->tableNameProfiles).' SET '.
-			$db->nameQuote('filters').'='.$db->Quote(serialize($filter_data))
-			.' WHERE '.
-			$db->nameQuote('id').' = '.$db->Quote($profile_id);
+		$sql = $db->getQuery(true)
+			->update($db->nq($this->tableNameProfiles))
+			->set($db->nq('filters').'='.$db->q(serialize($filter_data)))
+			->where($db->nq('id').' = '.$db->q($profile_id));
 		$db->setQuery($sql);
 		$db->query();
 

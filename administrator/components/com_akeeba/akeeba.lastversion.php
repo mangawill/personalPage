@@ -1,3 +1,3 @@
 <?php
 defined('_JEXEC') or die();
-define('AKEEBA_LASTVERSIONCHECK','3.4.3');
+define('AKEEBA_LASTVERSIONCHECK','3.5.a1');

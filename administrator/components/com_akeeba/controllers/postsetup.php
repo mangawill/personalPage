@@ -3,129 +3,108 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id$
  * @since 3.3.b1
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
+defined('_JEXEC') or die();
 
-// Load framework base classes
-jimport('joomla.application.component.controller');
-
-class AkeebaControllerPostsetup extends JController
+class AkeebaControllerPostsetup extends FOFController
 {
 	public function  __construct($config = array()) {
 		parent::__construct($config);
-		if(AKEEBA_JVERSION=='16')
-		{
-			// Access check, Joomla! 1.6 style.
-			$user = JFactory::getUser();
-			if (!$user->authorise('akeeba.configure', 'com_akeeba')) {
-				$this->setRedirect('index.php?option=com_akeeba');
-				return JError::raiseWarning(403, JText::_('JERROR_ALERTNOAUTHOR'));
-				$this->redirect();
-			}
-		} else {
-			// Custom ACL for Joomla! 1.5
-			$aclModel = JModel::getInstance('Acl','AkeebaModel');
-			if(!$aclModel->authorizeUser('configure')) {
-				$this->setRedirect('index.php?option=com_akeeba');
-				return JError::raiseWarning(403, JText::_('Access Forbidden'));
-				$this->redirect();
-			}
+		// Access check, Joomla! 1.6 style.
+		$user = JFactory::getUser();
+		if (!$user->authorise('core.manage', 'com_akeeba') || !$user->authorise('akeeba.configure', 'com_akeeba')) {
+			$this->setRedirect('index.php?option=com_cpanel');
+			return JError::raiseWarning(403, JText::_('JERROR_ALERTNOAUTHOR'));
+			$this->redirect();
 		}
 	}
 	
-	/**
-	 * Displays the editor page
-	 *
-	 */
-	public function display()
+	public function execute($task)
 	{
-		parent::display();
+		if($task != 'save') {
+			$task = 'browse';
+		}
+		parent::execute($task);
 	}
 	
 	public function save()
 	{
-		$enableSRP = JRequest::getBool('srp', 0);
-		$enableAutoupdate = JRequest::getBool('autoupdate', 0);
-		$runConfwiz = JRequest::getBool('confwiz', 0);
+		$enableSRP = FOFInput::getBool('srp', 0, $this->input);
+		$enableAutoupdate = FOFInput::getBool('autoupdate', 0, $this->input);
+		$runConfwiz = FOFInput::getBool('confwiz', 0, $this->input);
+		$minStability = FOFInput::getCmd('minstability', 'stable', $this->input);
+		
+		if(!in_array($minStability, array('alpha','beta','rc','stable'))) {
+			$minStability = 'stable';
+		}
+		
+		// SRP is only supported on MySQL databases
+		if(!$this->isMySQL()) $enableSRP = false;
 		
 		$db = JFactory::getDBO();
 		
 		if($enableSRP) {
-			if( version_compare( JVERSION, '1.6.0', 'ge' ) ) {
-				$query = "UPDATE #__extensions SET enabled=1 WHERE element='srp' AND folder='system'";
-				$db->setQuery($query);
-				$db->query();
-			} else {
-				$query = "UPDATE #__plugins SET published=1 WHERE element='srp' AND folder='system'";
-				$db->setQuery($query);
-				$db->query();
-			}
+			$query = $db->getQuery(true)
+				->update($db->nq('#__extensions'))
+				->set($db->nq('enabled').' = '.$db->q('1'))
+				->where($db->nq('element').' = '.$db->q('srp'))
+				->where($db->nq('folder').' = '.$db->q('system'));
+			$db->setQuery($query);
+			$db->query();
 		} else {
-			if( version_compare( JVERSION, '1.6.0', 'ge' ) ) {
-				$query = "UPDATE #__extensions SET enabled=0 WHERE element='srp' AND folder='system'";
-				$db->setQuery($query);
-				$db->query();
-			} else {
-				$query = "UPDATE #__plugins SET published=0 WHERE element='srp' AND folder='system'";
-				$db->setQuery($query);
-				$db->query();
-			}
+			$query = $db->getQuery(true)
+				->update($db->nq('#__extensions'))
+				->set($db->nq('enabled').' = '.$db->q('0'))
+				->where($db->nq('element').' = '.$db->q('srp'))
+				->where($db->nq('folder').' = '.$db->q('system'));
+			$db->setQuery($query);
+			$db->query();
 		}
 		
 		if($enableAutoupdate) {
-			if( version_compare( JVERSION, '1.6.0', 'ge' ) ) {
-				$query = "UPDATE #__extensions SET enabled=1 WHERE element='oneclickaction' AND folder='system'";
-				$db->setQuery($query);
-				$db->query();
-				
-				$query = "UPDATE #__extensions SET enabled=1 WHERE element='akeebaupdatecheck' AND folder='system'";
-				$db->setQuery($query);
-				$db->query();
-			} else {
-				$query = "UPDATE #__plugins SET published=1 WHERE element='oneclickaction' AND folder='system'";
-				$db->setQuery($query);
-				$db->query();
-				
-				$query = "UPDATE #__plugins SET published=1 WHERE element='akeebaupdatecheck' AND folder='system'";
-				$db->setQuery($query);
-				$db->query();
-			}
+			$query = $db->getQuery(true)
+				->update($db->nq('#__extensions'))
+				->set($db->nq('enabled').' = '.$db->q('1'))
+				->where($db->nq('element').' = '.$db->q('oneclickaction'))
+				->where($db->nq('folder').' = '.$db->q('system'));
+			$db->setQuery($query);
+			$db->query();
+
+			$query = $db->getQuery(true)
+				->update($db->nq('#__extensions'))
+				->set($db->nq('enabled').' = '.$db->q('1'))
+				->where($db->nq('element').' = '.$db->q('akeebaupdatecheck'))
+				->where($db->nq('folder').' = '.$db->q('system'));
+			$db->setQuery($query);
+			$db->query();
 		} else {
-			if( version_compare( JVERSION, '1.6.0', 'ge' ) ) {
-				$query = "UPDATE #__extensions SET enabled=0 WHERE element='oneclickaction' AND folder='system'";
-				$db->setQuery($query);
-				$db->query();
-				
-				$query = "UPDATE #__extensions SET enabled=0 WHERE element='akeebaupdatecheck' AND folder='system'";
-				$db->setQuery($query);
-				$db->query();
-			} else {
-				$query = "UPDATE #__plugins SET published=0 WHERE element='oneclickaction' AND folder='system'";
-				$db->setQuery($query);
-				$db->query();
-				
-				$query = "UPDATE #__plugins SET published=0 WHERE element='akeebaupdatecheck' AND folder='system'";
-				$db->setQuery($query);
-				$db->query();
-			}
+			$query = $db->getQuery(true)
+				->update($db->nq('#__extensions'))
+				->set($db->nq('enabled').' = '.$db->q('0'))
+				->where($db->nq('element').' = '.$db->q('oneclickaction'))
+				->where($db->nq('folder').' = '.$db->q('system'));
+			$db->setQuery($query);
+			$db->query();
+
+			$query = $db->getQuery(true)
+				->update($db->nq('#__extensions'))
+				->set($db->nq('enabled').' = '.$db->q('0'))
+				->where($db->nq('element').' = '.$db->q('akeebaupdatecheck'))
+				->where($db->nq('folder').' = '.$db->q('system'));
+			$db->setQuery($query);
+			$db->query();
 		}
 		
-		// Update last version check. DO NOT USE JCOMPONENTHELPER!
-		if( version_compare(JVERSION,'1.6.0','ge') ) {
-			$sql = 'SELECT '.$db->nameQuote('params').' FROM '.$db->nameQuote('#__extensions').
-				' WHERE '.$db->nameQuote('type').' = '.$db->Quote('component').' AND '.
-				$db->nameQuote('element').' = '.$db->Quote('com_akeeba');
-			$db->setQuery($sql);
-		} else {
-			$sql = 'SELECT '.$db->nameQuote('params').' FROM '.$db->nameQuote('#__components').
-				' WHERE '.$db->nameQuote('option').' = '.$db->Quote('com_akeeba').
-				" AND `parent` = 0 AND `menuid` = 0";
-			$db->setQuery($sql);
-		}
+		// Update last version check and minstability. DO NOT USE JCOMPONENTHELPER!
+		$sql = $db->getQuery(true)
+			->select($db->nq('params'))
+			->from($db->nq('#__extensions'))
+			->where($db->nq('type').' = '.$db->q('component'))
+			->where($db->nq('element').' = '.$db->q('com_akeeba'));
+		$db->setQuery($sql);
 		$rawparams = $db->loadResult();
 		if(version_compare(JVERSION, '1.6.0', 'ge')) {
 			$params = new JRegistry();
@@ -133,21 +112,16 @@ class AkeebaControllerPostsetup extends JController
 		} else {
 			$params = new JParameter($rawparams);
 		}
+		
 		$params->setValue('lastversion', AKEEBA_VERSION);
-		if( version_compare(JVERSION,'1.6.0','ge') )
-		{
-			// Joomla! 1.6
-			$data = $params->toString('JSON');
-			$sql = 'UPDATE `#__extensions` SET `params` = '.$db->Quote($data).' WHERE '.
-				"`element` = ".$db->Quote('com_akeeba')." AND `type` = 'component'";
-		}
-		else
-		{
-			// Joomla! 1.5
-			$data = $params->toString('INI');
-			$sql = 'UPDATE `#__components` SET `params` = '.$db->Quote($data).' WHERE '.
-				"`option` = ".$db->Quote('com_akeeba')." AND `parent` = 0 AND `menuid` = 0";
-		}
+		$params->setValue('minstability', $minStability);
+
+		$data = $params->toString('JSON');
+		$sql = $db->getQuery(true)
+			->update($db->nq('#__extensions'))
+			->set($db->nq('params').' = '.$db->q($data))
+			->where($db->nq('element').' = '.$db->q('com_akeeba'))
+			->where($db->nq('type').' = '.$db->q('component'));
 		$db->setQuery($sql);
 		$db->query();
 		
@@ -160,7 +134,7 @@ class AkeebaControllerPostsetup extends JController
 		
 		// Force reload the Live Update information
 		$dummy = LiveUpdate::getUpdateInformation(true);
-		
+
 		// Run the configuration wizard if requested
 		if($runConfwiz) {
 			$url = 'index.php?option=com_akeeba&view=confwiz';
@@ -170,5 +144,11 @@ class AkeebaControllerPostsetup extends JController
 		
 		$app = JFactory::getApplication();
 		$app->redirect($url);
+	}
+	
+	private function isMySQL()
+	{
+		$db = JFactory::getDbo();
+		return strtolower(substr($db->name, 0, 5)) == 'mysql';
 	}
 }

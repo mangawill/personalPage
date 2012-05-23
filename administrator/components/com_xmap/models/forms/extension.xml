@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-	<!-- $Id: extension.xml 24 2011-01-28 04:32:26Z guille $ -->
+	<!-- $Id$ -->
 <form>
 	<fieldset addpath="administrator/components/com_xmap/elements">
         <field

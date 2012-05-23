@@ -5,7 +5,7 @@
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU GPL version 3 or, at your option, any later version
  * @package akeebaengine
- * @version $Id$
+ *
  */
 
 // Protection against direct access
@@ -72,7 +72,9 @@ class AEUtilTempvars
 			case 'db':
 				$dbtag = self::get_storage_filename($tag);
 				$db = AEFactory::getDatabase();
-				$sql = 'DELETE FROM `#__ak_storage` WHERE `tag` = '.$db->Quote($dbtag);
+				$sql = $db->getQuery(true)
+					->delete($db->nq('#__ak_storage'))
+					->where($db->nq('tag').' = '.$db->q($dbtag));
 				$db->setQuery($sql);
 				return $db->query();
 				break;
@@ -103,8 +105,22 @@ class AEUtilTempvars
 				
 			case 'db':
 				$db = AEFactory::getDatabase();
-				$sql = 'REPLACE INTO `#__ak_storage` (`tag`,`data`) VALUES('.$db->Quote($storage_filename).
-					','.$db->Quote(self::encode($value)).')';
+
+				// Delete any old records
+				$sql = $db->getQuery(true)
+					->delete($db->nq('#__ak_storage'))
+					->where($db->nq('tag').' = '.$db->q($storage_filename));
+				$db->setQuery($sql);
+				$db->query();
+				
+				// Add the new record
+				$sql = $db->getQuery(true)
+					->insert($db->nq('#__ak_storage'))
+					->columns(array(
+						$db->nq('tag'),
+						$db->nq('data'),
+					))->values($db->q($storage_filename).','.$db->q(self::encode($value)));
+				
 				$db->setQuery($sql);
 				return $db->query();
 				break;
@@ -129,7 +145,10 @@ class AEUtilTempvars
 			
 			case 'db':
 				$db = AEFactory::getDatabase();
-				$sql = 'SELECT `data` FROM `#__ak_storage` WHERE `tag` = '.$db->Quote($storage_filename);
+				$sql = $db->getQuery(true)
+					->select($db->nq('data'))
+					->from($db->nq('#__ak_storage'))
+					->where($db->nq('tag').' = '.$db->q($storage_filename));
 				$db->setQuery($sql);
 				$data = $db->loadResult();
 				break;

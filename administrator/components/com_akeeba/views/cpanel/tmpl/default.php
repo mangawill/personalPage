@@ -3,14 +3,14 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id$
+ *
  * @since 1.3
  *
  * The main page of the Akeeba Backup component is where all the fun takes place :)
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
+defined('_JEXEC') or die();
 
 AEPlatform::getInstance()->load_version_defines();
 $lang = JFactory::getLanguage();
@@ -84,6 +84,12 @@ JFactory::getDocument()->addScriptDeclaration($script,'text/javascript');
 	}
 </script>
 
+<?php if($this->needsdlid): ?>
+<div class="aklargewarning">
+	<?php echo JText::sprintf('COM_AKEEBA_LBL_CPANEL_NEEDSDLID','https://www.akeebabackup.com/instructions/1435-akeeba-backup-download-id.html'); ?>
+</div>
+<?php endif; ?>
+
 <div id="cpanel">
 	<div class="ak_cpanel_modules" id="ak_cpanel_modules">
 	
@@ -143,7 +149,7 @@ JFactory::getDocument()->addScriptDeclaration($script,'text/javascript');
 				<input type="hidden" name="option" value="com_akeeba" />
 				<input type="hidden" name="view" value="cpanel" />
 				<input type="hidden" name="task" value="switchprofile" />
-				<?php echo JHTML::_( 'form.token' ); ?>
+				<input type="hidden" name="<?php echo JFactory::getSession()->getToken()?>" value="1" />
 				<p>
 					<?php echo JText::_('CPANEL_PROFILE_TITLE'); ?>: #<?php echo $this->profileid; ?>
 					<?php echo JHTML::_('select.genericlist', $this->profilelist, 'profileid', 'onchange="document.forms.adminForm.submit()"', 'value', 'text', $this->profileid); ?>
@@ -165,21 +171,8 @@ JFactory::getDocument()->addScriptDeclaration($script,'text/javascript');
 			</div>
 			<?php endforeach; ?>
 			
-			<?php if(AKEEBA_JVERSION == '15'): ?>
 			<div class="icon">
-				<a href="index.php?option=com_akeeba&view=acl">
-					<div class="ak-icon ak-icon-acl">&nbsp;</div>
-					<span><?php echo JText::_('AKEEBA_ACL_TITLE'); ?></span>
-				</a>
-			</div>
-			<?php endif; ?>
-			
-			<div class="icon">
-				<?php if(AKEEBA_JVERSION == '15'): ?>
-				<a href="index.php?option=com_config&controller=component&component=com_akeeba&path="
-				<?php else: ?>
 				<a href="index.php?option=com_config&view=component&component=com_akeeba&path=&tmpl=component"
-				<?php endif; ?>
 					class="modal"
 					rel="{handler: 'iframe', size: {x: 660, y: 500}}">
 					<div class="ak-icon ak-icon-componentparams">&nbsp;</div>

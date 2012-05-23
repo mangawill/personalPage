@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE install SYSTEM "http://dev.joomla.org/xml/1.5/component-install.dtd">
-<install type="component" version="1.5.0" method="upgrade">
+<extension version="2.5" type="component" method="upgrade">
 	<name>Akeeba</name>
-	<creationDate>2012-03-21</creationDate>
+	<creationDate>2012-05-14</creationDate>
 	<author>Nicholas K. Dionysopoulos</author>
 	<authorEmail>nicholas@dionysopoulos.me</authorEmail>
 	<authorUrl>http://www.akeebabackup.com</authorUrl>
-	<copyright>Copyright (c)2006-2010 Nicholas K. Dionysopoulos</copyright>
-	<license>This component in released under the GNU/GPL v3 or later license</license>
-	<version>3.4.3</version>
-	<description>Akeeba Backup Core (formerly JoomlaPack) - Full Joomla! site backup solution, Core Edition. Making backup as simple as ABC!</description>
+	<copyright>Copyright (c)2006-2012 Nicholas K. Dionysopoulos</copyright>
+	<license>GNU GPL v3 or later</license>
+	<version>3.5.0</version>
+	<description>Akeeba Backup Core - Full Joomla! site backup solution, Core Edition.</description>
 
 	<!-- Public front end files -->
 	<files folder="frontend">
 		<filename>akeeba.php</filename>
+		<filename>dispatcher.php</filename>
 		<folder>controllers</folder>
 		<folder>models</folder>
 		<folder>views</folder>
@@ -27,22 +27,31 @@
 	<!-- SQL query files to execute on installation -->
 	<install>
 		<sql>
-			<file charset="utf8" driver="mysql">install.sql</file>
-			<file driver="mysql">install.mysql4.sql</file>
-			<file charset="utf8" driver="mysqli">install.sql</file>
-			<file driver="mysqli">install.mysql4.sql</file>
+			<file driver="mysql" charset="utf8">sql/install/mysql/install.sql</file>
+			<file driver="mysql">sql/install/mysql/install.sql</file>
+			<file driver="mysqli" charset="utf8">sql/install/mysql/install.sql</file>
+			<file driver="mysqli">sql/install/mysql/install.sql</file>
 		</sql>
 	</install>
 
 	<!-- SQL query files to execute on uninstallation -->
 	<uninstall>
 		<sql>
-			<file charset="utf8" driver="mysql">uninstall.sql</file>
-			<file driver="mysql">uninstall.sql</file>
-			<file charset="utf8" driver="mysqli">uninstall.sql</file>
-			<file driver="mysqli">uninstall.sql</file>
+			<file driver="mysql" charset="utf8">sql/install/mysql/uninstall.sql</file>
+			<file driver="mysql">sql/install/mysql/uninstall.sql</file>
+			<file driver="mysqli" charset="utf8">sql/install/mysql/uninstall.sql</file>
+			<file driver="mysqli">sql/install/mysql/uninstall.sql</file>
 		</sql>
 	</uninstall>
+	
+	<!-- SQL files to run on update -->
+	<update>
+		<schemas>
+			<schemapath type="mysql">sql/updates/mysql</schemapath>
+			<schemapath type="sqlsrv">sql/updates/sqlsrv</schemapath>
+			<schemapath type="sqlazure">sql/updates/sqlazure</schemapath>
+		</schemas>
+	</update>
 	
 	<!-- Media files -->
 	<media destination="com_akeeba" folder="media">
@@ -55,24 +64,13 @@
 	<administration>
 		<!-- Administration menu -->
 		<menu view="cpanel"
-			img="components/com_akeeba/assets/images/akeeba-16.png">COM_AKEEBA</menu>
-		<!--
-		<submenu>
-			<menu view="backup"
-				img="components/com_akeeba/assets/images/backup-16.png">BACKUP_NOW</menu>
-			<menu view="config"
-				img="components/com_akeeba/assets/images/config-16.png">CONFIGURATION</menu>
-			<menu view="buadmin"
-				img="components/com_akeeba/assets/images/bufa-16.png">ADMINISTER_BACKUP_FILES</menu>
-		</submenu>
-		-->
+			img="../media/com_akeeba/icons/akeeba-16.png">COM_AKEEBA</menu>
 
 		<!-- Back-end files -->
 		<files folder="backend">
 			<filename>akeeba.php</filename>
-			<filename>install.mysql4.sql</filename>
-			<filename>install.sql</filename>
-			<filename>uninstall.sql</filename>
+			<filename>dispatcher.php</filename>
+			<filename>toolbar.php</filename>
 			<filename>version.php</filename>
 			<filename>config.xml</filename>
 			<filename>access.xml</filename>
@@ -85,6 +83,7 @@
 			<folder>helpers</folder>
 			<folder>liveupdate</folder>
 			<folder>models</folder>
+			<folder>sql</folder>
 			<folder>tables</folder>
 			<folder>views</folder>
 		</files>
@@ -98,14 +97,14 @@
 
 	</administration>
 
-	<!-- Installation / uninstallation PHP scripts -->
-	<installfile>install.akeeba.php</installfile>
-	<uninstallfile>uninstall.akeeba.php</uninstallfile>
+	<!-- Installation / uninstallation script file -->
 	<scriptfile>script.akeeba.php</scriptfile>
 
+	<!-- See you again when you grow up, Joomla! extensions updater
 	<updateservers>
 		<server type="extension" priority="1" name="Akeeba Backup Core Updates"><![CDATA[http://nocdn.akeebabackup.com/updates/abcore.xml]]></server>
 	</updateservers>
+	-->
 
 	<restorepoint>
 		<customdirs>
@@ -136,4 +135,4 @@
 			<prefix>ak</prefix>
 		</extraprefixes>
 	</restorepoint>
-</install>
+</extension>

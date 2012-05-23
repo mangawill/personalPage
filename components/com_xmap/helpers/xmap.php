@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version       $Id: xmap.php 50 2011-07-15 06:11:35Z guille $
+ * @version       $Id$
  * @copyright     Copyright (C) 2005 - 2009 Joomla! Vargas. All rights reserved.
  * @license       GNU General Public License version 2 or later; see LICENSE.txt
  * @author	Guillermo Vargas (guille@vargas.co.cr)
@@ -92,6 +92,9 @@ class XmapHelper
                     $item->changefreq = $menuOptions['changefreq'];
 
                     XmapHelper::prepareMenuItem($item);
+                } else {
+                    $item->priority = null;
+                    $item->changefreq = null;
                 }
 
                 if ($item->parent_id > 1) {
@@ -128,12 +131,12 @@ class XmapHelper
         $extensions = $db->loadObjectList('element');
 
         foreach ($extensions as $element => $extension) {
-            require_once(JPATH_PLUGINS . DS . $extension->folder . DS . $element. DS. $element . '.php');
-            //$xmlPath = JPATH_COMPONENT_ADMINISTRATOR . DS . 'extensions' . DS . $extension->folder . DS . $element . '.xml';
-            //$params = new JParameter($extension->params, $xmlPath);
-            $params = new JParameter($extension->params);
-            $extension->params = $params->toArray();
-            $list[$element] = $extension;
+            if (file_exists(JPATH_PLUGINS . DS . $extension->folder . DS . $element. DS. $element . '.php')) {
+                require_once(JPATH_PLUGINS . DS . $extension->folder . DS . $element. DS. $element . '.php');
+                $params = new JParameter($extension->params);
+                $extension->params = $params->toArray();
+                $list[$element] = $extension;
+            }
         }
 
         return $list;

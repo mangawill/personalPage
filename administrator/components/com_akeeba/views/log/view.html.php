@@ -3,40 +3,32 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id$
+ *
  * @since 1.3
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
-
-// Load framework base classes
-jimport('joomla.application.component.view');
+defined('_JEXEC') or die();
 
 /**
  * MVC View for Log
  *
  */
-class AkeebaViewLog extends JView
+class AkeebaViewLog extends FOFViewHtml
 {
-	public function display($tpl = null)
+	public function onBrowse($tpl = null)
 	{
-		// Add toolbar buttons
-		JToolBarHelper::title(JText::_('AKEEBA').': <small>'.JText::_('VIEWLOG').'</small>','akeeba');
-		JToolBarHelper::back('AKEEBA_CONTROLPANEL', 'index.php?option='.JRequest::getCmd('option'));
-		JToolBarHelper::spacer();
 		$document = JFactory::getDocument();
 		$document->addStyleSheet(JURI::base().'../media/com_akeeba/theme/akeebaui.css?'.AKEEBAMEDIATAG);
 
 		// Add live help
-		AkeebaHelperIncludes::addHelp();
+		AkeebaHelperIncludes::addHelp('log');
 
 		// Get a list of log names
-		if(!class_exists('AkeebaModelLog')) JLoader::import('models.log', JPATH_COMPONENT_ADMINISTRATOR);
-		$model = new AkeebaModelLog();
+		$model = $this->getModel();
 		$this->assign('logs', $model->getLogList());
 
-		$tag = JRequest::getCmd('tag',null);
+		$tag = $model->getState('tag');
 		if(empty($tag)) $tag = null;
 		$this->assign('tag', $tag);
 
@@ -45,14 +37,23 @@ class AkeebaViewLog extends JView
 		$this->assign('profileid', $profileid);
 
 		// Get profile name
-		if(!class_exists('AkeebaModelProfiles')) JLoader::import('models.profiles', JPATH_COMPONENT_ADMINISTRATOR);
-		$model = new AkeebaModelProfiles();
-		$model->setId($profileid);
-		$profile_data = $model->getProfile();
+		$pmodel = FOFModel::getAnInstance('Profiles', 'AkeebaModel');
+		$pmodel->setId($profileid);
+		$profile_data = $pmodel->getItem();
 		$this->assign('profilename', $profile_data->description);
 
 		AkeebaHelperIncludes::includeMedia(false);
 
-		parent::display($tpl);
+		return true;
+	}
+	
+	public function onIframe($tpl = null)
+	{
+		$model = $this->getModel();
+		$tag = $model->getState('tag');
+		if(empty($tag)) $tag = null;
+		$this->assign('tag', $tag);
+		
+		return true;
 	}
 }

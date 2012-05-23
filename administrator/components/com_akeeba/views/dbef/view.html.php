@@ -3,39 +3,34 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id$
+ *
  * @since 1.3
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
-
-// Load framework base classes
-jimport('joomla.application.component.view');
+defined('_JEXEC') or die();
 
 /**
  * MVC View for Database Table filters
  *
  */
-class AkeebaViewDbef extends JView
+class AkeebaViewDbef extends FOFViewHtml
 {
-	function display()
+	public function onBrowse($tpl = null)
 	{
-		$task = JRequest::getCmd('task','normal');
-
-		// Add toolbar buttons
-		JToolBarHelper::title(JText::_('AKEEBA').': <small>'.JText::_('DBEF').'</small>','akeeba');
-		JToolBarHelper::back('AKEEBA_CONTROLPANEL', 'index.php?option='.JRequest::getCmd('option'));
+		$model = $this->getModel();
 		
+		$task = $model->getState('browse_task', 'normal');
+
 		// Add custom submenus
 		JSubMenuHelper::addEntry(
 			JText::_('FILTERS_LABEL_NORMALVIEW'),
-			JURI::base().'index.php?option=com_akeeba&view='.JRequest::getCmd('view').'&task=normal',
+			JURI::base().'index.php?option=com_akeeba&view=dbef&task=normal',
 			($task == 'normal')
 		);
 		JSubMenuHelper::addEntry(
 			JText::_('FILTERS_LABEL_TABULARVIEW'),
-			JURI::base().'index.php?option=com_akeeba&view='.JRequest::getCmd('view').'&task=tabular',
+			JURI::base().'index.php?option=com_akeeba&view=dbef&task=tabular',
 			($task == 'tabular')
 		);
 
@@ -68,7 +63,7 @@ class AkeebaViewDbef extends JView
 		{
 			case 'normal':
 			default:
-				$tpl = null;
+				$this->setLayout('default');
 
 				// Get a JSON representation of the database data
 				$model = $this->getModel();
@@ -77,7 +72,7 @@ class AkeebaViewDbef extends JView
 				break;
 
 			case 'tabular':
-				$tpl = 'tab';
+				$this->setLayout('tabular');
 
 				// Get a JSON representation of the tabular filter data
 				$model = $this->getModel();
@@ -88,7 +83,7 @@ class AkeebaViewDbef extends JView
 		}
 
 		// Add live help
-		AkeebaHelperIncludes::addHelp();
+		AkeebaHelperIncludes::addHelp('dbef');
 
 		// Get profile ID
 		$profileid = AEPlatform::getInstance()->get_active_profile();
@@ -101,6 +96,6 @@ class AkeebaViewDbef extends JView
 		$profile_data = $model->getProfile();
 		$this->assign('profilename', $profile_data->description);
 
-		parent::display($tpl);
+		return true;
 	}
 }

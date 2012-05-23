@@ -47,7 +47,12 @@ class LiveUpdateConfig extends LiveUpdateAbstractConfig
 		parent::__construct();
 		
 		$this->_downloadID = AEPlatform::getInstance()->get_platform_configuration_option('update_dlid', '');
-		$this->_minStability = AEPlatform::getInstance()->get_platform_configuration_option('minstability', 'alpha');
+		if(AKEEBA_PRO) {
+			$this->_minStability = AEPlatform::getInstance()->get_platform_configuration_option('minstability', 'stable');
+		} else {
+			// Make sure the freeloaders who bitch all the time only get the stable releases and stop busting my balls
+			$this->_minStability = 'stable';
+		}
 		$this->_cacerts = dirname(__FILE__).'/../akeeba/assets/cacert.pem';
 		
 		if(substr($this->_currentVersion,0,3) == 'svn') {

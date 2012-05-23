@@ -5,7 +5,7 @@
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU GPL version 3 or, at your option, any later version
  * @package akeebaengine
- * @version $Id$
+ *
  */
 
 // Protection against direct access
@@ -41,14 +41,17 @@ final class AECoreFilters extends AEAbstractObject
 		// Load platform, plugin and core filters
 		$this->filters = array();
 		$locations = array(
-			AEFactory::getAkeebaRoot().DIRECTORY_SEPARATOR.'platform'.DIRECTORY_SEPARATOR.AKEEBAPLATFORM.DIRECTORY_SEPARATOR.'filters',
 			AEFactory::getAkeebaRoot().DIRECTORY_SEPARATOR.'plugins'.DIRECTORY_SEPARATOR.'filters',
 			AEFactory::getAkeebaRoot().DIRECTORY_SEPARATOR.'filters'
 		);
+		$platform_paths = AEPlatform::getInstance()->getPlatformDirectories();
+		foreach($platform_paths as $p) {
+			$locations[] = $p.'/filters';
+		}
 		AEUtilLogger::WriteLog(_AE_LOG_DEBUG,'Loading filters');
 		foreach($locations as $folder)
 		{
-			$is_platform = ($folder == AEFactory::getAkeebaRoot().DIRECTORY_SEPARATOR.'platform'.DIRECTORY_SEPARATOR.AKEEBAPLATFORM.DIRECTORY_SEPARATOR.'filters');
+			$is_platform = $this->isPlatformDirectory($folder);
 			$files = AEUtilScanner::getFiles($folder);
 			if($files === false) continue; // Skip inexistent folders
 			if(empty($files)) continue; // Skip no-match folders
@@ -56,10 +59,16 @@ final class AECoreFilters extends AEAbstractObject
 			// Loop all files
 			foreach($files as $file)
 			{
-				if( substr($file,-4) != '.php' ) continue; // Skip non-PHP files
-				if( in_array(substr($file,0,1), array('.','_'))) continue; // Skip filter files starting with dot or dash
+				if( substr($file,-4) != '.php' ) {
+					continue; // Skip non-PHP files
+				}
+				if( in_array(substr($file,0,1), array('.','_'))) {
+					continue; // Skip filter files starting with dot or dash
+				}
 				$filter_name = ($is_platform ? 'Platform' : '').ucfirst(basename($file,'.php')); // Extract filter base name
-				if(array_key_exists($filter_name, $this->filters)) continue; // Skip already loaded filters
+				if(array_key_exists($filter_name, $this->filters)) {
+					continue; // Skip already loaded filters
+				}
 				AEUtilLogger::WriteLog(_AE_LOG_DEBUG,'-- Loading filter '.$filter_name);
 				$this->filters[$filter_name] = AEFactory::getFilterObject($filter_name); // Add the filter
 			}
@@ -67,13 +76,13 @@ final class AECoreFilters extends AEAbstractObject
 		
 		// Load platform, plugin and core stacked filters
 		$locations = array(
-			AEFactory::getAkeebaRoot().DIRECTORY_SEPARATOR.'platform'.DIRECTORY_SEPARATOR.AKEEBAPLATFORM.DIRECTORY_SEPARATOR.'filters'.DIRECTORY_SEPARATOR.'stack',
 			AEFactory::getAkeebaRoot().DIRECTORY_SEPARATOR.'plugins'.DIRECTORY_SEPARATOR.'filters'.DIRECTORY_SEPARATOR.'stack',
 			AEFactory::getAkeebaRoot().DIRECTORY_SEPARATOR.'filters'.DIRECTORY_SEPARATOR.'stack'
 		);
 		$platform_paths = AEPlatform::getInstance()->getPlatformDirectories();
 		$platform_stack_paths = array();
 		foreach($platform_paths as $p) {
+			$locations[] = $p.'/filters';
 			$locations[] = $p.'/filters/stack';
 			$platform_stack_paths[] = $p.'/filters/stack';
 		}
@@ -82,8 +91,7 @@ final class AECoreFilters extends AEAbstractObject
 		AEUtilLogger::WriteLog(_AE_LOG_DEBUG,'Loading optional filters');
 		foreach($locations as $folder)
 		{
-			$is_platform = ($folder == AEFactory::getAkeebaRoot().DIRECTORY_SEPARATOR.'platform'.DIRECTORY_SEPARATOR.AKEEBAPLATFORM.DIRECTORY_SEPARATOR.'filters'.DIRECTORY_SEPARATOR.'stack');
-			$is_platform = in_array($folder, $platform_stack_paths);
+			$is_platform = $this->isPlatformDirectory($folder);
 			$files = AEUtilScanner::getFiles($folder);
 			if($files === false) continue; // Skip inexistent folders
 			if(empty($files)) continue; // Skip no-match folders
@@ -103,6 +111,22 @@ final class AECoreFilters extends AEAbstractObject
 				}
 			}
 		}
+	}
+	
+	private function isPlatformDirectory($path)
+	{
+		static $allPlatformPaths = array();
+		
+		if(empty($allPlatformPaths)) {
+			$platform_paths = AEPlatform::getInstance()->getPlatformDirectories();
+			foreach($platform_paths as $p) {
+				$allPlatformPaths[] = AEUtilFilesystem::TranslateWinPath($p.'/filters');
+				$allPlatformPaths[] = AEUtilFilesystem::TranslateWinPath($p.'/filters/stack');
+			}
+		}
+		
+		$search = AEUtilFilesystem::TranslateWinPath($path);
+		return in_array($search, $allPlatformPaths);
 	}
 
 	/**

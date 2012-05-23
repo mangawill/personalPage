@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @version		$Id: controller.php 13 2010-07-02 07:16:18Z guille $
+ * @version		$Id$
  * @copyright           Copyright (C) 2005 - 2009 Joomla! Vargas. All rights reserved.
  * @license		GNU General Public License version 2 or later; see LICENSE.txt
  * @author		Guillermo Vargas (guille@vargas.co.cr)

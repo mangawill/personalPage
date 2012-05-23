@@ -3,11 +3,11 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id: raw.php 632 2011-05-22 20:44:46Z nikosdion $
+ *
  * @since 1.3
  */
 
-defined('_JEXEC') or die('Restricted access');
+defined('_JEXEC') or die();
 ?>
 <script language="javascript" type="text/javascript">
 // Disable right-click
@@ -35,7 +35,7 @@ document.onkeydown = onKeyDown;
 <?php
 
 // -- Get the log's file name
-$tag = JRequest::getCmd('tag','null');
+$tag = $this->tag;
 $logName = AEUtilLogger::logName($tag);
 
 // Load JFile class

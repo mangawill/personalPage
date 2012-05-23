@@ -3,49 +3,29 @@
  * @package AkeebaBackup
  * @copyright Copyright (c)2009-2012 Nicholas K. Dionysopoulos
  * @license GNU General Public License version 3, or later
- * @version $Id$
  * @since 1.3
  */
 
 // Protect from unauthorized access
-defined('_JEXEC') or die('Restricted Access');
-
-// Load framework base classes
-jimport('joomla.application.component.view');
+defined('_JEXEC') or die();
 
 /**
  * Akeeba Backup Control Panel view class
  *
  */
-class AkeebaViewCpanel extends JView
-{
-	function display()
+class AkeebaViewCpanel extends FOFViewHtml
+{	
+	protected function onAdd($tpl = null)
 	{
-		$selfhealModel = JModel::getInstance('Selfheal','AkeebaModel');
+		$model = $this->getModel();
+
+		$selfhealModel = FOFModel::getTmpInstance('Selfheal','AkeebaModel');
 		$schemaok = $selfhealModel->healSchema();
 		$this->assign('schemaok', $schemaok);		
 		
 		$aeconfig = AEFactory::getConfiguration();
-		// Set the toolbar title; add a help button
-		JToolBarHelper::title(JText::_('AKEEBA').':: <small>'.JText::_('AKEEBA_CONTROLPANEL').'</small>','akeeba');
-		//JToolBarHelper::preferences('com_akeeba', '500', '660');
 
 		if($schemaok) {
-			// Add submenus (those nifty text links below the toolbar!)
-			// -- Configuration
-			$link = JURI::base().'index.php?option='.JRequest::getCmd('option').'&view=config';
-			JSubMenuHelper::addEntry(JText::_('CONFIGURATION'), $link);
-
-			// -- Backup Now
-			$link = JURI::base().'index.php?option='.JRequest::getCmd('option').'&view=backup';
-			JSubMenuHelper::addEntry(JText::_('BACKUP'), $link);
-			// -- Administer Backup Files
-			$link = JURI::base().'index.php?option='.JRequest::getCmd('option').'&view=buadmin';
-			JSubMenuHelper::addEntry(JText::_('BUADMIN'), $link);
-			// -- View log
-			$link = JURI::base().'index.php?option='.JRequest::getCmd('option').'&view=log';
-			JSubMenuHelper::addEntry(JText::_('VIEWLOG'), $link);
-
 			// Load the helper classes
 			$this->loadHelper('utils');
 			$this->loadHelper('status');
@@ -53,8 +33,10 @@ class AkeebaViewCpanel extends JView
 
 			// Load the model
 			if(!class_exists('AkeebaModelStatistics')) JLoader::import('models.statistics', JPATH_COMPONENT_ADMINISTRATOR);
-			$model = $this->getModel();
+			
 			$statmodel = new AkeebaModelStatistics();
+			//$needsDlid = !$model->applyJoomlaExtensionUpdateChanges();
+			$needsDlid = $model->needsDownloadID();
 
 			$this->assign('icondefs', $model->getIconDefinitions()); // Icon definitions
 			$this->assign('profileid', $model->getProfileID()); // Active profile ID
@@ -65,13 +47,15 @@ class AkeebaViewCpanel extends JView
 
 			$this->assign('fixedpermissions', $model->fixMediaPermissions() ); // Fix media/com_akeeba permissions
 			
+			$this->assign('needsdlid', $needsDlid);
+			
 			// Add live help
-			AkeebaHelperIncludes::addHelp();
+			AkeebaHelperIncludes::addHelp('cpanel');
 		}
 		
 		// Add references to CSS and JS files
 		AkeebaHelperIncludes::includeMedia(false);
-
-		parent::display();
+		
+		return $this->onDisplay($tpl);
 	}
 }
