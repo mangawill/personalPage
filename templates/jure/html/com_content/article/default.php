@@ -107,22 +107,12 @@ $user		= JFactory::getUser();
     
     <?php if ($params->get('show_hits')) : ?>
     	<div class="hitsClanek">
-    	<i class="icon-eye-open"></i><?php echo JText::sprintf('COM_CONTENT_ARTICLE_HITS', $this->item->hits); ?>
+    		<i class="icon-eye-open"></i><?php echo JText::sprintf('COM_CONTENT_ARTICLE_HITS', $this->item->hits); ?>
     	</div>
     
-    
-    <div class="comments">
-    	<i class="icon-comment"></i><a href="#disqus_thread">Comment</a>
-    	</div>
-    
-    <div class="share">
-      <a class="addthis_button_twitter"></a>
-      <a class="addthis_button_reddit"></a>
-      <a class="addthis_button_stumbleupon"></a>
-      <a class="addthis_button_google_plusone_share"></a>
-      <a class="addthis_button_compact"></a>
-      <script type="text/javascript" src="http://s7.addthis.com/js/250/addthis_widget.js#pubid=ra-4e5bd2ec4d28157e"></script>
-    </div><!-- share -->
+	    <div class="comments">
+	    	<i class="icon-comment"></i><a href="#disqus_thread">Comment</a>
+	    </div>
     
     <?php endif; ?>
     
