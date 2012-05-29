@@ -65,7 +65,7 @@ JHtml::core();
 
 <?php if (($params->get('show_author')) or ($params->get('show_category')) or ($params->get('show_create_date')) or ($params->get('show_modify_date')) or ($params->get('show_publish_date')) or ($params->get('show_parent_category')) or ($params->get('show_hits'))) : ?>
   <div class="avtorBlog clearfix">
-    <div class="postData">
+    <div class="postData clearfix">
 <?php endif; ?>
 
 <?php if ($params->get('show_author') && !empty($this->item->author )) : ?>

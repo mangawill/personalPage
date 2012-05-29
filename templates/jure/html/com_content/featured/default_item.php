@@ -61,7 +61,7 @@ $canEdit	= $this->item->params->get('access-edit');
 
 <?php if (($params->get('show_author')) or ($params->get('show_category')) or ($params->get('show_create_date')) or ($params->get('show_modify_date')) or ($params->get('show_publish_date')) or ($params->get('show_parent_category')) or ($params->get('show_hits'))) : ?>
   <div class="avtorBlog clearfix">
-    <div class="postData">
+    <div class="postData clearfix">
 <?php endif; ?>
 
 <?php if ($params->get('show_author') && !empty($this->item->author )) : ?>
@@ -128,7 +128,7 @@ $canEdit	= $this->item->params->get('access-edit');
   </div>
 
 
-<div class="share">
+<div class="share hidden-phone">
   <a class="addthis_button_twitter"></a>
   <a class="addthis_button_reddit"></a>
   <a class="addthis_button_stumbleupon"></a>

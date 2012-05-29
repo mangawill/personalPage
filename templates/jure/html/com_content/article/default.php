@@ -44,7 +44,7 @@ $user		= JFactory::getUser();
     
     <?php if ($useDefList) : ?>
       <div class="avtorBlog clearfix">
-        <div class="postData">
+        <div class="postData clearfix">
     <?php endif; ?>
       
     <?php if ($params->get('show_author') && !empty($this->item->author )) : ?>

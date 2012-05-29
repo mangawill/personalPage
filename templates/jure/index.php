@@ -29,6 +29,18 @@ if (empty($this->_script['text/javascript']))
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="<?php echo $this->baseurl ?>/templates/jure/css/style.css">
 	<link rel="stylesheet" href="<?php echo $this->baseurl ?>/templates/system/css/system.css" />
+	<link rel="stylesheet" href="<?php echo $this->baseurl ?>/templates/jure/css/desert.css" />
+	
+	<link rel="shortcut icon" href="<?php echo $this->baseurl ?>/templates/jure/favicon.ico" />
+  <!-- For non-Retina iPhone, iPod Touch, and Android 2.1+ devices: -->
+  <link rel="apple-touch-icon-precomposed" href="<?php echo $this->baseurl ?>/templates/jure/apple-touch-icon-precomposed.png" />
+  <!-- For first- and second-generation iPad: -->
+  <link rel="apple-touch-icon-precomposed" sizes="72x72" href="<?php echo $this->baseurl ?>/templates/jure/apple-touch-icon-72x72-precomposed.png" />
+  <!-- For iPhone with high-resolution Retina display: -->
+  <link rel="apple-touch-icon-precomposed" sizes="114x114" href="<?php echo $this->baseurl ?>/templates/jure/apple-touch-icon-114x114-precomposed.png" />
+  <!-- For third-generation iPad with high-resolution Retina display: -->
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="<?php echo $this->baseurl ?>/templates/jure/apple-touch-icon-144x144-precomposed.png" />
+  
 	<!--[if IE]>
 		<link rel="stylesheet" href="<?php echo $this->baseurl ?>/templates/jure/css/ie.css" />	
   <![endif]-->
@@ -42,8 +54,30 @@ if (empty($this->_script['text/javascript']))
 	<?php if($this->countModules('user1 + user2 + user3') >= 3) $contentWidthuser=' span4';?>
 	<?php if($this->countModules('user1 + user2 + user3') == 2) $contentWidthuser=' span6';?>
 	<?php if($this->countModules('user1 + user2 + user3') == 1) $contentWidthuser=' span12';?>
+	
+	<script type="text/javascript">
+		(function(doc) {
+			var addEvent = 'addEventListener',
+		    type = 'gesturestart',
+		    qsa = 'querySelectorAll',
+		    scales = [1, 1],
+		    meta = qsa in doc ? doc[qsa]('meta[name=viewport]') : [];
+		
+			function fix() {
+				meta.content = 'width=device-width,minimum-scale=' + scales[0] + ',maximum-scale=' + scales[1];
+				doc.removeEventListener(type, fix, true);
+			}
+		
+			if ((meta = meta[meta.length - 1]) && addEvent in doc) {
+				fix();
+				scales = [.25, 1.6];
+				doc[addEvent](type, fix, true);
+			}
+		}(document));
+	</script>
+
 </head>
-<body>
+<body onload="prettyPrint()">
   <header id="header">			
     <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
@@ -155,26 +189,29 @@ if (empty($this->_script['text/javascript']))
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
   <script src="<?php echo $this->baseurl ?>/templates/jure/js/mylibs/jquery.easing.1.3.js"></script>
   <script src="<?php echo $this->baseurl ?>/templates/jure/js/bootstrap.min.js"></script>
-  <script src="<?php echo $this->baseurl ?>/templates/jure/js/mylibs/jquery.jribbble-1.0.0.ugly.js"></script>
+  <script src="<?php echo $this->baseurl ?>/templates/jure/js/googlePrettify/prettify.js"></script>
+  <script src="<?php echo $this->baseurl ?>/templates/jure/js/numberLines.js"></script>
+ 
   <script defer src="<?php echo $this->baseurl ?>/templates/jure/js/script.js"></script>
+  <?php if ($menu->getActive() == $menu->getDefault( 'en-GB' )) {
+  	echo "<script defer src='$this->baseurl/templates/jure/js/dribbbleStats.js'></script><script src='$this->baseurl/templates/jure/js/mylibs/jquery.jribbble-1.0.0.ugly.js'></script>";
+  }?>
+  <?php if ($menu->getActive() == $menu->getDefault( 'sl-SI' )) {
+  	echo "<script defer src='$this->baseurl/templates/jure/js/dribbbleStats.js'></script><script src='$this->baseurl/templates/jure/js/mylibs/jquery.jribbble-1.0.0.ugly.js'></script>";
+  }?>
 	
-  <!-- Change UA-XXXXX-X to be your site's ID -->
-  <script type="text/javascript">
-
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-6253698-6']);
-  _gaq.push(['_setDomainName', 'none']);
-  _gaq.push(['_setAllowLinker', true]);
-  _gaq.push(['_trackPageview']);
-  _gaq.push(['_trackPageLoadTime']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-
-  </script>
+	<script type="text/javascript">
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-6253698-6']);
+	  _gaq.push(['_trackPageview']);
+	  _gaq.push(['_trackPageLoadTime']);
+	
+	  (function() {
+	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+	</script>
   <!--[if lt IE 7 ]>
     <script src="//ajax.googleapis.com/ajax/libs/chrome-frame/1.0.3/CFInstall.min.js"></script>
     <script>window.attachEvent('onload',function(){CFInstall.check({mode:'overlay'})})</script>

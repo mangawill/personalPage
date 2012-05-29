@@ -10,44 +10,47 @@
 // no direct access
 defined('_JEXEC') or die;
 ?>
-<form action="<?php echo JRoute::_('index.php');?>" method="post">
-	<div class="controls<?php echo $moduleclass_sfx ?>">
-		<?php
-			$output = '<div class="input-prepend"><span class="add-on"><i class="icon-search"></i></span><input name="searchword" id="prependedInput" class="span3" type="text" placeholder="'.$text.'" /></div>';
 
-			if ($button) :
-				if ($imagebutton) :
-					$button = '<input type="image" value="'.$button_text.'" class="button'.$moduleclass_sfx.'" src="'.$img.'" onclick="this.form.searchword.focus();"/>';
-				else :
-					$button = '<input type="submit" value="'.$button_text.'" class="button'.$moduleclass_sfx.'" onclick="this.form.searchword.focus();"/>';
+<form action="<?php echo JRoute::_('index.php');?>" method="post" class="form-inline">
+	<div class="control-group">
+		<div class="controls<?php echo $moduleclass_sfx ?>">
+			<?php
+				$output = '<div class="input-prepend"><span class="add-on"><i class="icon-search"></i></span><input name="searchword" id="inputIcon" class="span3" type="text" placeholder="'.$text.'" /></div>';
+
+				if ($button) :
+					if ($imagebutton) :
+						$button = '<input type="image" value="'.$button_text.'" class="button'.$moduleclass_sfx.'" src="'.$img.'" onclick="this.form.searchword.focus();"/>';
+					else :
+						$button = '<input type="submit" value="'.$button_text.'" class="button'.$moduleclass_sfx.'" onclick="this.form.searchword.focus();"/>';
+					endif;
 				endif;
-			endif;
 
-			switch ($button_pos) :
-				case 'top' :
-					$button = $button.'<br />';
-					$output = $button.$output;
-					break;
+				switch ($button_pos) :
+					case 'top' :
+						$button = $button.'<br />';
+						$output = $button.$output;
+						break;
 
-				case 'bottom' :
-					$button = '<br />'.$button;
-					$output = $output.$button;
-					break;
+					case 'bottom' :
+						$button = '<br />'.$button;
+						$output = $output.$button;
+						break;
 
-				case 'right' :
-					$output = $output.$button;
-					break;
+					case 'right' :
+						$output = $output.$button;
+						break;
 
-				case 'left' :
-				default :
-					$output = $button.$output;
-					break;
-			endswitch;
+					case 'left' :
+					default :
+						$output = $button.$output;
+						break;
+				endswitch;
 
-			echo $output;
-		?>
-	<input type="hidden" name="task" value="search" />
-	<input type="hidden" name="option" value="com_search" />
-	<input type="hidden" name="Itemid" value="<?php echo $mitemid; ?>" />
+				echo $output;
+			?>
+		<input type="hidden" name="task" value="search" />
+		<input type="hidden" name="option" value="com_search" />
+		<input type="hidden" name="Itemid" value="<?php echo $mitemid; ?>" />
+		</div>
 	</div>
 </form>
