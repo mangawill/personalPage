@@ -18,5 +18,5 @@ $canEdit	= $this->item->params->get('access-edit');
 ?>
 
 <article class="referenceClanek">
-	<?php echo $this->item->text; ?>
+  <?php echo $this->item->text; ?>
 </article>
