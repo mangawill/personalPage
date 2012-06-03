@@ -21,10 +21,8 @@ $this->direction = $doc->direction;
 <head>
 	<title><?php echo $this->error->getCode(); ?> - <?php echo $this->title; ?></title>
 	<link rel="stylesheet" href="<?php echo $this->baseurl; ?>/templates/jure/css/style.css" type="text/css" />
-	<link rel="stylesheet" href="<?php echo $this->baseurl ?>/templates/jure/css/960_12_col.css" />
-	<?php if ($this->direction == 'rtl') : ?>
-	<link rel="stylesheet" href="<?php echo $this->baseurl; ?>/templates/system/css/error_rtl.css" type="text/css" />
-	<?php endif; ?>
+	<link rel="stylesheet" href="<?php echo $this->baseurl ?>/templates/jure/css/bootstrap.css" />
+	<link rel="stylesheet" href="<?php echo $this->baseurl ?>/templates/jure/css/bootstrap-responsive.min.css" />
 	<script type="text/javascript">
   var _gaq = _gaq || [];
  _gaq.push(['_setAccount', 'UA-6253698-6']);
@@ -36,16 +34,14 @@ $this->direction = $doc->direction;
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
 </script>
-	<style>
-		html {background: url(<?php echo $this->baseurl; ?>/templates/jure/images/404Ozadje.jpg) no-repeat 50% 90%;height: 100%;width: 100%;}
-	</style>
 </head>
 <body>
-	<div class="container_12">
-		<div class="grid_12">
-		<div class="errorboxoutline">
+	<div class="container">
+		<div class="row">
+		<div class="errorboxoutline span8">
 			<div class="errorboxheader"><?php echo $this->error->getCode(); ?> - <?php echo $this->error->getMessage(); ?></div>
 			<div class="errorboxbody">
+			<p>&nbsp;</p>
 			<p><strong><?php echo JText::_('JERROR_LAYOUT_NOT_ABLE_TO_VISIT'); ?></strong></p>
 				<ol>
 					<li><?php echo JText::_('JERROR_LAYOUT_AN_OUT_OF_DATE_BOOKMARK_FAVOURITE'); ?></li>
@@ -70,7 +66,7 @@ $this->direction = $doc->direction;
 			</p>
 			<script type="text/javascript">
   var GOOG_FIXURL_LANG = 'en';
-  var GOOG_FIXURL_SITE = 'http://www.example.com'
+  var GOOG_FIXURL_SITE = 'http://www.jure-stern.si/en'
 </script>
 <script type="text/javascript"
   src="http://linkhelp.clients.google.com/tbproxy/lh/wm/fixurl.js">
