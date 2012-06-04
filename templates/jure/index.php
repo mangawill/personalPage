@@ -39,6 +39,9 @@ if (isset($this->_script['text/javascript']))
   <!--[if lt IE 9]>
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
   <![endif]-->
+  <!--[if IE 7]>
+    <link rel="stylesheet" href="<?php echo $this->baseurl ?>/templates/jure/css/font-awesome-ie7.css">
+  <![endif]-->
   <?php
     if($this->countModules('desno') == 0) $contentWidth='span12';
     if($this->countModules('desno') >= 1) $contentWidth='span8';
