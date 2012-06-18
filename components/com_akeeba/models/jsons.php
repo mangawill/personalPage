@@ -774,7 +774,8 @@ class AkeebaModelJsons extends FOFModel
 		require_once JPATH_COMPONENT_ADMINISTRATOR.'/models/statistics.php';
 
 		$model = new AkeebaModelStatistics();
-		$result = $model->delete((int)$backup_id);
+		$model->setState('id', (int)$backup_id);
+		$result = $model->delete();
 		if(!$result)
 		{
 			$this->status = self::STATUS_ERROR;
@@ -798,7 +799,8 @@ class AkeebaModelJsons extends FOFModel
 		require_once JPATH_COMPONENT_ADMINISTRATOR.'/models/statistics.php';
 
 		$model = new AkeebaModelStatistics();
-		$result = $model->deleteFile((int)$backup_id);
+		$model->setState('id', (int)$backup_id);
+		$result = $model->deleteFile();
 		if(!$result)
 		{
 			$this->status = self::STATUS_ERROR;

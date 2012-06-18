@@ -65,7 +65,7 @@ class AkeebaViewBuadmin extends FOFViewHtml
 
 		if(AKEEBA_PRO && ($task == 'default'))
 		{
-			$bar = & JToolBar::getInstance('toolbar');
+			$bar = JToolBar::getInstance('toolbar');
 			$bar->appendButton( 'Link', 'restore', JText::_('DISCOVER'), 'index.php?option=com_akeeba&view=discover' );
 			JToolBarHelper::publish('restore', JText::_('STATS_LABEL_RESTORE'));
 		}

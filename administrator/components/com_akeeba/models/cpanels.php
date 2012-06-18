@@ -125,7 +125,6 @@ class AkeebaModelCpanels extends FOFModel
 		if(empty($list)) return false;
 		$id = $list[0];
 
-		$statmodel->setId($id);
 		$record = AEPlatform::getInstance()->get_statistics($id);
 
 		return ($record['status'] == 'fail');
@@ -408,6 +407,7 @@ class AkeebaModelCpanels extends FOFModel
 		// Deactivate the update site for FOF
 		$query = $db->getQuery(true)
 			->select('update_site_id')
+			->from($db->qn('#__update_sites'))
 			->where($db->qn('location').' = '.$db->q('http://cdn.akeebabackup.com/updates/libraries/fof'));
 		$db->setQuery($query);
 		$updateSite = $db->loadResult();

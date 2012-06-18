@@ -1,4 +1,17 @@
 <?php die();?>
+Akeeba Backup 3.5.2
+================================================================================
+# [HIGH] Site Overrides' site root path was ignored
+# [HIGH] Restoring a backup with multiple database definitions would result in the restoration getting stuck in a loop showing the main site db restoration page
+# [MEDIUM] File filters for files in the site roto not respected when using the akeeba-backup.php CLI script
+# [LOW] Import Archives did not parse directory variables like [DEFAULT_OUTPUT] and [SITEROOT]
+# [LOW] You could no longer delete backup files or records through the JSON API
+# [LOW] Error thrown in the component's control panel when Debug System is enabled
+# [LOW] Wrong label "Database driver" instead of "Database hostname" in Site Overrides configuration (Professional release)
+# [LOW] Backup notification icon would be permanently deactivated if a user without backup privileges (e.g. Administrator) tried to display it
+# [LOW] Deleting a remotely stored backup could result in an error if there were too many parts
+# [LOW] Strict notice in Administer Backup Files page
+
 Akeeba Backup 3.5.1
 ================================================================================
 + Plugin for JMonitoring, notifies you on failed and stale backups

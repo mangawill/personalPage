@@ -154,23 +154,25 @@ class FOFModel extends JModel
 		} else {
 			$this->_name = $name;
 		}
+		
+		// Get the view name
+		$className = get_class($this);
+		if($className == 'FOFModel') {
+			if(array_key_exists('view', $config)) {
+				$view = $config['view'];
+			}
+			if(empty($view)) {
+				$view = FOFInput::getCmd('view','cpanel',$this->input);
+			}
+		} else {
+			$eliminatePart = ucfirst($name).'Model';
+			$view = strtolower(str_replace($eliminatePart, '', $className));
+		}
 
 		// Assign the correct table
 		if(array_key_exists('table',$config)) {
 			$this->table = $config['table'];
 		} else {
-			$className = get_class($this);
-			if($className == 'FOFModel') {
-				if(array_key_exists('view', $config)) {
-					$view = $config['view'];
-				}
-				if(empty($view)) {
-					$view = FOFInput::getCmd('view','cpanel',$this->input);
-				}
-			} else {
-				$eliminatePart = ucfirst($name).'Model';
-				$view = strtolower(str_replace($eliminatePart, '', $className));
-			}
 			$this->table = FOFInflector::singularize($view);
 		}
 
@@ -187,7 +189,7 @@ class FOFModel extends JModel
 				$default_limit = 20;
 			}
 			$limit = $this->getUserStateFromRequest('global.list.limit', 'limit', $default_limit);
-			$limitstart = $this->getUserStateFromRequest(JRequest::getCmd('option','com_ars').$this->getName().'limitstart','limitstart',0);
+			$limitstart = $this->getUserStateFromRequest($component.'.'.$view.'.limitstart','limitstart',0);
 		}
 		$this->setState('limit',$limit);
 		$this->setState('limitstart',$limitstart);
@@ -691,10 +693,14 @@ class FOFModel extends JModel
 		}
 
 		// Get the savestate status
-		$savestate = parent::getState('savestate');
+		$savestate = FOFInput::getBool('savestate', false, $this->input);
+		/*
+		$savestate = parent::getState('savestate', false);
 		if(is_null($savestate)) {
-			$savestate = FOFInput::getBool('savestate',false,$this->input);
+			$savestate = FOFInput::getBool('savestate', 0, $this->input);
+			parent::setState('savestate', $savestate);
 		}
+		*/
 
 		$value = parent::getState($key);
 		if(is_null($value))
