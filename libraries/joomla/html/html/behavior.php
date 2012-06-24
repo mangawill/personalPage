@@ -256,21 +256,8 @@ abstract class JHtmlBehavior
 		$opt['onHide']			= (isset($params['onHide'])) ? '\\' . $params['onHide'] : null;
 
 		$options = JHtmlBehavior::_getJSObject($opt);
-
+    
 		// Attach tooltips to document
-		JFactory::getDocument()->addScriptDeclaration(
-			"window.addEvent('domready', function() {
-			$$('$selector').each(function(el) {
-				var title = el.get('title');
-				if (title) {
-					var parts = title.split('::', 2);
-					el.store('tip:title', parts[0]);
-					el.store('tip:text', parts[1]);
-				}
-			});
-			var JTooltips = new Tips($$('$selector'), $options);
-		});"
-		);
 
 		// Set static array
 		self::$loaded[__METHOD__][$sig] = true;
