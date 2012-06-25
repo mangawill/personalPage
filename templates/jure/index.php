@@ -67,6 +67,7 @@ if (isset($this->_script['text/javascript']))
         scales = [.25, 1.6];
         doc[addEvent](type, fix, true);
       }
+      
     }(document));
   </script>
 
@@ -191,6 +192,13 @@ if (isset($this->_script['text/javascript']))
     echo "<script defer src='$this->baseurl/templates/jure/js/dribbbleStats.js'></script><script src='$this->baseurl/templates/jure/js/mylibs/jquery.jribbble-1.0.0.ugly.js'></script>";
   }?>
 
+  <script type="text/javascript">
+    $(document).ready(function () {
+        if ($("[rel=tooltip]").length) {
+            $("[rel=tooltip]").tooltip();
+        }
+    });
+  </script>
   <script type="text/javascript">
     var _gaq = _gaq || [];
     _gaq.push(['_setAccount', 'UA-6253698-6']);
