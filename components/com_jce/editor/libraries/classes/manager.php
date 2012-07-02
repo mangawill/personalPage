@@ -84,11 +84,11 @@ class WFMediaManager extends WFEditorPlugin {
         $filetypes = $this->getParam('extensions', $this->get('_filetypes', 'images=jpg,jpeg,png,gif'));
 
         $config = array(
-            'dir' => $this->getParam('dir', 'images', '', 'string', false),
+            'dir' => $this->getParam('dir', '', '', 'string', false),
             'filesystem' => $filesystem,
             'filetypes' => $filetypes,
             'upload' => array(
-                'runtimes' => $this->getParam('editor.upload_runtimes', array('html5', 'flash'), '', 'array', false),
+                'runtimes' => $this->getParam('editor.upload_runtimes', array('html5', 'flash', 'silverlight'), '', 'array', false),
                 'chunk_size' => null,
                 'max_size' => $this->getParam('max_size', 1024, '', 'string', false),
                 'validate_mimetype' => $this->getParam('validate_mimetype', 0)

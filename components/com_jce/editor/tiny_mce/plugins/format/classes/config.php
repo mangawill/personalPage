@@ -23,12 +23,18 @@ class WFFormatPluginConfig {
         }
 
         // Encoding
-        $settings['entity_encoding'] = $wf->getParam('editor.entity_encoding', 'raw', 'named');
-        $settings['inline_styles'] = $wf->getParam('editor.inline_styles', 1, 1, 'boolean');
+        $settings['entity_encoding']        = $wf->getParam('editor.entity_encoding', 'raw', 'named');
+        $settings['inline_styles']          = $wf->getParam('editor.inline_styles', 1, 1, 'boolean');
 
         // Paragraph handling
-        $settings['forced_root_block'] = $wf->getParam('editor.forced_root_block', 'p', 'p');
-        $settings['removeformat_selector'] = $wf->getParam('editor.removeformat_selector', 'span,b,strong,em,i,font,u,strike', 'span,b,strong,em,i,font,u,strike');
+        $settings['forced_root_block']      = $wf->getParam('editor.forced_root_block', 'p');
+        
+        // set as boolean if disabled
+        if (is_numeric($settings['forced_root_block'])) {
+            $settings['forced_root_block'] = (bool)$settings['forced_root_block'];
+        }
+        
+        $settings['removeformat_selector']  = $wf->getParam('editor.removeformat_selector', 'span,b,strong,em,i,font,u,strike', 'span,b,strong,em,i,font,u,strike');
 
         $formats = array(
             'p' => 'advanced.paragraph',
@@ -53,17 +59,27 @@ class WFFormatPluginConfig {
             'dt' => 'advanced.dt',
             'dd' => 'advanced.dd'
         );
+        
+        $html5  = array('section', 'article', 'hgroup', 'aside', 'figure');
+        $schema = $wf->getParam('editor.schema', 'html4'); 
+        $verify = $wf->getParam('editor.verify_html', 0, 1, 'boolean');
 
-        $tmpblocks = $wf->getParam('editor.theme_advanced_blockformats', 'p,div,address,pre,h1,h2,h3,h4,h5,h6,code,samp,span,section,article,hgroup,aside,figure,dt,dd', 'p,address,pre,h1,h2,h3,h4,h5,h6');
-        $list = array();
-        $blocks = array();
-
+        $tmpblocks  = $wf->getParam('editor.theme_advanced_blockformats', 'p,div,address,pre,h1,h2,h3,h4,h5,h6,code,samp,span,section,article,hgroup,aside,figure,dt,dd', 'p,address,pre,h1,h2,h3,h4,h5,h6');
+        $list       = array();
+        $blocks     = array();
+        
+        // make an array
         if (is_string($tmpblocks)) {
             $tmpblocks = explode(',', $tmpblocks);
         }
 
-        foreach ($tmpblocks as $k => $v) {
+        foreach ($tmpblocks as $v) {
             $key = $formats[$v];
+            
+            // skip html5 blocks for html4 schema
+            if ($verify && $schema == 'html4' && in_array($v, $html5)) {
+                continue;
+            }
 
             if ($key) {
                 $list[$key] = $v;
@@ -88,15 +104,6 @@ class WFFormatPluginConfig {
         // Format list / Remove Format
         $settings['theme_advanced_blockformats'] = json_encode($list);
 
-        // add span 'format'
-        //$settings['formats'] = "{span : {inline : 'span'}}";
-        // new lines (paragraphs or linebreaks)
-        if ($wf->getParam('editor.newlines', 0)) {
-            $settings['force_br_newlines'] = true;
-            $settings['force_p_newlines'] = false;
-            $settings['forced_root_block'] = false;
-        }
-
         // Relative urls
         $settings['relative_urls'] = $wf->getParam('editor.relative_urls', 1, 1, 'boolean');
         if ($settings['relative_urls'] == 0) {
@@ -118,7 +125,6 @@ class WFFormatPluginConfig {
             $settings['theme_advanced_styles'] = implode(';', explode(',', $styles));
         }
     }
-
 }
 
 ?>

@@ -52,9 +52,9 @@ class WFModelEditor extends JModel {
 
             // Theme and skins
             $theme = array(
-                'toolbar_location' => array('top', 'bottom', 'string'),
-                'toolbar_align' => array('left', 'center', 'string'),
-                'statusbar_location' => array('bottom', 'top', 'string'),
+                'toolbar_location' => array('top', 'top', 'string'),
+                'toolbar_align' => array('left', 'left', 'string'),
+                'statusbar_location' => array('bottom', 'bottom', 'string'),
                 'path' => array(1, 1, 'boolean'),
                 'resizing' => array(1, 0, 'boolean'),
                 'resize_horizontal' => array(1, 1, 'boolean'),
@@ -85,7 +85,7 @@ class WFModelEditor extends JModel {
 
             // Editor Toggle
             $settings['toggle'] = $wf->getParam('editor.toggle', 1, 1);
-            $settings['toggle_label'] = htmlspecialchars($wf->getParam('editor.toggle_label', '[show/hide]', '[show/hide]'));
+            $settings['toggle_label'] = htmlspecialchars($wf->getParam('editor.toggle_label', '[Toggle Editor]', '[Toggle Editor]'));
             $settings['toggle_state'] = $wf->getParam('editor.toggle_state', 1, 1);
         }// end profile
         //Other - user specified
@@ -197,7 +197,7 @@ class WFModelEditor extends JModel {
 
         if ($profile) {
             if ($wf->getParam('editor.callback_file')) {
-                $document->addScript(JURI::root(true) . '/' . $callbackFile);
+                $document->addScript(JURI::root(true) . '/' . $wf->getParam('editor.callback_file'));
             }
         }
     }
@@ -299,7 +299,7 @@ class WFModelEditor extends JModel {
         if (is_object($profile)) {
             $plugins = explode(',', $profile->plugins);
 
-            $plugins = array_unique(array_merge(array('advlist', 'autolink', 'cleanup', 'code', 'format', 'lists', 'tabfocus', 'wordcount'), $plugins));
+            $plugins = array_unique(array_merge(array('advlist', 'autolink', 'cleanup', 'core', 'code', 'format', 'lists', 'tabfocus', 'wordcount'), $plugins));
 
             $compress = $wf->getParam('editor.compress_javascript', 0);
 
@@ -645,7 +645,7 @@ class WFModelEditor extends JModel {
 
     private static function importFontFace($file) {
         jimport('joomla.filesystem.file');
-        
+
         $content = '';
 
         if (is_file($file)) {
@@ -661,7 +661,7 @@ class WFModelEditor extends JModel {
             // @font-face
             if (strpos($content, '@font-face') !== false) {
                 $font = '';
-                
+
                 preg_match_all('#\@font-face\s*\{([^}]+)\}#', $content, $matches, PREG_SET_ORDER);
 
                 if ($matches) {
@@ -675,7 +675,7 @@ class WFModelEditor extends JModel {
                         $font .= preg_replace('#url\(([\'"]?)#', 'url($1' . $url, $match[0]);
                     }
                 }
-                
+
                 return $font;
             }
         }
@@ -688,14 +688,16 @@ class WFModelEditor extends JModel {
 
         foreach ((array) $files as $file) {
             $font = self::importFontFace($file);
-            
-            if (strpos($font, '@import') !== false) {
-                array_unshift($fonts, $font);
-            } else {
-                $fonts[] = $font;
-            } 
+
+            if ($font) {
+                if (strpos($font, '@import') !== false) {
+                    array_unshift($fonts, $font);
+                } else {
+                    $fonts[] = $font;
+                }
+            }
         }
-        
+
         if (!empty($fonts)) {
             return "/* @font-face and Google Font rules for JCE */" . "\n" . str_replace("\n\n", "\n", implode("\n", $fonts));
         }

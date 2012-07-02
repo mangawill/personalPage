@@ -13,14 +13,22 @@ defined('_JEXEC') or die('RESTRICTED');
 $position = 'mce' . ucfirst($this->profile->layout_params->get('toolbar_align', 'center'));
 
 // width and height
-$width = $this->profile->layout_params->get('editor_width', 600);
+$width  = $this->profile->layout_params->get('editor_width', 600);
 $height = $this->profile->layout_params->get('editor_height', 'auto');
 
-if (is_numeric($width)) {
+if (is_numeric($width) || strpos('%', $width) === false) {
     $width .= 'px';
 }
-if (is_numeric($height)) {
+if (is_numeric($height) || strpos('%', $height) === false) {
     $height .= 'px';
+}
+
+if (strpos('%', $width) !== false) {
+    $height = '600px';
+}
+
+if (strpos('%', $height) !== false) {
+    $height = 'auto';
 }
 
 $theme = $this->profile->layout_params->get('toolbar_theme', 'default');
@@ -48,6 +56,7 @@ if (strpos($theme, '.') === false) {
         <li>
             <label class="tooltip" title="<?php echo WFText::_('WF_PROFILES_FEATURES_LAYOUT_EDITOR') . '::' . WFText::_('WF_PROFILES_FEATURES_LAYOUT_EDITOR_DESC'); ?>"><?php echo WFText::_('WF_PROFILES_FEATURES_LAYOUT_EDITOR'); ?></label>
             <span class="profileLayoutContainer profileLayoutContainerCurrent <?php echo $theme; ?>">
+                <span id="editor_toggle"><?php echo $this->profile->layout_params->get('toggle_label', '[Toggle Editor]');?></span>
                 <span class="widthMarker" style="width:<?php echo $width; ?>;"><span><?php echo $width; ?></span></span>
                 <!-- Toolbar -->
                 <span id="toolbar_container" class="profileLayoutContainerToolbar">
@@ -59,7 +68,7 @@ if (strpos($theme, '.') === false) {
                                         <?php if ($i == $x) : ?>
                                             <?php foreach (explode(',', $this->rows[$x]) as $icon) : ?>
                                                 <?php if ($icon == 'spacer') : ?>
-                                                    <span class="sortableRowItem spacer" data-name="spacer"><span class="mceSeparator">|</span></span>
+                                                    <span class="sortableRowItem spacer" data-name="spacer"><span class="mceSeparator"></span></span>
                                                 <?php endif; ?>
                                                 <?php foreach ($this->plugins as $plugin) : ?>
                                                     <?php if ($plugin->icon && $plugin->name == $icon) : ?>
@@ -96,14 +105,14 @@ if (strpos($theme, '.') === false) {
                                 <?php if ($i == 5) :
                                     for ($x = 1; $x <= 10; $x++) :
                                 ?>
-                                    <span class="sortableRowItem spacer"><span class="mceSeparator">|</span></span>
+                                    <span class="sortableRowItem spacer" data-name="spacer"><span class="mceSeparator"></span></span>
                                 <?php
                                     endfor;
                                 endif;
 
                                 foreach ($this->plugins as $plugin) :
                                     if (!in_array($plugin->name, explode(',', implode(',', $this->rows)))) :
-                                        if ($plugin->icon && $plugin->row == $i) :
+                                        if ($plugin->icon && (int)$plugin->row == $i) :
                                             echo '<span class="sortableRowItem ' . $plugin->type . '" data-name="' . $plugin->name . '">' . $this->model->getIcon($plugin) . '</span>';
                                         endif;
                                     endif;
@@ -121,8 +130,8 @@ if (strpos($theme, '.') === false) {
     </ul>
     <!--  Legend -->	
     <div>
-        <a class="dialog legend" data-options="{'width': 750, 'height': 600}" target="_blank" title="<?php echo WFText::_('WF_LEGEND_TITLE'); ?>" href="index.php?option=com_jce&tmpl=component&view=legend">
-            <button id="layout-legend"><?php echo WFText::_('WF_PROFILES_LEGEND'); ?></button>
+        <a class="dialog legend" id="layout-legend" data-options="{'width': 750, 'height': 600}" target="_blank" title="<?php echo WFText::_('WF_LEGEND_TITLE'); ?>" href="index.php?option=com_jce&tmpl=component&view=legend">
+            <?php echo WFText::_('WF_PROFILES_LEGEND'); ?>
         </a>
     </div>
     <input type="hidden" name="rows" value="<?php echo $this->profile->rows; ?>" />
