@@ -2,9 +2,9 @@
 // ensure this file is being included by a parent file
 if (!defined('_JEXEC') && !defined('_VALID_MOS')) die('Restricted access');
 /**
- * @version $Id: download.php 201 2011-06-27 09:45:09Z soeren $
+ * @version $Id: download.php 211 2012-02-02 13:46:39Z soeren $
  * @package eXtplorer
- * @copyright soeren 2007-2009
+ * @copyright soeren 2007-2011
  * @author The eXtplorer project (http://extplorer.net)
  * @author The	The QuiX project (http://quixplorer.sourceforge.net)
  * 
@@ -58,10 +58,12 @@ class ext_Download extends ext_Action {
 
 		if (!$GLOBALS['ext_File']->file_exists($abs_item)) {
 			ext_Result::sendResult( 'download', false, $item.": ".$GLOBALS["error_msg"]["fileexist"]);
+			return false;
 		}
 
 		if (!get_show_item($dir, $item)) {
 			ext_Result::sendResult( 'download', false, $item.": ".$GLOBALS["error_msg"]["accessfile"]);
+			return false;
 		}
 
 		@set_time_limit( 0 );

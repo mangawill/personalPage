@@ -1,7 +1,10 @@
 ****************************
 Changelog for eXtplorer
-Version $Id: CHANGELOG.txt 207 2011-08-31 08:56:24Z soeren $
+Version $Id: CHANGELOG.txt 223 2012-07-02 13:46:08Z soeren $
 ****************************
+--- version 2.1.0 ---
+
+- fixed an XSS-vulnerability (impact: medium, users needs to be logged in)
 
 --- version 2.1.0 RC5 released ---
 

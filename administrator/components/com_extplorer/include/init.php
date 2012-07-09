@@ -2,7 +2,7 @@
 // ensure this file is being included by a parent file
 if (!defined('_JEXEC') && !defined('_VALID_MOS')) die('Restricted access');
 /**
- * @version $Id: init.php 203 2011-07-25 06:51:11Z soeren $
+ * @version $Id: init.php 211 2012-02-02 13:46:39Z soeren $
  * @package eXtplorer
  * @copyright soeren 2007-2011
  * @author The eXtplorer project (http://extplorer.net)
@@ -172,7 +172,8 @@ if( $action == 'include_javascript' ) {
   	while (@ob_end_clean());
 	ob_start();
   	header("Content-Type: text/javascript; charset=".strtolower($GLOBALS["charset"]));
-  	include( _EXT_PATH.'/scripts/'.basename(extGetParam($_REQUEST, 'file' )).'.php');
+  	$script_js_php = _EXT_PATH.'/scripts/'.basename(extGetParam($_REQUEST, 'file' )).'.php';
+  	if( file_exists( $script_js_php ) ) include( $script_js_php );
   	ext_exit();
 }
 //------------------------------------------------------------------------------
