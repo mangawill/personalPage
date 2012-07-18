@@ -23,6 +23,9 @@ final class WFImageManagerPlugin extends WFMediaManager {
      */
     public function __construct() {
         parent::__construct();
+
+        $browser = $this->getBrowser();
+        $browser->addEvent('onUpload', array($this, 'onUpload'));
     }
 
     /**
@@ -69,6 +72,94 @@ final class WFImageManagerPlugin extends WFMediaManager {
         $document->addScriptDeclaration('ImageManagerDialog.settings=' . json_encode($this->getSettings()) . ';');
     }
 
+    function onUpload($file) {
+        $browser = $this->getBrowser();
+        $filesystem = $browser->getFileSystem();
+
+        $params = $this->getParams();
+
+        if (JRequest::getWord('method') === 'dragdrop') {
+            $result = array(
+                'file' => str_replace(JPATH_SITE . '/', '', $file),
+                'name' => basename($file)
+            );
+
+            if ($params->get('always_include_dimensions', 1)) {
+                $dim = @getimagesize($file);
+
+                if ($dim) {
+                    $result['width'] = $dim[0];
+                    $result['height'] = $dim[1];
+                }
+            }
+
+            $defaults = $this->getDefaults();
+
+            unset($defaults['always_include_dimensions']);
+
+            if (!empty($defaults)) {
+                $styles = array();
+            }
+
+            foreach ($defaults as $k => $v) {
+                switch ($k) {
+                    case 'align':
+                        // convert to float
+                        if ($v == 'left' || $v == 'right') {
+                            $k = 'float';
+                        } else {
+                            $k = 'vertical-align';
+                        }
+
+                        // check for value and exclude border state parameter
+                        if ($v != '') {
+                            $styles[str_replace('_', '-', $k)] = $v;
+                        }
+                        break;
+                    case 'border_width':
+                    case 'border_style':
+                    case 'border_color':
+                        // only if border state set
+                        $v = $defaults['border'] ? $v : '';
+
+                        // add px unit to border-width
+                        if ($v && $k == 'border_width' && is_numeric($v)) {
+                            $v .= 'px';
+                        }
+
+                        // check for value and exclude border state parameter
+                        if ($v != '') {
+                            $styles[str_replace('_', '-', $k)] = $v;
+                        }
+
+                        break;
+                    case 'margin_left':
+                    case 'margin_right':
+                    case 'margin_top':
+                    case 'margin_bottom':
+                        // add px unit to border-width
+                        if ($v && is_numeric($v)) {
+                            $v .= 'px';
+                        }
+
+                        // check for value and exclude border state parameter
+                        if ($v != '') {
+                            $styles[str_replace('_', '-', $k)] = $v;
+                        }
+                        break;
+                }
+            }
+
+            if (!empty($styles)) {
+                $result['style'] = $styles;
+            }
+
+            return $result;
+        }
+
+        return $browser->getResult();
+    }
+
     function getSettings() {
         $params = $this->getParams();
 
@@ -79,7 +170,7 @@ final class WFImageManagerPlugin extends WFMediaManager {
                 'margin' => $params->get('imgmanager.attributes_margin', 1),
                 'border' => $params->get('imgmanager.attributes_border', 1)
             ),
-            'disable_dimensions' => $params->get('imgmanager.disable_dimensions', 0)
+            'always_include_dimensions' => $params->get('imgmanager.always_include_dimensions', 1)
         );
 
         return parent::getSettings($settings);

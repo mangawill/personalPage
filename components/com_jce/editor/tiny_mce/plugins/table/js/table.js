@@ -1,10 +1,10 @@
 /*  
- * JCE Editor                 2.2.1.2
+ * JCE Editor                 2.2.4
  * @package                 JCE
  * @url                     http://www.joomlacontenteditor.net
  * @copyright               Copyright (C) 2006 - 2012 Ryan Demmer. All rights reserved
  * @license                 GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html
- * @date                    29 June 2012
+ * @date                    16 July 2012
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -34,8 +34,8 @@ $('#insert').button('option','label',tinyMCEPopup.getLang('update','Update',true
 return className;});$('#dir').val(dir);$('#celltype').val(celltype);$('#scope').val(scope);if($('#backgroundimagebrowser').is(':visible')){$('#backgroundimage').width(180);}
 $('#insert').button('option','label',tinyMCEPopup.getLang('update','Update',true));}else{$('#action').hide();}},merge:function(){var func;tinyMCEPopup.restoreSelection();func=tinyMCEPopup.getWindowArg('onaction');func({cols:$('#numcols').val(),rows:$('#numrows').val()});tinyMCEPopup.close();},insertTable:function(){var ed=tinyMCEPopup.editor,dom=ed.dom;var cols=2,rows=2,border=0,cellpadding=-1,cellspacing=-1,align,width,height,className,caption,frame,rules;var html='',capEl,elm;var cellLimit,rowLimit,colLimit;tinyMCEPopup.restoreSelection();if(!AutoValidator.validate($('form').get(0))){tinyMCEPopup.alert(ed.getLang('invalid_data'));return false;}
 elm=dom.getParent(ed.selection.getNode(),'table');cols=$('#cols').val();rows=$('#rows').val();border=$('#border').val()!=""?$('#border').val():0;cellpadding=$('#cellpadding').val()!=""?$('#cellpadding').val():"";cellspacing=$('#cellspacing').val()!=""?$('#cellspacing').val():"";align=$("#align").val();frame=$("#tframe").val();rules=$("#rules").val();width=$('#width').val();height=$('#height').val();bordercolor=$('#bordercolor').val();bgcolor=$('#bgcolor').val();className=$("#class").val();id=$('#id').val();summary=$('#summary').val();style=$('#style').val();dir=$('#dir').val();lang=$('#lang').val();background=$('#backgroundimage').val();caption=$('#caption').is(':checked');cellLimit=tinyMCEPopup.getParam('table_cell_limit',false);rowLimit=tinyMCEPopup.getParam('table_row_limit',false);colLimit=tinyMCEPopup.getParam('table_col_limit',false);if(colLimit&&cols>colLimit){tinyMCEPopup.alert(ed.getLang('table_dlg.col_limit').replace(/\{\$cols\}/g,colLimit));return false;}else if(rowLimit&&rows>rowLimit){tinyMCEPopup.alert(ed.getLang('table_dlg.row_limit').replace(/\{\$rows\}/g,rowLimit));return false;}else if(cellLimit&&cols*rows>cellLimit){tinyMCEPopup.alert(ed.getLang('table_dlg.cell_limit').replace(/\{\$cells\}/g,cellLimit));return false;}
-if(action=="update"){ed.execCommand('mceBeginUndoLevel');if(!this.html5){dom.setAttrib(elm,'cellPadding',cellpadding,true);dom.setAttrib(elm,'cellSpacing',cellspacing,true);}
 if($('#border').is(':checkbox')){border=$('#border').is(':checked')?'1':'';}
+if(action=="update"){ed.execCommand('mceBeginUndoLevel');if(!this.html5){dom.setAttrib(elm,'cellPadding',cellpadding,true);dom.setAttrib(elm,'cellSpacing',cellspacing,true);}
 if(!this.isCssSize(border)){dom.setAttrib(elm,'border',border);}else{dom.setAttrib(elm,'border','');}
 if(border==''){dom.setStyle(elm,'border-width','');dom.setStyle(elm,'border','');dom.setAttrib(elm,'border','');}
 dom.setAttrib(elm,'align',align);dom.setAttrib(elm,'frame',frame);dom.setAttrib(elm,'rules',rules);dom.setAttrib(elm,'class',className);dom.setAttrib(elm,'style',style);dom.setAttrib(elm,'id',id);dom.setAttrib(elm,'summary',summary);dom.setAttrib(elm,'dir',dir);dom.setAttrib(elm,'lang',lang);capEl=ed.dom.select('caption',elm)[0];if(capEl&&!caption){capEl.parentNode.removeChild(capEl);}

@@ -31,14 +31,15 @@ class JElementLinkSearch extends JElement {
         $language   = JFactory::getLanguage();
         $plugins    = JPluginHelper::getPlugin('search');
 
+        // use tested defaults
         if (!$value) {
-            $value = array();
+            $value = array('categories', 'contacts', 'content', 'newsfeeds', 'weblinks');
         } else {
             $value = (array) $value;
         }
 
         //$html  = '<span style="display:inline-block;"><input class="checkbox-list-toggle-all" type="checkbox"'. $checked .' /><label>'. WFText::_('WF_PROFILES_TOGGLE_ALL') . '</label>'; 
-        $html = '<span><ul class="checkbox-list">';
+        $html = '<span style="display:inline-block;" data-parent="' . preg_replace(array('#^params#', '#([^\w]+)#'), '', $control_name) . $node->attributes('parent') . '"><ul class="checkbox-list">';
 
         foreach ($plugins as $item) {
             $plugin = WFExtensionHelper::getPlugin(null, $item->name, 'search');
@@ -48,7 +49,7 @@ class JElementLinkSearch extends JElement {
             $language->load($extension) || $language->load($extension, JPATH_ADMINISTRATOR);
             $language->load($extension . '.sys') || $language->load($extension . '.sys', JPATH_ADMINISTRATOR);
 
-            $checked = (in_array($plugin->element, $value) || empty($value)) ? ' checked="checked"' : '';
+            $checked = (in_array($plugin->element, $value)) ? ' checked="checked"' : '';
             $html   .= '<li><input type="checkbox" name="' . $control_name . '[' . $name . '][]" value="' . $plugin->element . '"' . $checked . ' /><label>' . JText::_($plugin->name) . '</label></li>';
         }
 

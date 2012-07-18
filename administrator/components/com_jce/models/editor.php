@@ -163,6 +163,12 @@ class WFModelEditor extends JModel {
                 else if (is_bool($v)) {
                     $v = $v ? 'true' : 'false';
                 }
+                // stringified booleans
+                else if ($v == "true") {
+                    $v = 'true';
+                } else if ($v == "false") {
+                    $v = 'false';
+                }
                 // anything that is not solely an integer
                 else if (!is_numeric($v)) {
                     if (strpos($v, '"') === 0) {
@@ -198,6 +204,15 @@ class WFModelEditor extends JModel {
         if ($profile) {
             if ($wf->getParam('editor.callback_file')) {
                 $document->addScript(JURI::root(true) . '/' . $wf->getParam('editor.callback_file'));
+            }
+            // add callback file if exists
+            if (is_file(JPATH_SITE . DS . 'media' . DS . 'jce' . DS . 'js' . DS . 'editor.js')) {
+                $document->addScript(JURI::root(true) . '/media/jce/js/editor.js');
+            }
+            
+            // add custom editor.css if exists
+            if (is_file(JPATH_SITE . DS . 'media' . DS . 'jce' . DS . 'css' . DS . 'editor.css')) {
+                $document->addStyleSheet(JURI::root(true) . '/media/jce/css/editor.css');
             }
         }
     }
@@ -299,7 +314,7 @@ class WFModelEditor extends JModel {
         if (is_object($profile)) {
             $plugins = explode(',', $profile->plugins);
 
-            $plugins = array_unique(array_merge(array('advlist', 'autolink', 'cleanup', 'core', 'code', 'format', 'lists', 'tabfocus', 'wordcount'), $plugins));
+            $plugins = array_unique(array_merge(array('advlist', 'autolink', 'cleanup', 'core', 'code', 'dragupload', 'format', 'lists', 'wordcount'), $plugins));
 
             $compress = $wf->getParam('editor.compress_javascript', 0);
 

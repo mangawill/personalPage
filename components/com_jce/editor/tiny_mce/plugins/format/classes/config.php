@@ -1,11 +1,10 @@
 <?php
 
 /**
- * @version		$Id: config.php 221 2011-06-11 17:30:33Z happy_noodle_boy $
  * @package     JCE
- * @copyright   Copyright (C) 2005 - 2009 Ryan Demmer. All rights reserved.
- * @author		Ryan Demmer
- * @license     GNU/GPL 2 - See licence.txt
+ * @copyright   @@opcyright@@
+ * @author      Ryan Demmer
+ * @license     GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
  * is derivative of works licensed under the GNU General Public License or
@@ -62,7 +61,7 @@ class WFFormatPluginConfig {
         
         $html5  = array('section', 'article', 'hgroup', 'aside', 'figure');
         $schema = $wf->getParam('editor.schema', 'html4'); 
-        $verify = $wf->getParam('editor.verify_html', 0, 1, 'boolean');
+        $verify = (bool) $wf->getParam('editor.verify_html', 0);
 
         $tmpblocks  = $wf->getParam('editor.theme_advanced_blockformats', 'p,div,address,pre,h1,h2,h3,h4,h5,h6,code,samp,span,section,article,hgroup,aside,figure,dt,dd', 'p,address,pre,h1,h2,h3,h4,h5,h6');
         $list       = array();

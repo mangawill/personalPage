@@ -1,10 +1,10 @@
 /*  
- * JCE Editor                 2.2.1.2
+ * JCE Editor                 2.2.4
  * @package                 JCE
  * @url                     http://www.joomlacontenteditor.net
  * @copyright               Copyright (C) 2006 - 2012 Ryan Demmer. All rights reserved
  * @license                 GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html
- * @date                    29 June 2012
+ * @date                    16 July 2012
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -27,5 +27,5 @@ data=data||{};var settings={bgiframe:true,width:640,height:480,modal:o.modal||fa
 $(this).dialog("close");}},open:function(){_fixDialog(div,settings);$(div).attr('id','dialog-confirm').append(text);$('button').each(function(){var h=this.innerHTML;h=h.replace(/\$([a-z]+)/,function(a,b){return self.options.labels[b];});this.innerHTML=h;}).addClass('ui-state-default ui-corner-all');},close:function(){$(this).dialog('destroy');}});if(o.type=='confirm'){$.extend(settings.buttons,{'$cancel':function(){$(this).dialog("close");}});}}
 if(data.id){$(div).attr('id',data.id);}
 $(div).css('overflow','hidden').attr('title',title).dialog($.extend(settings,data));},closeDialog:function(el){$(el).dialog("close").remove();},_passwordWidget:function(el){var span=document.createElement('span');$(span).addClass('widget-password locked').insertAfter(el).click(function(){el=$(this).siblings('input[type="password"]');if($(this).hasClass('locked')){var input=document.createElement('input');$(el).hide();$(input).attr({type:'text',size:$(el).attr('size'),value:$(el).val(),'class':$(el).attr('class')}).insertAfter(el).change(function(){$(el).val(this.value);});}else{var n=$(this).siblings('input[type="text"]');var v=$(n).val();$(n).remove();$(el).val(v).show();}
-$(this).toggleClass('locked');});},_formWidgets:function(){var self=this;$('input[type="password"]').each(function(){self._passwordWidget(this);});$('input[placeholder]:not(:file), textarea[placeholder]').placeholder();$(':input[pattern]').pattern();$(':input[max]').max();$(':input[min]').min();},_setDependants:function(){$(':input[data-parent]').each(function(){var el=this,data=$(this).data('parent');$(this).parent().hide();var s=/([\w\.]+)\[([\w,]+)\]/.exec(data);if(s){var k=s[1],v=s[2].split(',');$('#params'+k.replace(/[^\w]+/g,'')).change(function(){var state=$.inArray(this.value,v)!=-1;if(state){$(el).parent().show();}else{$(el).parent().hide();}
+$(this).toggleClass('locked');});},_formWidgets:function(){var self=this;$('input[type="password"]').each(function(){self._passwordWidget(this);});$('input[placeholder]:not(:file), textarea[placeholder]').placeholder();$(':input[pattern]').pattern();$(':input[max]').max();$(':input[min]').min();},_setDependants:function(){$('[data-parent]').each(function(){var el=this,data=$(this).data('parent');$(this).parent().hide();var s=/([\w\.]+)\[([\w,]+)\]/.exec(data);if(s){var k=s[1],v=s[2].split(',');$('#params'+k.replace(/[^\w]+/g,'')).change(function(){var state=$.inArray(this.value,v)!=-1;if(state){$(el).parent().show();}else{$(el).parent().hide();}
 $(el).trigger('visibility:toggle',state);}).on('visibility:toggle',function(e,state){if(state){$(el).parent().show();}else{$(el).parent().hide();}}).change();}});}};})(jQuery);var $jce=jQuery.jce;

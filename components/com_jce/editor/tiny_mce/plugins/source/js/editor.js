@@ -1,10 +1,10 @@
 /*  
- * JCE Editor                 2.2.1.2
+ * JCE Editor                 2.2.4
  * @package                 JCE
  * @url                     http://www.joomlacontenteditor.net
  * @copyright               Copyright (C) 2006 - 2012 Ryan Demmer. All rights reserved
  * @license                 GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html
- * @date                    29 June 2012
+ * @date                    16 July 2012
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -23,7 +23,8 @@ Event.add(n,'click',function(){func.call(self,!DOM.hasClass(n,'active'));if(DOM.
 var r=func.call(self,v,false,doc.getElementById('source_search_regex').checked);});var k=(s=='search')?'prev':'all';var btn2=DOM.add(search,'span',{'class':'button source_'+s+'_'+k,'title':ed.getLang('source.'+s+'_'+k,s+' '+k)});Event.add(btn2,'click',function(){var v=[doc.getElementById('source_search_value').value];if(s=='replace'){v.push(doc.getElementById('source_replace_value').value)}
 var r=func.call(self,v,true,doc.getElementById('source_search_regex').checked);});});DOM.add(search,'input',{'id':'source_search_regex','type':'checkbox'});DOM.add(search,'label',{'for':'source_search_regex'},ed.getLang('source.regex','Regular Expression'));},_format:function(html,validate){if(validate){parser.parse(html);}
 return this.formatHTML(html);},_load:function(content){var self=this,cm,o=this.options;if(window.CodeMirror){if(o.theme=='codemirror'){o.theme='default';}
-var settings={mode:"text/html",theme:o.theme,onChange:function(){o.change.call();},indentWithTabs:true,smartIndent:true,tabMode:"indent",onCursorActivity:function(){cm.matchHighlight("CodeMirror-matchhighlight");cm.setLineClass(hlLine,null,null);hlLine=cm.setLineClass(cm.getCursor().line,null,"activeline");},closeTagIndent:false};if(o.tag_closing){tinymce.extend(settings,{extraKeys:{"'>'":function(cm){cm.closeTag(cm,'>');},"'/'":function(cm){cm.closeTag(cm,'/');}}});}
+var settings={mode:"text/html",theme:o.theme,onChange:function(){o.change.call();},indentWithTabs:true,smartIndent:true,tabMode:"indent",closeTagIndent:false};if(o.selection_match){tinymce.extend(settings,{onCursorActivity:function(){cm.matchHighlight("CodeMirror-matchhighlight");cm.setLineClass(hlLine,null,null);hlLine=cm.setLineClass(cm.getCursor().line,null,"activeline");}});}
+if(o.tag_closing){tinymce.extend(settings,{extraKeys:{"'>'":function(cm){cm.closeTag(cm,'>');},"'/'":function(cm){cm.closeTag(cm,'/');}}});}
 cm=CodeMirror(this.container,settings);var hlLine=cm.setLineClass(0,"activeline");cm.setWrap=function(s){cm.setOption('lineWrapping',s);cm.focus();};cm.showGutter=function(s){cm.setOption('lineNumbers',s);cm.focus();};cm.highlight=function(s){var c=cm.getCursor();if(s){cm.setOption('mode','text/html');}else{cm.setOption('mode','text/plain');}
 cm.setCursor(c);cm.focus();};cm.resize=function(w,h,init){var gutter=cm.getGutterElement(),scroller=cm.getScrollerElement(),scrollbar=scroller.previousSibling;if(!init){h=h-self.toolbar.offsetHeight;}
 DOM.setStyles(scroller,{width:w-scrollbar.offsetWidth,height:h});DOM.setStyles(scrollbar,{height:h});DOM.setStyles(gutter,{height:h});};cm.showInvisibles=function(s){};cm.setContent=function(v){if(v===''){v='\u00a0';}
@@ -33,10 +34,10 @@ function doSearch(cm,rev,query){var state=cm.getSearchState(cm);if(state.query)r
 state.marked.push(cm.markText(cursor.from(),cursor.to(),"CodeMirror-searching"));}
 state.posFrom=state.posTo=cm.getCursor();findNext(cm,rev);});}
 function findNext(cm,rev){cm.operation(function(){var state=cm.getSearchState(cm);var cursor=cm.getSearchCursor(state.query,rev?state.posFrom:state.posTo);if(!cursor.find(rev)){cursor=cm.getSearchCursor(state.query,rev?{line:cm.lineCount()-1}:{line:0,ch:0});if(!cursor.find(rev))return;}
-cm.setSelection(cursor.from(),cursor.to());state.posFrom=cursor.from();state.posTo=cursor.to();})}
+cm.setSelection(cursor.from(),cursor.to());state.posFrom=cursor.from();state.posTo=cursor.to();var pos=cm.charCoords(state.posFrom,'local');cm.scrollTo(pos.x,pos.y);})}
 doSearch(cm,rev,query);};cm.replace=function(query,text,all,re){var self=this;if(re){query=new RegExp(query);}
 if(all){cm.compoundChange(function(){cm.operation(function(){for(var cursor=cm.getSearchCursor(query);cursor.findNext();){if(typeof query!="string"){var match=cm.getRange(cursor.from(),cursor.to()).match(query);cursor.replace(text.replace(/\$(\d)/,function(w,i){return match[i];}));}else cursor.replace(text);}})});}else{cm.clearSearch();var cursor=cm.getSearchCursor(query,cm.getCursor());function advance(){var start=cursor.from(),match;if(!(match=cursor.findNext())){cursor=cm.getSearchCursor(query);if(!start||!(match=cursor.findNext())||(cursor.from().line==start.line&&cursor.from().ch==start.ch)){cm.focus();return false;}}
-cm.setSelection(cursor.from(),cursor.to());doReplace(match);cm.setCursor(cursor.to());cm.focus();}
+cm.setSelection(cursor.from(),cursor.to());doReplace(match);cm.setCursor(cursor.to());var pos=cm.charCoords(cursor.to(),'local');cm.scrollTo(pos.x,pos.y);cm.focus();}
 function doReplace(match){cursor.replace(typeof query=="string"?text:text.replace(/\$(\d)/,function(w,i){return match[i];}));}
 advance();}};cm.format=function(){CodeMirror.commands["selectAll"](cm);function getSelectedRange(){return{from:cm.getCursor(true),to:cm.getCursor(false)};}
 var range=getSelectedRange();cm.autoFormatRange(range.from,range.to);};this.editor=cm;this._loaded(content);cm.refresh();window.setTimeout(function(){var scroller=cm.getScrollerElement(),h=cm.getScrollerElement().offsetHeight-self.toolbar.offsetHeight;DOM.setStyle(scroller,'height',h);DOM.setStyle(scroller.previoussibling,'height',h);},10);}},_loaded:function(content){var o=this.options;this.setContent(content);this.wrap(!!o.wrap);this.linenumbers(!!o.linenumbers);this.focus();o.load.call();},search:function(s,rev,re){return this.editor.search(s[0],rev,re);},replace:function(s,all,re){return this.editor.replace(s[0],s[1],all,re);},clearSearch:function(){return this.editor.clearSearch();},wrap:function(s){return this.editor.setWrap(s);},linenumbers:function(s){return this.editor.showGutter(s);},highlight:function(s){return this.editor.highlight(s);},setContent:function(v,format){if(format){v=this._format(v);}
