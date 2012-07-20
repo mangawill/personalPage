@@ -68,12 +68,12 @@ $user		= JFactory::getUser();
     
     <?php if ($params->get('show_create_date')) : ?>
       <div class="create">
-      <?php echo JText::sprintf('COM_CONTENT_CREATED_DATE_ON', JHtml::_('date', $this->item->created, JText::_('DATE_FORMAT_LC3'))); ?>
+      <?php echo JText::sprintf('COM_CONTENT_CREATED_DATE_ON', JHtml::_('date', $this->item->created, JText::_('DATE_FORMAT_LC2'))); ?>
       </div>
     <?php endif; ?>
     <?php if ($params->get('show_modify_date')) : ?>
       <div class="modified">
-      <?php echo JText::sprintf('COM_CONTENT_LAST_UPDATED', JHtml::_('date', $this->item->modified, JText::_('DATE_FORMAT_LC3'))); ?>
+      <?php echo JText::sprintf('COM_CONTENT_LAST_UPDATED', JHtml::_('date', $this->item->modified, JText::_('DATE_FORMAT_LC2'))); ?>
       </div>
     <?php endif; ?>
     <?php if ($params->get('show_publish_date')) : ?>
