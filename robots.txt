@@ -25,7 +25,6 @@ Disallow: /modules/
 Disallow: /plugins/
 Disallow: /templates/
 Disallow: /tmp/
-Disallow: /hobyles/
 sitemap: http://jure-stern.si/en/?option=com_xmap&view=xml&id=1
 sitemap: http://jure-stern.si/sl/?option=com_xmap&view=xml&id=1
 
