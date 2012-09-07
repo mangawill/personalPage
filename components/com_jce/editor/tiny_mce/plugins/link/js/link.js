@@ -1,10 +1,10 @@
 /*  
- * JCE Editor                 2.2.4
+ * JCE Editor                 2.2.6
  * @package                 JCE
  * @url                     http://www.joomlacontenteditor.net
  * @copyright               Copyright (C) 2006 - 2012 Ryan Demmer. All rights reserved
  * @license                 GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html
- * @date                    16 July 2012
+ * @date                    19 August 2012
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,8 +18,8 @@
  * NOTE : Javascript files have been compressed for speed and can be uncompressed using http://jsbeautifier.org/
  */
 var LinkDialog={settings:{},preInit:function(){tinyMCEPopup.requireLangPack();},init:function(){tinyMCEPopup.restoreSelection();var self=this,ed=tinyMCEPopup.editor,se=ed.selection,n,el;$('button#insert').click(function(e){self.insert();e.preventDefault();});$('button#help').click(function(e){self.openHelp();e.preventDefault();});tinyMCEPopup.resizeToInnerSize();if(!this.settings.file_browser){$('#href').removeClass('browser');}
-$('span.email').click(function(){LinkDialog.createEmail();});$('#anchor_container').html(this.getAnchorListHTML('anchor','href'));WFLinkBrowser.init({onClick:function(v){self.insertLink(v);}});WFLinkSearch.init({onClick:function(v){self.insertLink(v);}});WFPopups.setup();if(!se.isCollapsed()){n=se.getNode();var state=false,v;function setText(state,v){if(state&&v){$('#text').val(v);$('#text').attr('disabled',false);}else{$('#text').val(tinyMCEPopup.getLang('dlg.selection','Element Selection'));$('#text').attr('disabled',true);$('#text').addClass('disabled');}}
-if(n){n=ed.dom.getParent(n,'A')||n;if(n.nodeName=='A'){var c=n.childNodes;if(c.length==1&&c[0].nodeType==3){state=true;v=se.getContent({format:'text'});}}else{if(ed.dom.isBlock(n)||n.nodeName==='BODY'){state=true;v=se.getContent({format:'text'});}}}else{state=true;v=se.getContent({format:'text'});}
+$('span.email').click(function(){LinkDialog.createEmail();});$('#anchor_container').html(this.getAnchorListHTML('anchor','href'));WFLinkBrowser.init({onClick:function(v){self.insertLink(v);}});WFLinkSearch.init({onClick:function(v){self.insertLink(v);}});WFPopups.setup();var bh=$('#link-browser').innerHeight(),wh=$(window).height(),ww=$(window).width(),iw=$('#search-input').width();$(window).bind('resize',function(){$('#link-browser').height(bh+$(this).height()-wh);$('#search-input').width(iw+$(this).width()-ww);});if(!se.isCollapsed()){n=se.getNode();var state=false,v;function setText(state,v){if(state&&v){$('#text').val(v);$('#text').attr('disabled',false);}else{$('#text').val(tinyMCEPopup.getLang('dlg.selection','Element Selection'));$('#text').attr('disabled',true);$('#text').addClass('disabled');}}
+if(n){n=ed.dom.getParent(n,'A')||n;if(n.nodeName=='A'){var c=n.childNodes;if(c.length==1&&c[0].nodeType==3){state=true;v=se.getContent({format:'text'});}}else{if(ed.dom.isBlock(n)||n.nodeName==='BODY'){v=se.getContent();state=/<([^>]+)>/.test(v)===false;}}}else{state=true;v=se.getContent({format:'text'});}
 setText(state,v);}
 $.Plugin.init();TinyMCE_Utils.fillClassList('classlist');$.each(this.settings.attributes,function(k,v){if(parseInt(v)===0){$('#attributes-'+k).hide();}});if(n&&n.nodeName=='A'){$('#insert').button('option','label',tinyMCEPopup.getLang('update','Update',true));var href=decodeURIComponent(ed.convertURL(ed.dom.getAttrib(n,'href')));$('#href').val(href);$.each(['title','id','style','dir','lang','tabindex','accesskey','class','charset','hreflang','target'],function(i,k){$('#'+k).val(ed.dom.getAttrib(n,k));});$('#dir').val(ed.dom.getAttrib(n,'dir'));$('#rev').val(ed.dom.getAttrib(n,'rel'),true);$('#rel').val(function(){var v=ed.dom.getAttrib(n,'rel');if($('option[value="'+v+'"]',this).length==0){$(this).append(new Option(v,v));$(this).val(v);}
 return v;});if(href.charAt(0)=='#'){$('#anchor').val(href);}

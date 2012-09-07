@@ -41,24 +41,103 @@ function com_uninstall() {
 
 class WFInstall {
 
+    private static function cleanupInstall() {
+        $path = JPATH_ADMINISTRATOR . '/components/com_jce';
+
+        if (!is_file($path . '/jce.php')) {
+            self::removePackages();
+
+            $db = JFactory::getDBO();
+
+            // cleanup menus
+            if (defined('JPATH_PLATFORM')) {
+                $db->setQuery('DELETE FROM #__menu WHERE alias = ' . $db->Quote('jce') . ' AND menutype = ' . $db->Quote('main'));
+                $db->query();
+
+                $db->setQuery('DELETE FROM #__menu WHERE alias LIKE ' . $db->Quote('wf-menu-%') . ' AND menutype = ' . $db->Quote('main'));
+                $db->query();
+            } else {
+                $db->setQuery('DELETE FROM #__components WHERE `option` = ' . $db->Quote('com_jce'));
+                $db->query();
+            }
+        }
+
+        if (is_file($path . '/install.script.php')) {
+            jimport('joomla.filesystem.folder');
+            jimport('joomla.filesystem.file');
+
+            JFile::delete($path . '/install.script.php');
+            JFolder::delete($path);
+        }
+    }
+
     public static function install($installer) {
-        
+        error_reporting(E_ERROR | E_WARNING);
+
+        // load languages
+        $language = JFactory::getLanguage();
+        $language->load('com_jce', JPATH_ADMINISTRATOR, null, true);
+        $language->load('com_jce.sys', JPATH_ADMINISTRATOR, null, true);
+
+        $requirements = array();
+
         // check PHP version
-        if (version_compare(PHP_VERSION, '5.2.1', '<')) {            
-            $installer->abort('JCE requires PHP 5.2.1 or later. Your server currently uses ' . PHP_VERSION);
+        if (version_compare(PHP_VERSION, '5.2.4', '<')) {
+            $requirements[] = array(
+                'name' => 'PHP Version',
+                'info' => 'JCE Requires PHP version 5.2.4 or later. Your version is : ' . PHP_VERSION
+            );
+        }
+
+        // check JSON is installed
+        if (function_exists('json_encode') === false || function_exists('json_decode') === false) {
+            $requirements[] = array(
+                'name' => 'JSON',
+                'info' => 'JCE requires the <a href="http://php.net/manual/en/book.json.php" target="_blank">PHP JSON</a> extension which is not available on this server.'
+            );
+        }
+
+        // check SimpleXML
+        if (function_exists('simplexml_load_string') === false || function_exists('simplexml_load_file') === false || class_exists('SimpleXMLElement') === false) {
+            $requirements[] = array(
+                'name' => 'SimpleXML',
+                'info' => 'JCE requires the <a href="http://php.net/manual/en/book.simplexml.php" target="_blank">PHP SimpleXML</a> library which is not available on this server.'
+            );
+        }
+
+        if (!empty($requirements)) {
+            $message = '<div id="jce"><style type="text/css" scoped="scoped">' . file_get_contents(dirname(__FILE__) . '/media/css/install.css') . '</style>';
+
+            $message .= '<h2>' . JText::_('WF_ADMIN_TITLE') . ' - Install Failed</h2>';
+            $message .= '<h3>JCE could not be installed as this site does not meet <a href="http://www.joomlacontenteditor.net/support/documentation/56-editor/106-requirements" target="_blank">technical requirements</a> (see below)</h3>';
+            $message .= '<ul class="install">';
+
+            foreach ($requirements as $requirement) {
+                $message .= '<li class="error">' . $requirement['name'] . ' : ' . $requirement['info'] . '<li>';
+            }
+
+            $message .= '</ul>';
+            $message .= '</div>';
+
+            $installer->set('message', $message);
+
+            $installer->abort();
+
+            self::cleanupInstall();
+
             return false;
         }
-        
-        require_once($installer->getPath('extension_administrator') . DS . 'includes' . DS . 'base.php');
-        
+
+        require_once($installer->getPath('extension_administrator') . '/includes/base.php');
+
         $manifest = $installer->get('manifest');
-        
+
         // get the version we're installing
         if ($manifest) {
-            $new_version    = $manifest->version;
+            $new_version = $manifest->version;
         } else {
-            $manifest       = JApplicationHelper::parseXMLInstallFile($installer->getPath('source') . DS . 'jce.xml');
-            $new_version    = $manifest['version'];
+            $manifest = JApplicationHelper::parseXMLInstallFile($installer->getPath('source') . '/jce.xml');
+            $new_version = $manifest['version'];
         }
 
         $state = false;
@@ -67,7 +146,7 @@ class WFInstall {
         $current_version = $new_version;
 
         // get the current version 
-        $xml_file = $installer->getPath('extension_administrator') . DS . 'jce.xml';
+        $xml_file = $installer->getPath('extension_administrator') . '/jce.xml';
 
         if (is_file($xml_file)) {
             $xml = JApplicationHelper::parseXMLInstallFile($xml_file);
@@ -105,23 +184,19 @@ class WFInstall {
         }
 
         if ($state) {
-            $language = JFactory::getLanguage();
-            $language->load('com_jce', JPATH_ADMINISTRATOR, null, true);
-            $language->load('com_jce.sys', JPATH_ADMINISTRATOR, null, true);
-
             // legacy (JCE 1.5) cleanup
             if (!defined('JPATH_PLATFORM')) {
                 self::legacyCleanup();
             }
 
-            $message = '<div id="jce"><style type="text/css" scoped="scoped">' . file_get_contents(dirname(__FILE__) . DS . 'media' . DS . 'css' . DS . 'install.css') . '</style>';
+            $message = '<div id="jce"><style type="text/css" scoped="scoped">' . file_get_contents(dirname(__FILE__) . '/media/css/install.css') . '</style>';
 
             $message .= '<h2>' . JText::_('WF_ADMIN_TITLE') . ' ' . $new_version . '</h2>';
             $message .= '<ul class="install">';
             $message .= '<li class="success">' . JText::_('WF_ADMIN_DESC') . '<li>';
 
             // install packages (editor plugin, quickicon etc)
-            $packages = dirname(__FILE__) . DS . 'packages';
+            $packages = dirname(__FILE__) . '/packages';
 
             // install additional packages
             if (is_dir($packages)) {
@@ -134,10 +209,10 @@ class WFInstall {
             $installer->set('message', $message);
 
             // post-install
-            self::addIndexfiles(array(dirname(__FILE__), JPATH_SITE . DS . 'components' . DS . 'com_jce', JPATH_PLUGINS . DS . 'jce'));
+            self::addIndexfiles(array(dirname(__FILE__), JPATH_SITE . '/components/com_jce', JPATH_PLUGINS . '/jce'));
         } else {
             $installer->abort();
-            
+
             return false;
         }
     }
@@ -174,14 +249,14 @@ class WFInstall {
         jimport('joomla.filesystem.folder');
         jimport('joomla.filesystem.file');
 
-        $admin = JPATH_ADMINISTRATOR . DS . 'components' . DS . 'com_jce';
-        $site = JPATH_SITE . DS . 'components' . DS . 'com_jce';
+        $admin = JPATH_ADMINISTRATOR . '/components/com_jce';
+        $site = JPATH_SITE . '/components/com_jce';
 
-        require_once($admin . DS . 'helpers' . DS . 'parameter.php');
+        require_once($admin . '/helpers/parameter.php');
 
         // add tables path
-        JTable::addIncludePath($admin . DS . 'tables');
-        
+        JTable::addIncludePath($admin . '/tables');
+
         // upgrade from 1.5.x to 2.0.0 (only in Joomla! 1.5)
         if (version_compare($version, '2.0.0', '<') && !defined('JPATH_PLATFORM')) {
             // check for groups table / data
@@ -243,7 +318,7 @@ class WFInstall {
                         $row->rows = implode(';', $rows);
 
                         $names = array('anchor');
-                        
+
                         // transfer plugin ids to names
                         foreach (explode(',', $group->plugins) as $id) {
                             if (isset($plugins[$id])) {
@@ -418,130 +493,117 @@ class WFInstall {
             }
 
             // remove old admin language files
-            $folders = JFolder::folders(JPATH_ADMINISTRATOR . DS . 'language', '.', false, true, array('.svn', 'CVS', 'en-GB'));
-            
+            $folders = JFolder::folders(JPATH_ADMINISTRATOR . '/language', '.', false, true, array('.svn', 'CVS', 'en-GB'));
+
             foreach ($folders as $folder) {
                 $name = basename($folder);
                 $files = array($name . '.com_jce.ini', $name . '.com_jce.menu.ini', $name . '.com_jce.xml');
                 foreach ($files as $file) {
-                    if (is_file($folder . DS . $file)) {
-                        @JFile::delete($folder . DS . $file);
+                    if (is_file($folder . '/' . $file)) {
+                        @JFile::delete($folder . '/' . $file);
                     }
                 }
             }
-            
+
             // remove old site language files
-            $folders = JFolder::folders(JPATH_SITE . DS . 'language', '.', false, true, array('.svn', 'CVS', 'en-GB'));
+            $folders = JFolder::folders(JPATH_SITE . '/language', '.', false, true, array('.svn', 'CVS', 'en-GB'));
 
             foreach ($folders as $folder) {
                 $files = JFolder::files($folder, '^' . basename($folder) . '\.com_jce([_a-z0-9]+)?\.(ini|xml)$', false, true);
                 @JFile::delete($files);
             }
-            
+
             // remove legacy admin folders
             $folders = array('cpanel', 'config', 'css', 'groups', 'plugins', 'img', 'installer', 'js');
             foreach ($folders as $folder) {
-                if (is_dir($admin . DS . $folder)) {
-                    @JFolder::delete($admin . DS . $folder);
+                if (is_dir($admin . '/' . $folder)) {
+                    @JFolder::delete($admin . '/' . $folder);
                 }
             }
-            
+
             // remove legacy admin files
             $files = array('editor.php', 'helper.php', 'updater.php');
-            
+
             foreach ($files as $file) {
-                if (is_file($admin . DS . $file)) {
-                    @JFile::delete($admin . DS . $file);
+                if (is_file($admin . '/' . $file)) {
+                    @JFile::delete($admin . '/' . $file);
                 }
             }
-            
+
             // remove legacy admin folders
             $folders = array('controller', 'css', 'js');
             foreach ($folders as $folder) {
-                if (is_dir($site . DS . $folder)) {
-                    @JFolder::delete($site . DS . $folder);
+                if (is_dir($site . '/' . $folder)) {
+                    @JFolder::delete($site . '/' . $folder);
                 }
             }
-            
+
             // remove legacy admin files
             $files = array('popup.php');
-            
+
             foreach ($files as $file) {
-                if (is_file($site . DS . $file)) {
-                    @JFile::delete($site . DS . $file);
+                if (is_file($site . '/' . $file)) {
+                    @JFile::delete($site . '/' . $file);
                 }
             }
-            
-            
+
+
             if (!defined('JPATH_PLATFORM')) {
                 // remove old plugin folder
-                $path = JPATH_PLUGINS . DS . 'editors';
+                $path = JPATH_PLUGINS . '/editors';
 
-                if (is_dir($path . DS . 'jce')) {
-                    @JFolder::delete($path . DS . 'jce');
+                if (is_dir($path . '/jce')) {
+                    @JFolder::delete($path . '/jce');
                 }
             }
 
             return true;
         }// end JCE 1.5 upgrade
-
         // cleanup javascript and css files moved to site
         if (version_compare($version, '2.0.10', '<')) {
-            $path = $admin . DS . 'media';
+            $path = $admin . '/media';
 
             $scripts = array('colorpicker.js', 'help.js', 'html5.js', 'select.js', 'tips.js');
 
             foreach ($scripts as $script) {
-                if (is_file($path . DS . 'js' . DS . $script)) {
-                    @JFile::delete($path . DS . 'js' . DS . $script);
+                if (is_file($path . '/js/' . $script)) {
+                    @JFile::delete($path . '/js/' . $script);
                 }
             }
 
-            if (is_dir($path . DS . 'js' . DS . 'jquery')) {
-                @JFolder::delete($path . DS . 'js' . DS . 'jquery');
+            if (is_dir($path . '/js/jquery')) {
+                @JFolder::delete($path . '/js/jquery');
             }
 
             $styles = array('help.css', 'select.css', 'tips.css');
 
             foreach ($styles as $style) {
-                if (is_file($path . DS . 'css' . DS . $style)) {
-                    @JFile::delete($path . DS . 'css' . DS . $style);
+                if (is_file($path . '/css/' . $style)) {
+                    @JFile::delete($path . '/css/' . $style);
                 }
             }
 
             // delete jquery
-            if (is_dir($path . DS . 'css' . DS . 'jquery')) {
-                @JFolder::delete($path . DS . 'css' . DS . 'jquery');
+            if (is_dir($path . '/css/jquery')) {
+                @JFolder::delete($path . '/css/jquery');
             }
 
             // remove popup controller
-            if (is_dir($site . DS . 'controller')) {
-                @JFolder::delete($site . DS . 'controller');
+            if (is_dir($site . '/controller')) {
+                @JFolder::delete($site . '/controller');
             }
         }
 
         // delete error.php file
         if (version_compare($version, '2.0.12', '<')) {
-            if (is_file($site . DS . 'editor' . DS . 'libraries' . DS . 'classes' . DS . 'error.php')) {
-                @JFile::delete($site . DS . 'editor' . DS . 'libraries' . DS . 'classes' . DS . 'error.php');
-            }
-        }
-
-        // remove old jQuery and jQuery UI versions
-        if (version_compare($version, '2.0.20', '<')) {
-            $path = $site . DS . 'editor' . DS . 'libraries' . DS . 'js' . DS . 'jquery';
-            $files = array('jquery-1.7.1.min.js', 'jquery-ui-1.8.17.custom.min.js', 'jquery-ui-layout.js');
-
-            foreach ($files as $file) {
-                if (is_file($path . DS . $file)) {
-                    @JFile::delete($path . DS . $file);
-                }
+            if (is_file($site . '/editor/libraries/classes/error.php')) {
+                @JFile::delete($site . '/editor/libraries/classes/error.php');
             }
         }
 
         if (version_compare($version, '2.1', '<')) {
-            if (is_dir($admin . DS . 'plugin')) {
-                @JFolder::delete($admin . DS . 'plugin');
+            if (is_dir($admin . '/plugin')) {
+                @JFolder::delete($admin . '/plugin');
             }
 
             // Add Visualblocks plugin
@@ -554,7 +616,7 @@ class WFInstall {
             if (!empty($profiles)) {
                 foreach ($profiles as $item) {
                     $profile->load($item->id);
-                    
+
                     if (strpos($profile->rows, 'visualblocks') === false) {
                         $profile->rows = str_replace('visualchars', 'visualchars,visualblocks', $profile->rows);
                     }
@@ -568,8 +630,8 @@ class WFInstall {
         }
 
         if (version_compare($version, '2.1.1', '<')) {
-            @JFile::delete($admin . DS . 'classes' . DS . 'installer.php');
-            
+            @JFile::delete($admin . '/classes/installer.php');
+
             // Add Visualblocks plugin
             $query = 'SELECT id FROM #__wf_profiles';
             $db->setQuery($query);
@@ -580,7 +642,7 @@ class WFInstall {
             if (!empty($profiles)) {
                 foreach ($profiles as $item) {
                     $profile->load($item->id);
-                    
+
                     // add anchor to end of plugins list
                     if (strpos($profile->rows, 'anchor') !== false) {
                         $profile->plugins .= ',anchor';
@@ -589,78 +651,98 @@ class WFInstall {
                     $profile->store();
                 }
             }
-            
+
             // delete old anchor stuff
-            $theme = $site . DS . 'editor' . DS . 'tiny_mce' . DS . 'themes' . DS . 'advanced';
-            
-            foreach(array('css/anchor.css', 'js/anchor.js', 'tmpl/anchor.php', 'skins/default/img/items.gif') as $item) {
-                if (JFile::exists($theme . DS . $item)) {
-                    @JFile::delete($theme . DS . $item);
+            $theme = $site . '/editor/tiny_mce/themes/advanced';
+
+            foreach (array('css/anchor.css', 'js/anchor.js', 'tmpl/anchor.php', 'skins/default/img/items.gif') as $item) {
+                if (JFile::exists($theme . '/' . $item)) {
+                    @JFile::delete($theme . '/' . $item);
                 }
             }
-            
+
             // delete popup.php
-            if (is_file($site . DS . 'popup.php')) {
-                @JFile::delete($site . DS . 'popup.php');
-            } 
-        }
-        
-        // remove old jQuery and jQuery UI versions
-        if (version_compare($version, '2.2.0', '<')) {
-            $path = $site . DS . 'editor' . DS . 'libraries' . DS . 'js' . DS . 'jquery';
-            $file = 'jquery-ui-1.8.20.custom.min.js';
-            
-            if (is_file($path . DS . $file)) {
-                @JFile::delete($path . DS . $file);
+            if (is_file($site . '/popup.php')) {
+                @JFile::delete($site . '/popup.php');
             }
         }
+
         // Add "Blogger" profile and selete some stuff
         if (version_compare($version, '2.2.1', '<')) {
-            $path = $site . DS . 'editor' . DS . 'extensions' . DS . 'browser';
+            $path = $site . '/editor/extensions/browser';
             $files = array('css/search.css', 'js/search.js', 'search.php');
-            
-            foreach($files as $file) {
-                if (is_file($path . DS . $file)) {
-                    @JFile::delete($path . DS . $file);
+
+            foreach ($files as $file) {
+                if (is_file($path . '/' . $file)) {
+                    @JFile::delete($path . '/' . $file);
                 }
             }
-            
-            // Blogger
-            $file = $admin . DS . 'models' . DS . 'profiles.xml';
 
-            $xml = WFXMLElement::getXML($file);
+            $query = 'SELECT id FROM #__wf_profiles WHERE name = ' . $db->Quote('Blogger');
+            $id = $db->loadResult();
 
-            if ($xml) {
-                foreach ($xml->profiles->children() as $profile) {
-                    if ($profile->attributes()->name == 'Blogger') {
-                        $row = JTable::getInstance('profiles', 'WFTable');
+            if (!$id) {
+                // Blogger
+                $file = $admin . '/models/profiles.xml';
 
-                        foreach ($profile->children() as $item) {
-                            switch ($item->name()) {
-                                case 'rows':
-                                    $row->rows = $item->data();
-                                    break;
-                                case 'plugins':
-                                    $row->plugins = $item->data();
-                                    break;
-                                default:
-                                    $key = $item->name();
-                                    $row->$key = $item->data();
+                $xml = WFXMLElement::getXML($file);
 
-                                    break;
+                if ($xml) {
+                    foreach ($xml->profiles->children() as $profile) {
+                        if ($profile->attributes()->name == 'Blogger') {
+                            $row = JTable::getInstance('profiles', 'WFTable');
+
+                            foreach ($profile->children() as $item) {
+                                switch ($item->getName()) {
+                                    case 'rows':
+                                        $row->rows = (string) $item;
+                                        break;
+                                    case 'plugins':
+                                        $row->plugins = (string) $item;
+                                        break;
+                                    default:
+                                        $key = $item->getName();
+                                        $row->$key = (string) $item;
+
+                                        break;
+                                }
                             }
+                            $row->store();
                         }
-                        $row->store();
                     }
                 }
             }
-        }    
+        }
+
+        // remove k2links from previous version (accidentally installed)
+        if (version_compare($version, '2.2.1', '>') && version_compare($version, '2.2.5', '<')) {
+            $path = $site . '/editor/extensions/links';
+
+            if (is_file($path . '/k2links.php') && is_file($path . '/k2links.xml') && !is_dir($path . '/k2links')) {
+                @JFile::delete($path . '/k2links.php');
+                @JFile::delete($path . '/k2links.xml');
+            }
+        }
+
+        // cleanup old JQuery libraries
+        if (version_compare($version, '2.2.6', '<')) {
+            $path       = $site . '/editor/libraries/js/jquery';
+            $files      = JFolder::files($path, '\.js');
+            $exclude    = array('jquery-1.7.2.min.js', 'jquery-ui-1.8.21.custom.min.js', 'jquery-ui-layout.js');
+
+            foreach ($files as $file) {
+                if (in_array(basename($file), $exclude) === false) {
+                    @JFile::delete($path . '/' . $file);
+                }
+            }
+        }
+        
         return true;
     }
 
     private static function createProfilesTable() {
         // add models path
-        JModel::addIncludePath(dirname(__FILE__) . DS . 'models');
+        JModel::addIncludePath(dirname(__FILE__) . '/models');
 
         $profiles = JModel::getInstance('profiles', 'WFModel');
 
@@ -669,7 +751,7 @@ class WFInstall {
 
     private static function installProfiles() {
         // add models path
-        JModel::addIncludePath(dirname(__FILE__) . DS . 'models');
+        JModel::addIncludePath(dirname(__FILE__) . '/models');
 
         $profiles = JModel::getInstance('profiles', 'WFModel');
 
@@ -690,7 +772,7 @@ class WFInstall {
 
         $result = '';
 
-        JTable::addIncludePath(JPATH_LIBRARIES . DS . 'joomla' . DS . 'database' . DS . 'table');
+        JTable::addIncludePath(JPATH_LIBRARIES . '/joomla/database/table');
 
         $packages = array(
             'editors' => array('jce'),
@@ -714,10 +796,10 @@ class WFInstall {
             $installer = new JInstaller();
             $installer->setOverwrite(true);
 
-            if ($installer->install($source . DS . $folder)) {
+            if ($installer->install($source . '/' . $folder)) {
 
                 if (method_exists($installer, 'loadLanguage')) {
-                    $installer->loadLanguage($source . DS . $folder);
+                    $installer->loadLanguage($source . '/' . $folder);
                 }
 
                 if ($installer->message) {
@@ -749,10 +831,9 @@ class WFInstall {
                         $module->store();
                     }
                 }
-                
+
                 // add index files
                 self::addIndexfiles(array($installer->getPath('extension_root')));
-                
             } else {
                 $result .= '<li class="error">' . JText::_($installer->message, $installer->message) . '</li>';
             }
@@ -852,17 +933,17 @@ class WFInstall {
         jimport('joomla.filesystem.file');
 
         // get the base file
-        $file = JPATH_ADMINISTRATOR . DS . 'components' . 'com_jce' . DS . 'index.html';
+        $file = JPATH_ADMINISTRATOR . '/components' . 'com_jce/index.html';
 
         if (is_file($file)) {
 
-            foreach((array) $paths as $path) {
+            foreach ((array) $paths as $path) {
                 if (is_dir($path)) {
                     // admin component
                     $folders = JFolder::folders($path, '.', true, true);
 
                     foreach ($folders as $folder) {
-                        JFile::copy($file, $folder . DS . basename($file));
+                        JFile::copy($file, $folder . '/' . basename($file));
                     }
                 }
             }

@@ -2,7 +2,7 @@
 
 /**
  * @package   	JCE
- * @copyright 	Copyright © 2009-2011 Ryan Demmer. All rights reserved.
+ * @copyright 	Copyright (c) 2009-2012 Ryan Demmer. All rights reserved.
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -176,7 +176,7 @@ class WFLinkBrowser extends WFBrowserExtension {
     public function getItemId($component, $needles = array()) {
         $match = null;
 
-        require_once(JPATH_SITE . DS . 'includes' . DS . 'application.php');
+        require_once(JPATH_SITE . '/includes/application.php');
 
         $tag = WF_JOOMLA15 ? 'componentid' : 'component_id';
 

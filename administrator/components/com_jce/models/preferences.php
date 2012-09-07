@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   	JCE
- * @copyright 	Copyright © 2009-2011 Ryan Demmer. All rights reserved.
+ * @copyright 	Copyright (c) 2009-2012 Ryan Demmer. All rights reserved.
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -12,7 +12,7 @@
 defined('_JEXEC') or die('RESTRICTED');
 
 // load base model
-require_once(dirname(__FILE__) . DS . 'model.php');
+require_once(dirname(__FILE__) . '/model.php');
 
 class WFModelPreferences extends WFModel {
 	
@@ -110,7 +110,7 @@ class WFModelPreferences extends WFModel {
 	 */
 	protected function getActions()
 	{
-		$file 		= JPATH_COMPONENT_ADMINISTRATOR . DS . 'access.xml';			
+		$file 		= JPATH_COMPONENT_ADMINISTRATOR . '/access.xml';			
 		$xml 		= WFXMLElement::getXML($file);
 		
 		$actions 	= array();
@@ -119,7 +119,7 @@ class WFModelPreferences extends WFModel {
 			// Iterate over the children and add to the actions.
 			foreach ($xml->section->children() as $element)
 			{
-				if ($element->name() == 'action') {
+				if ($element->getName() == 'action') {
 					$actions[] = (object) array(
 						'name'			=> (string) $element['name'],
 						'title'			=> (string) $element['title'],

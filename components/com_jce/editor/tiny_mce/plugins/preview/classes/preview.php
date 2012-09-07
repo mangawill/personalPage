@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   	JCE
- * @copyright 	Copyright © 2009-2011 Ryan Demmer. All rights reserved.
+ * @copyright 	Copyright (c) 2009-2012 Ryan Demmer. All rights reserved.
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -67,6 +67,8 @@ class WFPreviewPlugin extends WFEditorPlugin
 		$document->setType('html');
 		// required by module loadposition
 		jimport('joomla.application.module.helper');
+                // load paramter class
+                jimport('joomla.html.parameter');
 		
 		wfimport('admin.helpers.extension');
 
@@ -113,7 +115,7 @@ class WFPreviewPlugin extends WFEditorPlugin
 		$buffer 	= $article->text;
 		
 		$protocols 	= '[a-zA-Z0-9]+:'; //To check for all unknown protocals (a protocol must contain at least one alpahnumeric fillowed by :
-      	$regex     	= '#(src|href)="(?!/|'.$protocols.'|\#|\')([^"]*)"#m';
+      	$regex     	= '#(src|href|poster)="(?!/|'.$protocols.'|\#|\')([^"]*)"#m';
         $buffer    	= preg_replace($regex, "$1=\"$base\$2\"", $buffer);
 		$regex     	= '#(onclick="window.open\(\')(?!/|'.$protocols.'|\#)([^/]+[^\']*?\')#m';
 		$buffer    	= preg_replace($regex, '$1'.$base.'$2', $buffer);

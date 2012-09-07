@@ -2,7 +2,7 @@
 
 /**
  * @package   	JCE
- * @copyright 	Copyright © 2009-2011 Ryan Demmer. All rights reserved.
+ * @copyright 	Copyright (c) 2009-2012 Ryan Demmer. All rights reserved.
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -58,7 +58,7 @@ class JoomlalinksContent extends JObject {
     public function getLinks($args) {
         $wf = WFEditorPlugin::getInstance();
 
-        require_once(JPATH_SITE . DS . 'components' . DS . 'com_content' . DS . 'helpers' . DS . 'route.php');
+        require_once(JPATH_SITE . '/components/com_content/helpers/route.php');
 
         $items = array();
         $view = isset($args->view) ? $args->view : '';

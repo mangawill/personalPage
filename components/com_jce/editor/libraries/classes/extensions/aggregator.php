@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   	JCE
- * @copyright 	Copyright © 2009-2011 Ryan Demmer. All rights reserved.
+ * @copyright 	Copyright (c) 2009-2012 Ryan Demmer. All rights reserved.
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -98,7 +98,7 @@ class WFAggregatorExtension extends WFExtension {
 
 			$aggregators[$format] = array();
 
-			$path = WF_EDITOR_EXTENSIONS . DS . 'aggregator';
+			$path = WF_EDITOR_EXTENSIONS . '/aggregator';
 			$files = JFolder::files($path, '\.php$', false, true);
 
 			foreach($files as $file) {
@@ -133,7 +133,7 @@ class WFAggregatorExtension extends WFExtension {
 	 */
 	public function loadTemplate($name, $tpl ='')
 	{
-		$path = WF_EDITOR_EXTENSIONS . DS . 'aggregator' . DS . $name;
+		$path = WF_EDITOR_EXTENSIONS . '/aggregator/' . $name;
 
 		$output = '';
 
@@ -143,10 +143,10 @@ class WFAggregatorExtension extends WFExtension {
 			$file = 'default_' . $tpl . '.php';
 		}
 
-		if(file_exists($path . DS . 'tmpl' . DS . $file)) {
+		if(file_exists($path . '/tmpl/' . $file)) {
 			ob_start();
 
-			include $path . DS . 'tmpl' . DS . $file;
+			include $path . '/tmpl/' . $file;
 
 			$output .= ob_get_contents();
 			ob_end_clean();

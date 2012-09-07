@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   	JCE
- * @copyright 	Copyright © 2009-2011 Ryan Demmer. All rights reserved.
+ * @copyright 	Copyright (c) 2009-2012 Ryan Demmer. All rights reserved.
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -74,7 +74,7 @@ final class WFFileBrowserPlugin extends WFMediaManager
 			$document->addScript(array('browser'), 'component');
 			
 			// load the language file
-			if (is_file(WF_EDITOR . DS . 'tiny_mce' . DS . 'langs' . DS . $this->getLanguage() . '_dlg.js')) {
+			if (is_file(WF_EDITOR . '/tiny_mce/langs/' . $this->getLanguage() . '_dlg.js')) {
 				$document->addScript(array('langs/' . $this->getLanguage() . '_dlg.js'), 'tiny_mce');
 			} else {
 				$document->addScript(array('langs/en_dlg.js'), 'tiny_mce');

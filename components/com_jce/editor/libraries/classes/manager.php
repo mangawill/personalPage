@@ -2,7 +2,7 @@
 
 /**
  * @package   	JCE
- * @copyright 	Copyright © 2009-2011 Ryan Demmer. All rights reserved.
+ * @copyright 	Copyright (c) 2009-2012 Ryan Demmer. All rights reserved.
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -27,8 +27,8 @@ class WFMediaManager extends WFEditorPlugin {
         // set private properties
         $this->set('_type', 'manager');
         $this->set('_layout', 'manager');
-        $this->set('_base_path', WF_EDITOR_LIBRARIES . DS . 'views' . DS . 'plugin');
-        $this->set('_template_path', WF_EDITOR_LIBRARIES . DS . 'views' . DS . 'plugin' . DS . 'tmpl');
+        $this->set('_base_path', WF_EDITOR_LIBRARIES . '/views/plugin');
+        $this->set('_template_path', WF_EDITOR_LIBRARIES . '/views/plugin/tmpl');
 
         $this->setProperties(array_merge($this->getConfig(), $this->getProperties()));
 
@@ -91,7 +91,8 @@ class WFMediaManager extends WFEditorPlugin {
                 'runtimes' => $this->getParam('editor.upload_runtimes', array('html5', 'flash', 'silverlight'), '', 'array', false),
                 'chunk_size' => null,
                 'max_size' => $this->getParam('max_size', 1024, '', 'string', false),
-                'validate_mimetype' => $this->getParam('validate_mimetype', 0)
+                'validate_mimetype' => $this->getParam('validate_mimetype', 1),
+                'add_random' => $this->getParam('editor.upload_add_random', 0)
             ),
             'folder_tree' => $this->getParam('editor.folder_tree', 1),
             'list_limit' => $this->getParam('editor.list_limit', 'all'),

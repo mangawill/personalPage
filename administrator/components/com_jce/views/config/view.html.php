@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   	JCE
- * @copyright 	Copyright © 2009-2011 Ryan Demmer. All rights reserved.
+ * @copyright 	Copyright (c) 2009-2012 Ryan Demmer. All rights reserved.
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -29,11 +29,11 @@ class WFViewConfig extends JView
         $lists = array();
         
         $component 	= WFExtensionHelper::getComponent();        
-        $xml 		= WF_EDITOR_LIBRARIES.DS.'xml'.DS.'config'.DS.'editor.xml';
+        $xml 		= WF_EDITOR_LIBRARIES.'/xml/config/editor.xml';
         
         // get params definitions
         $params = new WFParameter($component->params, $xml, 'editor');      
-        $params->addElementPath(JPATH_COMPONENT.DS.'elements');
+        $params->addElementPath(JPATH_COMPONENT.'/elements');
         
         $this->assignRef('model', 	$model);
         $this->assignRef('params', 	$params);

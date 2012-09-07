@@ -2,7 +2,7 @@
 
 /**
  * @package   	JCE
- * @copyright 	Copyright (c) 2009-2011 Ryan Demmer. All rights reserved.
+ * @copyright 	Copyright (c) 2009-2012 Ryan Demmer. All rights reserved.
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -14,7 +14,7 @@ defined('JPATH_BASE') or die('RESTRICTED');
 /**
  * Renders a select element
  */
-class JElementLinkSearch extends JElement {
+class WFElementLinkSearch extends WFElement {
 
     /**
      * Element type
@@ -39,7 +39,7 @@ class JElementLinkSearch extends JElement {
         }
 
         //$html  = '<span style="display:inline-block;"><input class="checkbox-list-toggle-all" type="checkbox"'. $checked .' /><label>'. WFText::_('WF_PROFILES_TOGGLE_ALL') . '</label>'; 
-        $html = '<span style="display:inline-block;" data-parent="' . preg_replace(array('#^params#', '#([^\w]+)#'), '', $control_name) . $node->attributes('parent') . '"><ul class="checkbox-list">';
+        $html = '<span style="display:inline-block;" data-parent="' . preg_replace(array('#^params#', '#([^\w]+)#'), '', $control_name) . $node->attributes()->parent . '"><ul class="checkbox-list">';
 
         foreach ($plugins as $item) {
             $plugin = WFExtensionHelper::getPlugin(null, $item->name, 'search');

@@ -1,10 +1,10 @@
 /*  
- * JCE Editor                 2.2.4
+ * JCE Editor                 2.2.6
  * @package                 JCE
  * @url                     http://www.joomlacontenteditor.net
  * @copyright               Copyright (C) 2006 - 2012 Ryan Demmer. All rights reserved
  * @license                 GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html
- * @date                    16 July 2012
+ * @date                    19 August 2012
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -26,7 +26,7 @@ return t.handleSpacebar(ed);});},handleEclipse:function(ed){this.parseCurrentLin
 return;prev=r.endContainer.firstChild.nextSibling;}
 len=prev.length;r.setStart(prev,len);r.setEnd(prev,len);if(r.endOffset<5)
 return;end=r.endOffset;endContainer=prev;}else{endContainer=r.endContainer;if(endContainer.nodeType!=3&&endContainer.firstChild){while(endContainer.nodeType!=3&&endContainer.firstChild)
-endContainer=endContainer.firstChild;r.setStart(endContainer,0);r.setEnd(endContainer,endContainer.nodeValue.length);}
+endContainer=endContainer.firstChild;if(endContainer.nodeType==3){r.setStart(endContainer,0);r.setEnd(endContainer,endContainer.nodeValue.length);}}
 if(r.endOffset==1)
 end=2;else
 end=r.endOffset-1-end_offset;}

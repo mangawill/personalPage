@@ -2,7 +2,7 @@
 
 /**
  * @package   	JCE
- * @copyright 	Copyright © 2009-2011 Ryan Demmer. All rights reserved.
+ * @copyright 	Copyright (c) 2009-2012 Ryan Demmer. All rights reserved.
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -32,7 +32,8 @@ class WFController extends JController {
 
     private function loadMenu() {
         $view = JRequest::getWord('view', 'cpanel');
-        $model = $this->getModel($view);
+        
+        wfimport('admin.models.model');
 
         JSubMenuHelper::addEntry(WFText::_('WF_CPANEL'), 'index.php?option=com_jce&view=cpanel', $view == 'cpanel');
 
@@ -47,7 +48,7 @@ class WFController extends JController {
         }
 
         foreach ($subMenus as $menu => $item) {
-            if ($model->authorize($item)) {
+            if (WFModel::authorize($item)) {
                 JSubMenuHelper::addEntry(WFText::_($menu), 'index.php?option=com_jce&view=' . $item, $view == $item);
             }
         }
@@ -106,7 +107,7 @@ class WFController extends JController {
                     JHtml::core();
                 }
 
-                require_once(JPATH_ADMINISTRATOR . DS . 'includes' . DS . 'toolbar.php');
+                require_once(JPATH_ADMINISTRATOR . '/includes/toolbar.php');
 
                 JToolBarHelper::title(WFText::_('WF_ADMINISTRATION') . ' &rsaquo;&rsaquo; ' . WFText::_('WF_' . strtoupper($name)), 'logo.png');
 
@@ -135,8 +136,8 @@ class WFController extends JController {
 
                 $document->addScriptDeclaration('jQuery(document).ready(function($){$.jce.init(' . json_encode($options) . ');});');
 
-                $view->addHelperPath(dirname(__FILE__) . DS . 'helpers');
-                $this->addModelPath(dirname(__FILE__) . DS . 'models');
+                $view->addHelperPath(dirname(__FILE__) . '/helpers');
+                $this->addModelPath(dirname(__FILE__) . '/models');
 
                 $view->loadHelper('toolbar');
                 $view->loadHelper('tools');
@@ -157,7 +158,7 @@ class WFController extends JController {
             $document->addScript(JURI::root(true) . '/components/com_jce/editor/libraries/js/' . $script . '?version=' . $model->getVersion());
         }
 
-        require_once(dirname(__FILE__) . DS . 'helpers' . DS . 'system.php');
+        require_once(dirname(__FILE__) . '/helpers/system.php');
 
         $app = JFactory::getApplication();
         $app->registerEvent('onAfterRender', 'WFSystemHelper');
@@ -197,7 +198,7 @@ class WFController extends JController {
         }
 
         // add models path
-        JModel::addIncludePath(dirname(__FILE__) . DS . 'models');
+        JModel::addIncludePath(dirname(__FILE__) . '/models');
         $profiles = JModel::getInstance('profiles', 'WFModel');
 
         $state = $profiles->checkTable();
@@ -231,7 +232,7 @@ class WFController extends JController {
         switch ($type) {
             case 'tables' :
                 // add models path
-                JModel::addIncludePath(dirname(__FILE__) . DS . 'models');
+                JModel::addIncludePath(dirname(__FILE__) . '/models');
                 $profiles = JModel::getInstance('profiles', 'WFModel');
 
                 $profiles->installProfiles();
@@ -240,7 +241,7 @@ class WFController extends JController {
 
                 break;
             case 'editor' :
-                $source = dirname(__FILE__) . DS . 'packages' . DS . 'editors';
+                $source = dirname(__FILE__) . '/packages/editors';
 
                 if (is_dir($source)) {
                     jimport('joomla.installer.installer');
@@ -260,16 +261,13 @@ class WFController extends JController {
     }
 
     public function authorize($task) {
-        $view = JRequest::getWord('view', 'cpanel');
+        wfimport('admin.models.model');
 
-        $model = $this->getModel($view);
-
-        if (!$model->authorize($task)) {
-
-            if ($model->authorize('manage')) {
-                $this->setRedirect('index.php?option=com_jce', WFText::_('JERROR_ALERTNOAUTHOR'), 'error');
+        if (WFModel::authorize($task) === false) {
+            if (WFModel::authorize('manage')) {
+                $this->setRedirect('index.php?option=com_jce', WFText::_('ALERTNOTAUTH'), 'error');
             } else {
-                $this->setRedirect('index.php', WFText::_('JERROR_ALERTNOAUTHOR'), 'error');
+                $this->setRedirect('index.php', WFText::_('ALERTNOTAUTH'), 'error');
             }
             return false;
         }

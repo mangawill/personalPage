@@ -2,7 +2,7 @@
 
 /**
  * @package   	JCE
- * @copyright 	Copyright � 2009-2011 Ryan Demmer. All rights reserved.
+ * @copyright 	Copyright � 2009-2012 Ryan Demmer. All rights reserved.
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -12,13 +12,13 @@
 defined('_JEXEC') or die('RESTRICTED');
 
 // load base model
-require_once (dirname(__FILE__) . DS . 'model.php');
+require_once (dirname(__FILE__) . '/model.php');
 
 class WFModelPlugins extends WFModel {
 
     function getCommands() {
         //$xml  = JFactory::getXMLParser('Simple');
-        $file = dirname(__FILE__) . DS . 'commands.xml';
+        $file = dirname(__FILE__) . '/commands.xml';
         $xml = WFXMLElement::getXML($file);
 
         $commands = array();
@@ -33,8 +33,8 @@ class WFModelPlugins extends WFModel {
                     $commands[$name] = new StdClass();
 
                     foreach ($command->children() as $item) {
-                        $key = $item->name();
-                        $value = $item->data();
+                        $key 	= $item->getName();
+                        $value 	= (string) $item;
                         $commands[$name]->$key = $value;
                     }
 
@@ -52,7 +52,7 @@ class WFModelPlugins extends WFModel {
         $plugins = array();
 
         // get core xml
-        $xml = WFXMLElement::getXML(dirname(__FILE__) . DS . 'plugins.xml');
+        $xml = WFXMLElement::getXML(dirname(__FILE__) . '/plugins.xml');
 
         if ($xml) {
 
@@ -63,8 +63,8 @@ class WFModelPlugins extends WFModel {
                     $plugins[$name] = new StdClass();
 
                     foreach ($plugin->children() as $item) {
-                        $key    = $item->name();
-                        $value  = $item->data();
+                        $key    = $item->getName();
+                        $value  = (string) $item;
 
                         $plugins[$name]->$key = $value;
                     }
@@ -86,10 +86,10 @@ class WFModelPlugins extends WFModel {
 
         foreach ($folders as $folder) {
             $name = basename($folder);
-            $file = $folder . DS . $name . '.xml';
+            $file = $folder . '/' . $name . '.xml';
 
             if (is_file($file)) {
-                $xml = WFXMLElement::getXML($folder . DS . $name . '.xml');
+                $xml = WFXMLElement::getXML($folder . '/' . $name . '.xml');
 
                 if ($xml) {
                     $params = $xml->params;
@@ -99,8 +99,8 @@ class WFModelPlugins extends WFModel {
 
                         $plugins[$name]->name = $name;
 
-                        $plugins[$name]->title = (string) $xml->name;
-                        $plugins[$name]->icon = (string) $xml->icon;
+                        $plugins[$name]->title 	= (string) $xml->name;
+                        $plugins[$name]->icon 	= (string) $xml->icon;
 
                         $editable = (int) $xml->attributes()->editable;
                         $plugins[$name]->editable = $editable ? $editable : ($params && count($params->children()) ? 1 : 0);

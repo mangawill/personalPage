@@ -15,7 +15,7 @@ class com_jceInstallerScript {
 
     public function install($parent) {
         if (!class_exists('WFInstall')) {
-            require_once(JPATH_ADMINISTRATOR . DS . 'components' . DS . 'com_jce' . DS . 'install.php');
+            require_once(JPATH_ADMINISTRATOR . '/components/com_jce/install.php');
         }
 
         $installer = method_exists($parent, 'getParent') ? $parent->getParent() : $parent->parent;
@@ -25,7 +25,7 @@ class com_jceInstallerScript {
 
     public function uninstall() {
         if (!class_exists('WFInstall')) {
-            require_once(JPATH_ADMINISTRATOR . DS . 'components' . DS . 'com_jce' . DS . 'install.php');
+            require_once(JPATH_ADMINISTRATOR . '/components/com_jce/install.php');
         }
 
         return WFInstall::uninstall();
@@ -37,16 +37,11 @@ class com_jceInstallerScript {
 
     function preflight($type, $parent) {
         $db = JFactory::getDBO();
-        
-        // remove admin menu emtries
-        $db = JFactory::getDBO();
-        $db->setQuery('DELETE FROM #__menu WHERE alias = "jce" AND menutype = "main"');
-        
-        $db = JFactory::getDBO();
-        $db->setQuery('DELETE FROM #__menu WHERE alias LIKE "wf-menu-%" AND menutype = "main"');
-        
+
+        $db->setQuery('DELETE FROM #__menu WHERE alias = ' . $db->Quote('jce') . ' AND menutype = ' . $db->Quote('main'));
         $db->query();
-        $db->setQuery('DELETE FROM #__assets WHERE title = "com_jce"');
+        
+        $db->setQuery('DELETE FROM #__menu WHERE alias LIKE ' . $db->Quote('wf-menu-%') . ' AND menutype = ' . $db->Quote('main'));
         $db->query();
     }
 }

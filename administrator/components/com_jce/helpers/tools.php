@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   	JCE
- * @copyright 	Copyright © 2009-2011 Ryan Demmer. All rights reserved.
+ * @copyright 	Copyright (c) 2009-2012 Ryan Demmer. All rights reserved.
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -51,7 +51,7 @@ abstract class WFToolsHelper {
 				$template = self::getTemplates();
 				
 				foreach ($matches[1] as $match) {
-					$file = JPATH_SITE.DS.'templates'.DS.$template.DS.'css'.DS.$match;
+					$file = JPATH_SITE.'/templates/'.$template.'/css/'.$match;
 					
 					if ($file) {
 						self::parseColors($file);
@@ -78,7 +78,7 @@ abstract class WFToolsHelper {
 		
 		foreach($templates as $template) {
 			// Template CSS
-        	$path = JPATH_SITE . DS . 'templates' . DS . $template . DS . 'css';
+        	$path = JPATH_SITE . '/templates/' . $template . '/css';
 			// get the first path that exists
 			if (is_dir($path)) {
 				break;

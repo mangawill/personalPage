@@ -2,7 +2,7 @@
 
 /**
  * @package   	JCE
- * @copyright 	Copyright © 2009-2011 Ryan Demmer. All rights reserved.
+ * @copyright 	Copyright (c) 2009-2012 Ryan Demmer. All rights reserved.
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -110,6 +110,11 @@ final class WFRequest extends JObject {
     public function process($array = false) {
         // Check for request forgeries
         WFToken::checkToken() or die('RESTRICTED ACCESS');
+        
+        // check referrer       
+        /*if (!$_SERVER['HTTP_REFERER'] || strpos($_SERVER['HTTP_REFERER'], JURI::base()) === false) {
+            throw new InvalidArgumentException('Invalid Referrer');
+        }*/
 
         $json = JRequest::getVar('json', '', 'POST', 'STRING', 2);
         $action = JRequest::getWord('action');
@@ -149,17 +154,17 @@ final class WFRequest extends JObject {
                 if (!isset($method->ref)) {
                     $call = $method->fn;
                     if (!function_exists($call)) {
-                        JError::raiseError(500, 'Invalid Function -  "' . $call . '"');
+                        throw new InvalidArgumentException('Invalid Function -  "' . $call . '"');
                     }
                 } else {
                     if (!method_exists($method->ref, $method->fn)) {
-                        JError::raiseError(500, 'Invalid Method "' . $method->ref . '::' . $method->fn . '"');
+                        throw new InvalidArgumentException('Invalid Method "' . $method->ref . '::' . $method->fn . '"');
                     }
                     $call = array($method->ref, $method->fn);
                 }
 
                 if (!$call) {
-                    JError::raiseError(500, 'Invalid Function Call');
+                    throw new InvalidArgumentException('Invalid Function Call');
                 }
 
                 if (!is_array($args)) {
@@ -169,9 +174,9 @@ final class WFRequest extends JObject {
                 }
             } else {
                 if ($fn) {
-                    JError::raiseError(500, 'Unregistered Function - "' . addslashes($fn) . '"');
+                    throw new InvalidArgumentException('Unregistered Function - "' . addslashes($fn) . '"');
                 } else {
-                    JError::raiseError(500, 'Invalid Function Call');
+                    throw new InvalidArgumentException('Invalid Function Call');
                 }
             }
 

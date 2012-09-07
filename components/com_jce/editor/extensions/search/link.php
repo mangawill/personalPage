@@ -2,7 +2,7 @@
 
 /**
  * @package   	JCE
- * @copyright 	Copyright © 2009-2012 Ryan Demmer. All rights reserved.
+ * @copyright 	Copyright (c) 2009-2012 Ryan Demmer. All rights reserved.
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -136,7 +136,7 @@ class WFLinkSearchExtension extends WFSearchExtension {
 
         $app = JFactory::getApplication('site');
         // get SearchHelper
-        require_once(JPATH_ADMINISTRATOR . DS . 'components' . DS . 'com_search' . DS . 'helpers' . DS . 'search.php');
+        require_once(JPATH_ADMINISTRATOR . '/components/com_search/helpers/search.php');
 
         // set router mode to RAW
         $router = $app->getRouter();
@@ -164,7 +164,7 @@ class WFLinkSearchExtension extends WFSearchExtension {
 
         if (!class_exists('JSite')) {
             // Load JSite class
-            JLoader::register('JSite', JPATH_SITE . DS . 'includes' . DS . 'application.php');
+            JLoader::register('JSite', JPATH_SITE . '/includes/application.php');
         }
 
         $event = WF_JOOMLA15 ? 'onSearch' : 'onContentSearch';

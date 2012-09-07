@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   	JCE
- * @copyright 	Copyright © 2009-2011 Ryan Demmer. All rights reserved.
+ * @copyright 	Copyright (c) 2009-2012 Ryan Demmer. All rights reserved.
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -33,7 +33,7 @@ class WFPopupsExtension_Jcemediabox extends JObject
 			jimport('joomla.filesystem.folder');
 			jimport('joomla.filesystem.file');
 			
-			$path = JPATH_PLUGINS.DS.'system'.DS.'jcemediabox'.DS.'addons';
+			$path = JPATH_PLUGINS.'/system/jcemediabox/addons';
 	
 			$files = JFolder::files($path, '.js');
 				
@@ -66,15 +66,15 @@ class WFPopupsExtension_Jcemediabox extends JObject
 	
 	function checkVersion()
 	{
-		$file = JPATH_PLUGINS . DS . 'system' . DS . 'jcemediabox.xml';
+		$file = JPATH_PLUGINS . '/system/jcemediabox.xml';
 		
 		if (!is_file($file)) {
-			$file = JPATH_PLUGINS . DS . 'system' . 'jcemediabox' . DS . 'jcemediabox.xml';
+			$file = JPATH_PLUGINS . '/system' . 'jcemediabox/jcemediabox.xml';
 		}
 		
 		$required = $this->get('_requires');
 		
-		if ($xml = JApplicationHelper::parseXMLInstallFile($file)) {
+		if ($xml = WFXMLHelper::parseInstallManifest($file)) {
 			if (version_compare($xml['version'], (int)$required, '<')) {
 				echo '<p class="required">' . WFText::sprintf('WF_POPUPS_JCEMEDIABOX_VERSION_ERROR', $required) . '</p>';
 			}

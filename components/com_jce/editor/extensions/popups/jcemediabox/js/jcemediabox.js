@@ -1,10 +1,10 @@
 /*  
- * JCE Editor                 2.2.4
+ * JCE Editor                 2.2.6
  * @package                 JCE
  * @url                     http://www.joomlacontenteditor.net
  * @copyright               Copyright (C) 2006 - 2012 Ryan Demmer. All rights reserved
  * @license                 GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html
- * @date                    16 July 2012
+ * @date                    19 August 2012
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -33,7 +33,7 @@ $.each(data,function(k,v){if($('#jcemediabox_popup_'+k).get(0)){$('#jcemediabox_
 x++;});$('#jcemediabox_popup_mediatype').val(this.getMediaType(n));$.extend(data,{src:ed.dom.getAttrib(n,'href'),type:ed.dom.getAttrib(n,'type')||''});return data;},setAttributes:function(n,args){var self=this,ed=tinyMCEPopup.editor;this.remove(n);ed.dom.addClass(n,'jcepopup');var auto=$('#jcemediabox_popup_autopopup').val();if(auto){ed.dom.addClass(n,auto);}
 var data={};tinymce.each(['title','caption','group','width','height'],function(k){var v=$('#jcemediabox_popup_'+k).val();if(v==''||v==null){if(args[k]){v=args[k];}else{return;}}
 data[k]=v;});$('li','#jcemediabox_popup_params').each(function(){var k=$('input.name',this).val();var v=$('input.value',this).val();if(k!==''&&v!==''){data[k]=v;}});$.extend(data,args.data||{});if(data.title&&data.caption){data.title=data.title+'::'+data.caption;delete data.caption;}
-var props=$.map(data,function(v,k){return k+'['+v+']';});var rel=ed.dom.getAttrib(n,'rel','');if(rel){rel=rel.replace(/([a-z0-9]+)(\[[^\]]+\])(;?)/,'');}
+var props=$.map(data,function(v,k){return k+'['+v+']';});var rel=ed.dom.getAttrib(n,'rel','');if(rel){rel=rel.replace(/([a-z0-9]+)(\[([^\]]+)\]);?/gi,'');}
 ed.dom.setAttrib(n,'rel',$.trim(rel+' '+props.join(';')));ed.dom.setAttrib(n,'data-json','');ed.dom.setAttrib(n,'data-mediabox','');if($('#jcemediabox_popup_icon').val()==0){ed.dom.addClass(n,'noicon');}else{ed.dom.addClass(n,$('#jcemediabox_popup_icon_position').val());}
 if($('#jcemediabox_popup_hide').val()==1){ed.dom.addClass(n,'noshow');}
 ed.dom.setAttrib(n,'target','_blank');var mt=$('#jcemediabox_popup_mediatype').val()||n.type||args.type||'';ed.dom.setAttrib(n,'type',mt);},setIcon:function(){var v=$('#jcemediabox_popup_icon').val();if(parseInt(v)){$('#jcemediabox_popup_icon_position').removeAttr('disabled');}else{$('#jcemediabox_popup_icon_position').attr('disabled','disabled');}},onSelect:function(){},onSelectFile:function(args){$.each(args,function(k,v){$('#jcemediabox_popup_'+k).val(v);});}});

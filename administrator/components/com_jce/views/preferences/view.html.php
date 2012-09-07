@@ -1,7 +1,7 @@
 <?php
 /**
  * @package   	JCE
- * @copyright 	Copyright © 2009-2011 Ryan Demmer. All rights reserved.
+ * @copyright 	Copyright (c) 2009-2012 Ryan Demmer. All rights reserved.
  * @license   	GNU/GPL 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  * JCE is free software. This version may have been modified pursuant
  * to the GNU General Public License, and as distributed it includes or
@@ -33,13 +33,13 @@ class WFViewPreferences extends JView
 		$this->document->addStyleSheet('templates/system/css/system.css');
  
  		$component 	= WFExtensionHelper::getComponent();
-        $xml 		= JPATH_COMPONENT.DS.'models'.DS.'preferences.xml';
+        $xml 		= JPATH_COMPONENT.'/models/preferences.xml';
         
         // get params definitions
         $params = new WFParameter($component->params, $xml, 'preferences');
-        $params->addElementPath(JPATH_COMPONENT.DS.'elements');
+        $params->addElementPath(JPATH_COMPONENT.'/elements');
         
-        if ($model->authorize('admin')) {
+        if (WFModel::authorize('admin')) {
         	$form = $model->getForm('permissions');
         } else {
         	$form = null;
